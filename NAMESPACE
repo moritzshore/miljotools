@@ -2,6 +2,7 @@
 
 export(get_metno_reanalysis3)
 importFrom(abind,abind)
+importFrom(dplyr,"%>%")
 importFrom(dplyr,mutate)
 importFrom(dplyr,nth)
 importFrom(lubridate,day)
