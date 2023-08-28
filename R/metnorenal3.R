@@ -23,7 +23,7 @@
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
 #' @param preview generate graphs showing previews of data download? (boolean)
 #' @importFrom abind abind
-#' @importFrom dplyr nth mutate
+#' @importFrom dplyr nth mutate %>%
 #' @importFrom lubridate year month day hour
 #' @importFrom mapview mapview
 #' @importFrom ncdf4 nc_open ncvar_get nc_close
