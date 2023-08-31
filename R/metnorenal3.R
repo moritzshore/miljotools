@@ -9,7 +9,6 @@
 # server status:
 # https://status.met.no/
 
-# main function ##################
 
 #' Download data from the metno renanalysis project
 #'
@@ -55,7 +54,7 @@ get_metno_reanalysis3 <-
     # load in the shape file
     area <- sf::read_sf(area)
 
-    # supporting functions
+    # supporting functions ----
     nc_open_retry <- function(link) {
 
       nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
@@ -541,7 +540,7 @@ get_metno_reanalysis3 <-
       }
 
 
-    ### START MAIN FUNCTION
+    ### START MAIN FUNCTION ----
 
     # Add stop if nots (date wrong order)
 
