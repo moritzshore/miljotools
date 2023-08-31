@@ -2,6 +2,14 @@
 
 This R package hosts a variety of functions for NIBIO DMN Hydrology and Water Environment. If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
 
+**Table of contents**
+
+1.  [Installing miljotools]
+
+2.  [MET Nordic Reanalysis Dataset]
+
+3.  [Add your own functions/code/workflows]
+
 ## Installing miljotools
 
 You can install and load `miljotools` from the GitHub repository using the following command:
@@ -60,4 +68,6 @@ As output you will receive a seperate .csv file for each grid point. This .csv f
 
 **Note:** Currently, this function must request the data from met.no server on an hour-basis. This means that for each year to download, 8760 requests must be made to the server. This is rather slow, and as such the download can take quite a few hours. We are working with met.no to improve this situation.
 
-### 
+## Add your own functions/code/workflows
+
+If you have a function / code / workflow / etc. which you would like to add to this package, please contact the maintainer for developer access.
