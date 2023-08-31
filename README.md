@@ -43,7 +43,7 @@ To access the data for a specific region of the Nordics, you need to provide the
 
 1.  A path to a geo-referenced [shapefile](https://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm) (single polygon) of the desired area
 
-2.  A directory where you would like to save the data.
+2.  A directory where you would like to save the data (default: working directory)
 
 3.  A starting date and time
 
