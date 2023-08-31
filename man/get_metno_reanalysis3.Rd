@@ -6,7 +6,7 @@
 \usage{
 get_metno_reanalysis3(
   area,
-  directory,
+  directory = NULL,
   fromdate = "2012-09-01 10:00:00",
   todate = "2012-09-01 20:00:00",
   area_buffer = 1500,
@@ -16,7 +16,7 @@ get_metno_reanalysis3(
 \arguments{
 \item{area}{(string) path to geo-referenced shapefile covering the desired area}
 
-\item{directory}{(string) path to desired working directory}
+\item{directory}{(string) path to desired working directory (default: working directory)}
 
 \item{fromdate}{(string) date and time for start of time series (ie. "2012-09-01 10:00:00")}
 

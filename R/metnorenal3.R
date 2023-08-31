@@ -17,7 +17,7 @@
 #' formatted from user input. (to be expanded upon)
 #'
 #' @param area (string) path to geo-referenced shapefile covering the desired area
-#' @param directory (string) path to desired working directory
+#' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
@@ -41,12 +41,16 @@
 #'
 get_metno_reanalysis3 <-
   function(area,
-           directory,
+           directory = NULL,
            fromdate =  "2012-09-01 10:00:00",
            todate = "2012-09-01 20:00:00",
            area_buffer = 1500,
            preview = TRUE
   ){
+
+    if(directory %>% is.null()){
+      directory <- getwd()
+    }
 
     # load in the shape file
     area <- sf::read_sf(area)
