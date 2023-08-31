@@ -212,9 +212,9 @@ get_metno_reanalysis3 <-
       # create the daterange
       daterange <- seq(as.POSIXct(fromdate, tz = "CET"), as.POSIXct(todate, tz = "CET"), by="hour")
       years <- lubridate::year(daterange)
-      months <- lubridate::month(daterange) %>% stringr::str_pad(string = ., width = 2, side = "left", pad = "0")
-      days <- lubridate::day(daterange) %>% stringr::str_pad(string = ., width = 2, side = "left", pad = "0")
-      hours <- lubridate::hour(daterange) %>% stringr::str_pad(string = ., width = 2, side = "left", pad = "0")
+      months <- lubridate::month(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
+      days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
+      hours <- lubridate::hour(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
 
       # create the file names using the date range
       filenames <- paste0("met_analysis_1_0km_nordic_", years, months, days, "T", hours, "Z", ".nc")
@@ -279,7 +279,8 @@ get_metno_reanalysis3 <-
         filebatch <- split(filenames, f = years)
 
         # set list names
-        names(yearbatch) <- years %>% unique() %>% sort() %>% paste0("y",.)
+        years_string <- years %>% unique() %>% sort()
+        names(yearbatch) <-  paste0("y", years_string)
 
         for (cbyear in names(yearbatch)) {
           print(paste0("downloading: ", cbyear))
