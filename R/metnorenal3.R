@@ -29,7 +29,7 @@
 #' @importFrom ncdf4 nc_open ncvar_get nc_close
 #' @importFrom purrr map
 #' @importFrom readr write_csv
-#' @importFrom sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates
+#' @importFrom sf read_sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates
 #' @importFrom stringr str_pad str_replace_all str_split
 #'
 #' @author Moritz Shore
@@ -48,9 +48,8 @@ get_metno_reanalysis3 <-
            preview = TRUE
   ){
 
-
-
-
+    # load in the shape file
+    area <- sf::read_sf(area)
 
     # supporting functions
     nc_open_retry <- function(link) {
