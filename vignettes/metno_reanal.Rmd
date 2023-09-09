@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The MET Nordic Reanalysis Dataset is a reanalysis product from the [Meteorologisk institutt](https://www.met.no/). You can read more about the dataset [here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset). The MET Nordic rerun archive version 3 can be accessed using a dedicated function in `miljotools`. Please inform yourself on the limitations of reanalysis data before applying this dataset to your needs.
 
-```{r, fig1, echo= FALSE, fig.align='center', fig.cap="The spatial domain of the reanalysis dataset."}
+```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: The spatial domain of the reanalysis dataset.", out.width="50%", out.height="50%"}
 knitr::include_graphics("../man/figures/domain.png")
 ```
 
@@ -49,7 +49,7 @@ download_folder = get_metno_reanalysis3(
 
 ### Output
 
-```{r, fig2, fig.align='center', fig.cap= "Processing the shapefile and downloading relevant grid points.", echo=FALSE}
+```{r, fig2, fig.align='center', fig.cap= "Figure 2. Processing the shapefile and downloading relevant grid points.", echo=FALSE, out.height="100%", out.width="100%"}
 knitr::include_graphics("../man/figures/output.png")
 ```
 
