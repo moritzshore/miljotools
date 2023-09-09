@@ -4,9 +4,11 @@ This R package hosts a variety of functions for NIBIO DMN Hydrology and Water En
 
 **Table of contents**
 
-1.  Installing miljotools
+1. Installing miljotools
 
-2.  Add your own functions/code/workflows
+2. Getting started
+
+3. Add your own functions/code/workflows
 
 ## Installing miljotools
 
