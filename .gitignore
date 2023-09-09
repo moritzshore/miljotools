@@ -1,3 +1,6 @@
 .Rproj.user
-.Rbuildignore
 .Rhistory
+docs
+pkgdown
+_pkgdown.yaml
+inst/doc

@@ -1,14 +1,19 @@
-Package: miljotools
 Type: Package
+Package: miljotools
 Title: An R package hosting a variety of useful functions for and from NIBIO DMN
 Version: 0.1.0
-Author: Moritz Shore
+Authors@R: 
+    person("Moritz", "Shore", , "moritz.shore@nibio.no", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7586-997X"))
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: This package is intended for all functions used within NIBIO
              DMN, which might also be useful for others. If you have some code,
              workflow, or function which you would like to add, please contact
              the maintainer. 
-License: GPL-3 + file LICENSE
+License: GPL (>= 3)
+URL: https://moritzshore.github.io/miljotools/
+BugReports: https://github.com/moritzshore/miljotools/issues
+Language: English
 Depends:
     R (>= 4.0)
 Imports:
@@ -23,9 +28,12 @@ Imports:
     stringr
 Suggests:
     devtools,
-    roxygen2,
+    knitr,
+    rmarkdown,
+    roxygen2
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-   
-

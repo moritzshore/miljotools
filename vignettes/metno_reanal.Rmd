@@ -1,6 +1,10 @@
 ---
 title: "MET Nordic Reanalysis Dataset"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MET Nordic Reanalysis Dataset}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -49,7 +53,7 @@ download_folder = get_metno_reanalysis3(
 
 ### Output
 
-```{r, fig2, fig.align='center', fig.cap= "Figure 2. Processing the shapefile and downloading relevant grid points.", echo=FALSE, out.height="100%", out.width="100%"}
+```{r, fig2, fig.align='center', fig.cap= "Figure 2. Processing the shapefile and downloading relevant grid points.", echo=FALSE, out.height="50%", out.width="50%"}
 knitr::include_graphics("../man/figures/output.png")
 ```
 

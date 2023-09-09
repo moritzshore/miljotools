@@ -28,9 +28,9 @@ get_metno_reanalysis3(
 }
 \value{
 Writes .csv files into a folder located at the provided directory.
-  One .csv file for each grid point within the (buffered) shape file area.
-  Addtionally one metadata file (.csv) is written with the attributes of each
-  other file
+One .csv file for each grid point within the (buffered) shape file area.
+Addtionally one metadata file (.csv) is written with the attributes of each
+other file
 }
 \description{
 This function accesses the THREDDS server of met.no with download queries
