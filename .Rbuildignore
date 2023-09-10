@@ -6,3 +6,5 @@
 ^LICENSE\.md$
 ^\.github$
 _pkgdown.yaml
+apa-5th-edition.csl
+references.bib
