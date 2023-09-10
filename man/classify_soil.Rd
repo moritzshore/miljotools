@@ -14,7 +14,8 @@ classify_soil(
   sheet = 1,
   decimal = ",",
   append = TRUE,
-  new_sums = FALSE
+  new_sums = FALSE,
+  write = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ classify_soil(
 \item{append}{append results to existing dataframe? (TRUE) or return single column (FALSE). default TRUE.}
 
 \item{new_sums}{append new "rounded sums" to input dataframe? Default FALSE}
+
+\item{write}{optional flag to stop the function from writing any files. Default FALSE}
 }
 \value{
 Returns path to written file
@@ -68,16 +71,17 @@ Silt column: "silt" in percent format (\%), decimal = "."
 Sand column: "sand" in percent format (\%), decimal = "."
 }
 \examples{
- # for demonstration purposes, use path of package
+# x for demonstration purposes, use path of package
  example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 
 classify_soil(
   input = example_file_path,
   output = "output_file.csv",
   version = "NOR",
-  plot_result = T,
-  interactive = F,
-  decimal = "."
+  plot_result = TRUE,
+  interactive = FALSE,
+  decimal = ".",
+  write = FALSE # FALSE just for demonstration
 )
 
 }

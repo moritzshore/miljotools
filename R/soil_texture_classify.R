@@ -47,9 +47,10 @@
 #'   input = example_file_path,
 #'   output = "output_file.csv",
 #'   version = "NOR",
-#'   plot_result = T,
-#'   interactive = F,
-#'   decimal = "."
+#'   plot_result = TRUE,
+#'   interactive = FALSE,
+#'   decimal = ".",
+#'   write = FALSE # FALSE just for demonstration
 #' )
 #'
 #' @return Returns path to written file
