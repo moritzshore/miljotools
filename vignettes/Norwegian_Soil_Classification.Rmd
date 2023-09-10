@@ -8,8 +8,8 @@ vignette: >
 editor_options: 
   markdown: 
     wrap: 72
-bibliography: ../references.bib
-csl: ../apa-5th-edition.csl
+bibliography: ../vignettes/references.bib
+csl: ../vignettes/apa-5th-edition.csl
 
 ---
 

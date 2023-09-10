@@ -4,5 +4,5 @@ docs
 pkgdown
 _pkgdown.yaml
 inst/doc
-apa-5th-edition.csl
-references.bib
+/doc/
+/Meta/
