@@ -37,6 +37,7 @@
 #' @param decimal Specify decimal separator ("," or "."). By default ","
 #' @param append append results to existing dataframe? (TRUE) or return single column (FALSE). default TRUE.
 #' @param new_sums append new "rounded sums" to input dataframe? Default FALSE
+#' @param write optional flag to stop the function from writing any files. Default FALSE
 #'
 #' @examples
 #' # x for demonstration purposes, use path of package
@@ -76,7 +77,8 @@ classify_soil <-
            sheet = 1,
            decimal = ",",
            append = TRUE,
-           new_sums = FALSE){
+           new_sums = FALSE,
+           write = FALSE){
 
     # REQUIRED to fill these out!
     PATH = input
@@ -761,25 +763,28 @@ classify_soil <-
     # only returns the vector of the textures, in order (ALTERNATIVE)
     if (!APPEND & !NEW_SUMS) {input.df <- texture_class}
 
-    # Write the output file in either csv or xlsx form:
-    cat("\n writing output file to", paste0(OUTPATH, "/", OUTPUT_FILE), "\n")
+    if(write){
+      # Write the output file in either csv or xlsx form:
+      cat("\n writing output file to", paste0(OUTPATH, "/", OUTPUT_FILE), "\n")
 
-    # xlsx form
-    if(detect_file_ext(OUTPUT_FILE)=="xlsx") {
-      writexl::write_xlsx(input.df,
-                 path = paste0(OUTPATH, "/", OUTPUT_FILE),
-                 col_names = T)
+      # xlsx form
+      if(detect_file_ext(OUTPUT_FILE)=="xlsx") {
+        writexl::write_xlsx(input.df,
+                            path = paste0(OUTPATH, "/", OUTPUT_FILE),
+                            col_names = T)
+      }
+      # CSV form
+      if(detect_file_ext(OUTPUT_FILE)=="csv") {
+        utils::write.csv(
+          x = input.df,
+          file = paste0(OUTPATH, "/", OUTPUT_FILE),
+          quote = F,
+          row.names = F
+        )
+      }
     }
 
-    # CSV form
-    if(detect_file_ext(OUTPUT_FILE)=="csv") {
-      utils::write.csv(
-        x = input.df,
-        file = paste0(OUTPATH, "/", OUTPUT_FILE),
-        quote = F,
-        row.names = F
-      )
-    }
+
 
     if(plot_result){
       plot_data <- cbind(rounded_sums, texture_class)
