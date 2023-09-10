@@ -19,13 +19,20 @@ Depends:
 Imports:
     abind,
     dplyr,
+    ggplot2,
+    ggtern,
     lubridate,
     mapview,
     ncdf4,
+    plotly,
     purrr,
+    RColorBrewer,
     readr,
+    readxl,
     sf,
-    stringr
+    stringr,
+    utils,
+    writexl
 Suggests:
     devtools,
     knitr,
