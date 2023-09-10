@@ -10,6 +10,9 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+Author: Moritz Shore
+
+Date: August, 2023
 
 ## Introduction
 
