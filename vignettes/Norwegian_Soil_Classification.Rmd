@@ -30,7 +30,7 @@ Reads in soil clay, silt, sand fractions and returns soil classification based
 on USDA or Norwegian definitions.
 
 
-```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: Soil classificatio based on the Norwegian (left) and USDA (right) systems.", out.width="50%", out.height="50%"}
+```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: Soil classificatio based on the Norwegian (left) and USDA (right) systems.", out.width="100%", out.height="100%"}
 knitr::include_graphics("../man/figures/soil_class.png")
 ```
 The function has the following features:
@@ -69,7 +69,7 @@ classify_soil(
   output = "output_file.csv",
   version = "NOR",
   plot_result = T,
-  interactive = T,
+  interactive = FALSE,
   decimal = ".",
   write = FALSE # false just for demonstration. 
 )

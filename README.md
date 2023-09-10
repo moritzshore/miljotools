@@ -27,7 +27,11 @@ library(miljotools)
 
 View the "Articles" to get started
 
-1. MET Nordic Reanalysis Dataset  
+1. MET Nordic Reanalysis Dataset
+
+2. Soil Classification
+
+3. Coming soon..
 
 ## Add your own functions/code/workflows
 
