@@ -27,9 +27,9 @@ library(miljotools)
 
 View the "Articles" to get started
 
-1. MET Nordic Reanalysis Dataset
+1. [MET Nordic Reanalysis Dataset](https://moritzshore.github.io/miljotools/articles/metno_reanal.html)
 
-2. Soil Classification
+2. [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
 3. Coming soon..
 

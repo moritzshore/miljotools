@@ -1,10 +1,16 @@
 ---
-title: "Norwegian_Soil_Classification"
+title: "Soil Classification"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Norwegian_Soil_Classification}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Soil Classification}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+bibliography: ../references.bib
+csl: ../apa-5th-edition.csl
+
 ---
 
 Author: Moritz Shore
@@ -24,40 +30,41 @@ library(miljotools)
 
 ## Introduction
 
-Classifies soils based off of clay, silt, sand fractions using USDA or Norwegian systems.
-
-Reads in soil clay, silt, sand fractions and returns soil classification based
-on USDA or Norwegian definitions.
-
+Classifies soils based off of clay, silt, sand fractions using USDA [@ditzler2017soil] or
+Norwegian [@sveistrup1984kornstorrelsesgrupper] systems. 
 
 ```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: Soil classificatio based on the Norwegian (left) and USDA (right) systems.", out.width="100%", out.height="100%"}
 knitr::include_graphics("../man/figures/soil_class.png")
 ```
+
 The function has the following features:
 
-- Automatically Compatible with csv or xlsx. Tries to automatically guess format of data, and acts accordingly.
+-   Automatically Compatible with csv or xlsx. Tries to automatically
+    guess format of data, and acts accordingly.
 
-- Automatically rounds total fraction to 100%, if differences are under 1%.
+-   Automatically rounds total fraction to 100%, if differences are
+    under 1%.
 
-- Exports classification based on user settings
+-   Exports classification based on user settings
 
-- Creates an interactive diagnostic plot, as well as saving one to output directory.
+-   Creates an interactive diagnostic plot, as well as saving one to
+    output directory.
 
-Note: the script will automatically try to identify which columns contain the
-clay, silt, sand fractions and also try to identify which format they are in. If
-this does not work, you might get incorrect or flawed results, so make sure to
-**READ what THE CONSOLE prints out**, to make sure it did the correct things.
-If the script cannot read your file automatically, then the following format is
-recommended:
+Note: the script will automatically try to identify which columns
+contain the clay, silt, sand fractions and also try to identify which
+format they are in. If this does not work, you might get incorrect or
+flawed results, so make sure to **READ what THE CONSOLE prints out**, to
+make sure it did the correct things. If the script cannot read your file
+automatically, then the following format is recommended:
 
-- Clay column: "clay" in percent format (%), decimal = "." 
-- Silt column: "silt" in  format (%), decimal = "." 
-- Sand column: "sand" in percent format (%), decimal = "."
+-   Clay column: "clay" in percent format (%), decimal = "."
+-   Silt column: "silt" in format (%), decimal = "."
+-   Sand column: "sand" in percent format (%), decimal = "."
 
 ## Usage
 
-A simple usage is shown below. for a more in-depth run down of the arguments 
-please visit the function help page. 
+A simple usage is shown below. for a more in-depth run down of the
+arguments please visit the function help page.
 
 ```{r}
 
@@ -74,3 +81,4 @@ classify_soil(
   write = FALSE # false just for demonstration. 
 )
 ```
+## References
