@@ -10,13 +10,19 @@
     <loc>/articles/metno_reanal.html</loc>
   </url>
   <url>
+    <loc>/articles/Norwegian_Soil_Classification.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
     <loc>/index.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
+    <loc>/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>/reference/classify_soil.html</loc>
   </url>
   <url>
     <loc>/reference/get_metno_reanalysis3.html</loc>
