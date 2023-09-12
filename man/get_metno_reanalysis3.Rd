@@ -36,6 +36,20 @@ other file
 This function accesses the THREDDS server of met.no with download queries
 formatted from user input. (to be expanded upon)
 }
+\examples{
+ # for demonstration purposes, use path of package
+ example_file_path <- system.file(package = "miljotools", "/extdata/metno_reanal/watershed.shp")
+
+ get_metno_reanalysis3(
+ area = example_file_path,
+ fromdate = "2015-01-01",
+ todate = "2015-01-02",
+ area_buffer = 100,
+ preview = TRUE
+ )
+
+
+}
 \author{
 Moritz Shore
 }
