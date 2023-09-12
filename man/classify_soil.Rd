@@ -71,7 +71,7 @@ Silt column: "silt" in percent format (\%), decimal = "."
 Sand column: "sand" in percent format (\%), decimal = "."
 }
 \examples{
-# x for demonstration purposes, use path of package
+# for demonstration purposes, use path of package
  example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 
 classify_soil(
