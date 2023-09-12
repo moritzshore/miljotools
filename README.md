@@ -23,7 +23,7 @@ remotes::install_github(repo = "moritzshore/miljotools", ref = remotes::github_r
 library(miljotools)
 ```
 
-## Topics <a name="start"></a>
+## Tools <a name="start"></a>
 
 View the "Articles" to get started
 
@@ -33,6 +33,6 @@ View the "Articles" to get started
 
 3.  Coming soon..
 
-## Add your own functions/code/workflows <a name="add"></a>
+## Add your own <a name="add"></a>
 
-If you have a function / code / workflow / etc. which you would like to add to this package, please contact the maintainer for developer access.
+If you have a function / code / workflow / script / etc. which you would like to add to this package, please contact the maintainer for developer access.
