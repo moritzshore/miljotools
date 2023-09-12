@@ -2,9 +2,7 @@ Type: Package
 Package: miljotools
 Title: An R package hosting a variety of useful functions for and from NIBIO DMN
 Version: 0.2.0
-Authors@R: 
-    person("Moritz", "Shore", , "moritz.shore@nibio.no", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-7586-997X"))
+Authors: Placeholder Name
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: This package is intended for all functions used within NIBIO
              DMN, which might also be useful for others. If you have some code,
