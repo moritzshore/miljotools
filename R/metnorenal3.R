@@ -40,15 +40,15 @@
 #'
 #' @examples
 #'  # for demonstration purposes, use path of package
-#'  example_file_path <- system.file(package = "miljotools", "/extdata/metno_reanal/watershed.shp")
+#'  ##example_file_path <- system.file(package = "miljotools", "/extdata/metno_reanal/watershed.shp")
 #'
-#'  get_metno_reanalysis3(
-#'  area = example_file_path,
-#'  fromdate = "2015-01-01",
-#'  todate = "2015-01-02",
-#'  area_buffer = 100,
-#'  preview = TRUE
-#'  )
+#'  ##get_metno_reanalysis3(
+#'  ##area = example_file_path,
+#'  ##fromdate = "2015-01-01",
+#'  ##todate = "2015-01-02",
+#'  ##area_buffer = 100,
+#'  ##preview = TRUE
+#'  ##)
 #'
 #'
 

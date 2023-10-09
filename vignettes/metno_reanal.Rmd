@@ -46,12 +46,12 @@ To access the data for a specific region of the Nordics, you need to provide the
 Optionally, you can pass additional parameters to either buffer your shapefile, or to preview the data you are downloading.
 
 ```{r example, eval = FALSE}
-download_folder = get_metno_reanalysis3(
-  area = "C:/Users/mosh/Documents/skuterud_wb.shp",
-  directory = "C:/Users/mosh/Documents/met_no",
-  fromdate = "2013-01-01 00:00:00",
-  todate = "2022-12-31 00:00:00"
-)
+##download_folder = get_metno_reanalysis3(
+  ##area = "C:/Users/mosh/Documents/skuterud_wb.shp",
+  ##directory = "C:/Users/mosh/Documents/met_no",
+  ##fromdate = "2013-01-01 00:00:00",
+  ##todate = "2022-12-31 00:00:00"
+##)
 ```
 
 ### Output
