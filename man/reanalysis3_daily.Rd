@@ -4,7 +4,7 @@
 \alias{reanalysis3_daily}
 \title{Downscale MetNo Reanalysis3 data to daily resolution}
 \usage{
-reanalysis3_daily(path, outpath = NULL, verbose = FALSE)
+reanalysis3_daily(path, outpath = NULL, verbose = FALSE, precision = 2)
 }
 \arguments{
 \item{path}{path to output of get_metno_reanalysis3()}
@@ -12,6 +12,8 @@ reanalysis3_daily(path, outpath = NULL, verbose = FALSE)
 \item{outpath}{(optional) path to write the new files to}
 
 \item{verbose}{(optional) flag to print status}
+
+\item{precision}{round the values to what precision? (integrer, default 2)}
 }
 \value{
 path of written files
@@ -19,4 +21,9 @@ path of written files
 \description{
 This function takes the hourly data from get_metno_reanalysis3() and
 recalculates it into daily time resolution.
+}
+\details{
+Warning, this funcitonality requires "svatools" to be installed:
+
+https://github.com/biopsichas/svatools
 }
