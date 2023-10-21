@@ -652,7 +652,7 @@ get_metno_reanalysis3 <-
 #' @importFrom stringr str_split
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE){
 
-  # path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
+  #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
   if(verbose){cat(green(italic("reading files..\n")))}
 
   # get the file paths and differentiate between metadata and data
@@ -668,17 +668,36 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE){
   hourly2daily <- function(data){
     # These will potentially need to be expanded
     sum_these <- "precipitation_amount"
+    max_these <- "air_temperature_2m"
+    min_these <- "air_temperature_2m"
 
     data_cols <- colnames(data)[2:length(colnames(data))]
     mean_data_cols <- data_cols[which((data_cols %in% sum_these) == FALSE)]
     sum_data_cols <- data_cols[which(data_cols %in% sum_these)]
+    max_data_cols <- data_cols[which(data_cols %in% max_these)]
+    min_data_cols <- data_cols[which(data_cols %in% min_these)]
+
 
     data$daily <- data$date %>% lubridate::date()
 
     daily_data <- data %>% group_by(daily) %>%
       summarise(across(all_of(mean_data_cols), mean))
 
-    return(daily_data)
+    daily_data_sum <- data %>% group_by(daily) %>%
+      summarise(across(all_of(sum_data_cols), sum))
+
+    daily_data_max <- data %>% group_by(daily) %>%
+      summarise(across(all_of(max_data_cols), max)) %>%
+      rename(max_temp = air_temperature_2m)
+
+    daily_data_min <- data %>% group_by(daily) %>%
+      summarise(across(all_of(min_data_cols), min)) %>%
+      rename(min_temp = air_temperature_2m)
+
+    # -1 to get rid of the date column
+    full_df <- cbind(daily_data, daily_data_sum[-1], daily_data_max[-1], daily_data_min[-1])
+
+    return(full_df)
   }
 
   # load all the csv files into memory
@@ -705,7 +724,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE){
 
   out_filepaths <- paste0(outpath, "/", stations_short)
   dir.create(outpath)
-  quiet <- file.copy(from = metadata, to = paste0(outpath, "/matadata.csv"))
+  quiet <- file.copy(from = metadata, to = paste0(outpath, "/metadata.csv"))
 
   if(verbose){cat(green(italic("writing files..\n")))}
 
