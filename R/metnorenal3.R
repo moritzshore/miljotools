@@ -650,7 +650,7 @@ get_metno_reanalysis3 <-
 #' @export
 #'
 #' @importFrom crayon underline italic blue green
-#' @importFrom dplyr %>% group_by all_of across summarise last
+#' @importFrom dplyr %>% group_by all_of across summarise last rename
 #' @importFrom purrr map
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
@@ -697,7 +697,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 
     daily_data_min <- data %>% group_by(daily) %>%
       summarise(across(all_of(min_data_cols), min)) %>%
-      rename(min_temp = air_temperature_2m)
+      dplyr::rename(min_temp = air_temperature_2m)
 
     # -1 to get rid of the date column and round by precisision
     full_df <-
@@ -771,24 +771,25 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom writexl write_xlsx
+#' @importFrom svatools load_template
 reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = FALSE){
 
-  # Check that svatools is installed
-  if ("svatools" %in% utils::installed.packages()) {
-    # nothing to do
-  } else{
-    cat("svatools is required for this functionality, would you like to install? (y) or not (n) \n")
-    answer <- readline()
-
-    if(answer != "y"){return(FALSE)}
-
-    devtools::install_github("biopsichas/svatools")
-    if ("svatools" %in% utils::installed.packages()) {
-      underline(blue(cat("svatools installed succesfully\n")))
-    } else{
-      stop("svatools install unsuccessful! \nYou can try installing the package manually from github.")
-    }
-  }
+  # # Check that svatools is installed
+  # if ("svatools" %in% utils::installed.packages()) {
+  #   # nothing to do
+  # } else{
+  #   cat("svatools is required for this functionality, would you like to install? (y) or not (n) \n")
+  #   answer <- readline()
+  #
+  #   if(answer != "y"){return(FALSE)}
+  #
+  #   devtools::install_github("biopsichas/svatools")
+  #   if ("svatools" %in% utils::installed.packages()) {
+  #     underline(blue(cat("svatools installed succesfully\n")))
+  #   } else{
+  #     stop("svatools install unsuccessful! \nYou can try installing the package manually from github.")
+  #   }
+  # }
 
   # get the file paths and differentiate between metadata and data
   files <- list.files(path, full.names = T)

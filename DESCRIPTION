@@ -13,6 +13,7 @@ Depends:
     R (>= 4.0)
 Imports:
     abind,
+    crayon,
     dplyr,
     ggplot2,
     ggtern,
@@ -26,6 +27,7 @@ Imports:
     readxl,
     sf,
     stringr,
+    svatools,
     utils,
     writexl
 Suggests:
