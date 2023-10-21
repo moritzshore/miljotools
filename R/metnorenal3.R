@@ -628,3 +628,94 @@ get_metno_reanalysis3 <-
 
     return(paste0(directory, "/",foldername))
   }
+
+
+### Downscale resolution
+#' Downscale MetNo Reanalysis3 data to daily resolution
+#'
+#' This function takes the hourly data from get_metno_reanalysis3() and
+#' recalculates it into daily time resolution.
+#'
+#' @param path path to output of get_metno_reanalysis3()
+#' @param outpath (optional) path to write the new files to
+#' @param verbose (optional) flag to print status
+#'
+#' @return path of written files
+#'
+#' @export
+#'
+#' @importFrom crayon underline italic blue green
+#' @importFrom dplyr %>% group_by all_of across summarise last
+#' @importFrom purrr map
+#' @importFrom readr read_csv write_csv
+#' @importFrom lubridate date
+#' @importFrom stringr str_split
+reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE){
+
+  # path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
+  if(verbose){cat(green(italic("reading files..\n")))}
+
+  # get the file paths and differentiate between metadata and data
+  files <- list.files(path, full.names = T)
+  files_short <- list.files(path, full.names = F)
+  stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+
+  stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+  metadata <- files[which(grepl(x = files,pattern =  "metadata.csv"))]
+
+  # Custom funciton to convert the hourly data to daily data
+  # certain considerations need to be made when summing or averaging.
+  hourly2daily <- function(data){
+    # These will potentially need to be expanded
+    sum_these <- "precipitation_amount"
+
+    data_cols <- colnames(data)[2:length(colnames(data))]
+    mean_data_cols <- data_cols[which((data_cols %in% sum_these) == FALSE)]
+    sum_data_cols <- data_cols[which(data_cols %in% sum_these)]
+
+    data$daily <- data$date %>% lubridate::date()
+
+    daily_data <- data %>% group_by(daily) %>%
+      summarise(across(all_of(mean_data_cols), mean))
+
+    return(daily_data)
+  }
+
+  # load all the csv files into memory
+  if(verbose){cat(green(italic("loading files into memory..\n")))}
+
+  data_frames <- purrr::map(stations, readr::read_csv, show_col_types = F)
+  # process them with custom function
+  if(verbose){cat(green(italic("re-calculating to daily..\n")))}
+
+  daily_data_frames <- purrr::map(data_frames, hourly2daily)
+  # write them to custom folder
+
+  foldername <- stringr::str_split(path, "/", simplify = T) %>%
+    as.vector() %>% last() %>% paste0("_daily")
+
+  if(outpath %>% is.null()){
+    outpath = paste0(path, "_daily")
+  }else{
+    outpath <- paste0(outpath, "/", foldername)
+  }
+
+  if(verbose){cat(green(italic("copying metadata..\n")))}
+
+
+  out_filepaths <- paste0(outpath, "/", stations_short)
+  dir.create(outpath)
+  quiet <- file.copy(from = metadata, to = paste0(outpath, "/matadata.csv"))
+
+  if(verbose){cat(green(italic("writing files..\n")))}
+
+  for (i in 1:length(daily_data_frames)) {
+    readr::write_csv(daily_data_frames[[i]], file = out_filepaths[i], progress = F)
+  }
+
+  if(verbose){
+    cat("Conversion finished, files written to:\n", underline(blue(outpath)))
+  }
+
+  return(outpath)
+}
