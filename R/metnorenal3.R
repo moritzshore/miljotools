@@ -1032,7 +1032,7 @@ swat_weather_input_chain <-
 
 
     path3 <- reanalysis3_swatinput(
-      path = path3,
+      path = path2,
       outpath = directory,
       swat_setup = swat_setup,
       write_wgn = write_wgn,
