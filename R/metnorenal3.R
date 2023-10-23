@@ -817,48 +817,43 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
     variables <- colnames(df)
 
     if("daily" %in% variables){
-      df <- df %>% rename(DATE = daily)
+      df2 <- data.frame(DATE = df$daily)
     }else{stop("no date found! cannot create SWAT+ input")}
 
     if("min_temp" %in% variables){
-      df <- df %>% rename(TMP_MIN = min_temp)
+      df2$TMP_MIN <- df$min_temp
       # convert to C
-      df$TMP_MIN <- df$TMP_MIN-273.15
+      df2$TMP_MIN <- df2$TMP_MIN-273.15
     }
 
     if("max_temp" %in% variables){
-      df <- df %>% rename(TMP_MAX = max_temp)
+      df2$TMP_MAX<- df$max_temp
       # convert to C
-      df$TMP_MAX <- df$TMP_MAX-273.15
+      df2$TMP_MAX <- df2$TMP_MAX-273.15
     }
 
     if("precipitation_amount" %in% variables){
-      df <- df %>% rename(PCP = precipitation_amount)
+      df2$PCP <- df$precipitation_amount
     }
 
     if("integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time" %in% variables){
-      df <- df %>% rename(SLR = integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time)
-
+      df2$SLR <- df$integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time
       # convert to MJ
-      df$SLR <- df$SLR/1000000
+      df2$SLR <- df2$SLR/1000000
     }
 
     if("relative_humidity_2m" %in% variables){
-      df <- df %>% rename(RELHUM = relative_humidity_2m)
+      df2$RELHUM <- df$relative_humidity_2m
     }
 
     if("wind_speed_10m" %in% variables){
-      df <- df %>% rename(WNDSPD = wind_speed_10m)
+      df2$WNDSPD <- df$wind_speed_10m
     }
 
     if("wind_direction_10m" %in% variables){
-      df <- df %>% rename(WNDIR = wind_direction_10m)
+      df2$WNDIR <- df$wind_direction_10m
     }
-
-    # drop average air temp since SWAT does not use it.
-    df <- df %>% select(-air_temperature_2m)
-
-    return(df)
+    return(df2)
   }
 
   # loading data into memory
