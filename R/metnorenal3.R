@@ -661,6 +661,7 @@ get_metno_reanalysis3 <-
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
 #' @importFrom stringr str_split
+#' @importFrom utils globalVariables
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
   #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
@@ -688,6 +689,9 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
     max_data_cols <- data_cols[which(data_cols %in% max_these)]
     min_data_cols <- data_cols[which(data_cols %in% min_these)]
 
+
+    #bandiad
+    utils::globalVariables(c("daily", "air_temperature_2m"))
 
     data$daily <- data$date %>% lubridate::date()
 
@@ -778,9 +782,9 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #'   this will be your normal path
 #' @param verbose print status?
 #' @param write_wgn calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))
-#' @param path ti your SWAT+ setup. (Required!)
+#' @param swat_setup path to your SWAT+ setup. (Required!)
+#'
 #' @return path to generated files.
-#' @param swat_input The path to your SWAT+ setup (input files, aka TxtInOut)
 #' @export
 #'
 #' @author Moritz Shore, Svajunas Plunge

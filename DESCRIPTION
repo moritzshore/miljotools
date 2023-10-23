@@ -25,7 +25,6 @@ Imports:
     RColorBrewer,
     readr,
     readxl,
-    rlang,
     sf,
     stringr,
     utils,
