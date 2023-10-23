@@ -28,10 +28,10 @@ Imports:
     rlang,
     sf,
     stringr,
-    svatools,
     utils,
     writexl
 Suggests:
+    SWATprepR,
     devtools,
     knitr,
     rmarkdown,
