@@ -874,11 +874,12 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
 
   folder <- path %>% stringr::str_split("/") %>% unlist() %>% dplyr::last()
 
+  folder <- parts[which(nchar(parts) > 1)] %>% dplyr::last()
   # time and date should always be the 4th element.
-  tod <- folder %>% str_split("_") %>% unlist() %>% dplyr::nth(4)
+  tod <- folder %>% stringr::str_split("_") %>% unlist() %>% dplyr::nth(4)
 
   if(outpath %>% is.null()){
-    outpath <- path %>% stringr::str_remove(folder)
+    outpath <- path %>% stringr::str_remove(paste0("/", folder, "/"))
     }
 
   xlpath <- paste0(outpath, "/", tod, "_swat_weather_data.xlsx")
