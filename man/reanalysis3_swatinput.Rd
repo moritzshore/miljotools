@@ -4,14 +4,31 @@
 \alias{reanalysis3_swatinput}
 \title{Create SWAT+ meteo input from MetNo Reanalysis3 data}
 \usage{
-reanalysis3_swatinput(path, sqlite_path, outpath = NULL, verbose = FALSE)
+reanalysis3_swatinput(
+  path,
+  swat_setup,
+  outpath = NULL,
+  write_wgn = TRUE,
+  start = NA,
+  end = NA,
+  sqlite_path = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{path}{path to daily data provided by \code{reanalysis3_daily()}}
+\item{path}{ti your SWAT+ setup. (Required!)}
 
-\item{sqlite_path}{path to your SWAT+ sqlite file.}
+\item{outpath}{path to directory where files will be written. If left blank,
+this will be your normal path}
 
-\item{outpath}{optional path to directory where .xlsx file will be written.}
+\item{write_wgn}{calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))}
+
+\item{start}{optional parameter to define start date oftimeseries}
+
+\item{end}{optional parameter to define end date of timeseries}
+
+\item{sqlite_path}{path to your SWAT+ sqlite file (only needed if you wish to
+update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
 
 \item{verbose}{print status?}
 }
@@ -21,5 +38,14 @@ path to generated files.
 \description{
 Takes data gathered by \code{get_metno_reanalysis3()} and downscaled by
 \code{reanalysis3_daily()} and creates SWAT+ meteo input files and weather
-generators.
+generators for your SWAT+ input with help from SWATprepR.
+}
+\details{
+\strong{NOTE} package \code{SWATprepR} is required for this function
+
+\strong{NOTE}: the SWAT+ input files must be in your specified 'outpath' for the
+function to complete successfully when not writing to the SQL database
+}
+\author{
+Moritz Shore, Svajunas Plunge
 }
