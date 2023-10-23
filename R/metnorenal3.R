@@ -661,7 +661,6 @@ get_metno_reanalysis3 <-
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
 #' @importFrom stringr str_split
-#' @importFrom utils globalVariables
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
   #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
@@ -689,9 +688,6 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
     max_data_cols <- data_cols[which(data_cols %in% max_these)]
     min_data_cols <- data_cols[which(data_cols %in% min_these)]
 
-
-    #bandiad
-    utils::globalVariables(c("daily", "air_temperature_2m"))
 
     data$daily <- data$date %>% lubridate::date()
 

@@ -16,7 +16,9 @@ reanalysis3_swatinput(
 )
 }
 \arguments{
-\item{path}{ti your SWAT+ setup. (Required!)}
+\item{path}{path to daily data provided by \code{reanalysis3_daily()}}
+
+\item{swat_setup}{path to your SWAT+ setup. (Required!)}
 
 \item{outpath}{path to directory where files will be written. If left blank,
 this will be your normal path}
@@ -31,8 +33,6 @@ this will be your normal path}
 update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
 
 \item{verbose}{print status?}
-
-\item{swat_input}{The path to your SWAT+ setup (input files, aka TxtInOut)}
 }
 \value{
 path to generated files.
