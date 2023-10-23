@@ -902,13 +902,16 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
   # calculating the weather generator
   ## !!! which station should we use here?
   cat(green(italic(("creating weather generator\n"))))
-  wgn <- svatools::prepare_wgn(met_lst2,
-                     TMP_MAX = met_lst$data$ID1$TMP_MAX,
-                     TMP_MIN = met_lst$data$ID1$TMP_MIN,
-                     PCP = met_lst$data$ID1$PCP,
-                     RELHUM = met_lst$data$ID1$RELHUM,
-                     WNDSPD = met_lst$data$ID1$WNDSPD,
-                     SLR = met_lst$data$ID1$SLR)
+  wgn <- svatools::prepare_wgn(
+    meteo_lst,
+    TMP_MAX = meteo_lst$data$ID1$TMP_MAX,
+    TMP_MIN = meteo_lst$data$ID1$TMP_MIN,
+    PCP = meteo_lst$data$ID1$PCP,
+    RELHUM = meteo_lst$data$ID1$RELHUM,
+    WNDSPD = meteo_lst$data$ID1$WNDSPD,
+    SLR = meteo_lst$data$ID1$SLR
+  )
+
   # writing the weather gen
   if(verbose){cat(green(italic("writing weather generator to file in '", outpath, "'\n")))}
 
@@ -916,6 +919,12 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
   write.csv(wgn$wgn_data, paste0(outpath,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
 
   # write files and add them to project sqlite
+  # TODO: consider enabling fill_missing?
   if(verbose){cat(green(italic(("adding weather stations to project SQLITE\n"))))}
-  svatools::add_weather(sqlite_path, met_lst2, wgn)
-}
+  svatools::add_weather(
+    db_path = sqlite_path,
+    meteo_lst = meteo_lst,
+    wgn_lst = wgn,
+    fill_missing = FALSE
+  )
+  al}
