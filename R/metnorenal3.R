@@ -30,6 +30,7 @@
 #' @importFrom readr write_csv
 #' @importFrom sf read_sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates st_zm
 #' @importFrom stringr str_pad str_replace_all str_split
+#' @importFrom mapview mapview
 #'
 #' @author Moritz Shore
 #' @export
@@ -872,7 +873,7 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
   # set the name of the metadata (svatools format)
   names(stations_list)[1] <- "Stations"
 
-  folder <- path %>% stringr::str_split("/") %>% unlist() %>% dplyr::last()
+  parts <-  path %>% stringr::str_split("/") %>% unlist()
 
   folder <- parts[which(nchar(parts) > 1)] %>% dplyr::last()
   # time and date should always be the 4th element.
