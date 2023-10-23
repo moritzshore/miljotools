@@ -885,6 +885,7 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
 
   # writing the excel sheet
   if(verbose){cat(green(italic(("writing svatools excel sheet\n"))))}
+
   writexl::write_xlsx(
     x = stations_list,
     path = xlpath,
@@ -897,7 +898,10 @@ reanalysis3_swatinput <- function(path, sqlite_path, outpath = NULL, verbose = F
   # running svatool
   # loading the template
   if(verbose){cat(green(italic("loading data into svatools\n")))}
-  met_lst2 <- svatools::load_template(xlpath, epsg_code = 4368)
+  # double check if this EPSG code is correct
+  meteo_lst <- svatools::load_template(xlpath, epsg_code = 4326)
+
+  print(mapview::mapview(meteo_lst$stations))
 
   # calculating the weather generator
   ## !!! which station should we use here?
