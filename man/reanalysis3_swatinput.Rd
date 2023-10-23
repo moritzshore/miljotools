@@ -31,6 +31,8 @@ this will be your normal path}
 update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
 
 \item{verbose}{print status?}
+
+\item{swat_input}{The path to your SWAT+ setup (input files, aka TxtInOut)}
 }
 \value{
 path to generated files.

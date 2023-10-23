@@ -661,7 +661,6 @@ get_metno_reanalysis3 <-
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
 #' @importFrom stringr str_split
-#' @importFrom rlang .data
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
   #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
@@ -692,19 +691,19 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 
     data$daily <- data$date %>% lubridate::date()
 
-    daily_data <- data %>% group_by(rlang::.data$daily) %>%
+    daily_data <- data %>% group_by(daily) %>%
       summarise(across(all_of(mean_data_cols), mean))
 
-    daily_data_sum <- data %>% group_by(rlang::.data$daily) %>%
+    daily_data_sum <- data %>% group_by(daily) %>%
       summarise(across(all_of(sum_data_cols), sum))
 
-    daily_data_max <- data %>% group_by(rlang::.data$daily) %>%
+    daily_data_max <- data %>% group_by(daily) %>%
       summarise(across(all_of(max_data_cols), max)) %>%
-      rename(max_temp = rlang::.data$air_temperature_2m)
+      rename(max_temp = air_temperature_2m)
 
-    daily_data_min <- data %>% group_by(rlang::.data$daily) %>%
+    daily_data_min <- data %>% group_by(daily) %>%
       summarise(across(all_of(min_data_cols), min)) %>%
-      dplyr::rename(min_temp = rlang::.data$air_temperature_2m)
+      dplyr::rename(min_temp = air_temperature_2m)
 
     # -1 to get rid of the date column and round by precisision
     full_df <-

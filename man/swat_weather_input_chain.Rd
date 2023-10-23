@@ -10,7 +10,7 @@ swat_weather_input_chain(
   directory = NULL,
   from = NULL,
   to = NULL,
-  area_buffer = NULL,
+  area_buffer = 1500,
   verbose = TRUE,
   precision = 2,
   write_wgn = TRUE,
