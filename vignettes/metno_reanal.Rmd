@@ -117,7 +117,7 @@ your SWAT+ input files to match the new weather stations, or update your
 `SWATprepR` which needs to be installed before use. This can be done
 [here](https://biopsichas.github.io/SWATprepR/).
 
-```{r}
+```{r, eval=FALSE}
 reanalysis3_swatinput(path = daily_data_path,
                       swat_setup = "C:/path/to/swat/txtinout")
 ```

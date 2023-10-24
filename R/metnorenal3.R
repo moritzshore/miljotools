@@ -919,7 +919,19 @@ reanalysis3_swatinput <-
   # loading the template
   if(verbose){cat(green(italic("loading data into SWATprepR\n")))}
   # double check if this EPSG code is correct
+
   meteo_lst <- SWATprepR::load_template(xlpath, epsg_code = 4326)
+
+  metadata_spat <- st_as_sf(metadata, coords = c("Long",
+                                       "Lat"), crs = 4326)
+
+  mystations <- dplyr::tibble(metadata)
+
+
+  my_meteo_lst <- list(stations = mystations , data = my_data)
+
+
+
   print(mapview::mapview(meteo_lst$stations))
 
   # if the weather generator should be calculated and written:
