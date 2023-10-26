@@ -790,6 +790,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom writexl write_xlsx
+#' @importFrom SWATprepR prepare_climate add_weather prepare_wgn load_template
 reanalysis3_swatinput <-
   function(path,
            swat_setup,
@@ -810,7 +811,7 @@ reanalysis3_swatinput <-
       }
     } else{
       # it is not loaded, then load it
-      requireNamespace("SWATprepR")
+      #requireNamespace("SWATprepR")
       if (verbose) {
         cat(green(italic("loading SWATprepR\n")))
       }

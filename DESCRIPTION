@@ -27,6 +27,7 @@ Imports:
     readxl,
     sf,
     stringr,
+    SWATprepR,
     utils,
     writexl
 Remotes: github::biopsichas/SWATprepR
