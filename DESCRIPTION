@@ -29,8 +29,8 @@ Imports:
     stringr,
     utils,
     writexl
+Remotes: github::biopsichas/SWATprepR
 Suggests:
-    SWATprepR,
     devtools,
     knitr,
     rmarkdown,
