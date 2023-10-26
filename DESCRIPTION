@@ -1,7 +1,7 @@
 Type: Package
 Package: miljotools
 Title: An R package hosting a variety of useful functions for environmental data handling and anaylsis
-Version: 0.2.1
+Version: 0.3.0
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data processing and analysis.
@@ -13,6 +13,7 @@ Depends:
     R (>= 4.0)
 Imports:
     abind,
+    crayon,
     dplyr,
     ggplot2,
     ggtern,
@@ -26,8 +27,10 @@ Imports:
     readxl,
     sf,
     stringr,
+    SWATprepR,
     utils,
     writexl
+Remotes: github::biopsichas/SWATprepR
 Suggests:
     devtools,
     knitr,

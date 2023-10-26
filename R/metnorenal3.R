@@ -30,6 +30,7 @@
 #' @importFrom readr write_csv
 #' @importFrom sf read_sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates st_zm
 #' @importFrom stringr str_pad str_replace_all str_split
+#' @importFrom mapview mapview
 #'
 #' @author Moritz Shore
 #' @export
@@ -64,6 +65,11 @@ get_metno_reanalysis3 <-
     if(directory %>% is.null()){
       directory <- getwd()
     }
+
+    if(area_buffer < 1){
+      area_buffer = 1
+    }
+
 
     # load in the shape file
     area <- sf::read_sf(area)
@@ -627,4 +633,425 @@ get_metno_reanalysis3 <-
     )
 
     return(paste0(directory, "/",foldername))
+  }
+
+
+### Downscale resolution
+#' Downscale MetNo Reanalysis3 data to daily resolution
+#'
+#' This function takes the hourly data from get_metno_reanalysis3() and
+#' recalculates it into daily time resolution.
+#'
+#' Warning, this funcitonality requires "svatools" to be installed:
+#'
+#' https://github.com/biopsichas/svatools
+#'
+#' @param path path to output of get_metno_reanalysis3()
+#' @param outpath (optional) path to write the new files to
+#' @param verbose (optional) flag to print status
+#' @param precision round the values to what precision? (integrer, default 2)
+#'
+#' @return path of written files
+#'
+#' @export
+#'
+#' @importFrom crayon underline italic blue green
+#' @importFrom dplyr %>% group_by all_of across summarise last rename
+#' @importFrom purrr map
+#' @importFrom readr read_csv write_csv
+#' @importFrom lubridate date
+#' @importFrom stringr str_split
+reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
+
+  #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
+  if(verbose){cat(green(italic("reading files..\n")))}
+
+  # get the file paths and differentiate between metadata and data
+  files <- list.files(path, full.names = T)
+  files_short <- list.files(path, full.names = F)
+  stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+
+  stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+  metadata <- files[which(grepl(x = files,pattern =  "metadata.csv"))]
+
+  # Custom funciton to convert the hourly data to daily data
+  # certain considerations need to be made when summing or averaging.
+  hourly2daily <- function(data){
+    # These will potentially need to be expanded
+    sum_these <- "precipitation_amount"
+    max_these <- "air_temperature_2m"
+    min_these <- "air_temperature_2m"
+
+    data_cols <- colnames(data)[2:length(colnames(data))]
+    mean_data_cols <- data_cols[which((data_cols %in% sum_these) == FALSE)]
+    sum_data_cols <- data_cols[which(data_cols %in% sum_these)]
+    max_data_cols <- data_cols[which(data_cols %in% max_these)]
+    min_data_cols <- data_cols[which(data_cols %in% min_these)]
+
+
+    data$daily <- data$date %>% lubridate::date()
+
+    daily_data <- data %>% group_by(daily) %>%
+      summarise(across(all_of(mean_data_cols), mean))
+
+    daily_data_sum <- data %>% group_by(daily) %>%
+      summarise(across(all_of(sum_data_cols), sum))
+
+    daily_data_max <- data %>% group_by(daily) %>%
+      summarise(across(all_of(max_data_cols), max)) %>%
+      rename(max_temp = air_temperature_2m)
+
+    daily_data_min <- data %>% group_by(daily) %>%
+      summarise(across(all_of(min_data_cols), min)) %>%
+      dplyr::rename(min_temp = air_temperature_2m)
+
+    # -1 to get rid of the date column and round by precisision
+    full_df <-
+      cbind(
+        daily_data[1],
+        daily_data[-1] %>% round(precision),
+        daily_data_sum[-1] %>% round(precision),
+        daily_data_max[-1] %>% round(precision),
+        daily_data_min[-1] %>% round(precision)
+      )
+
+    return(full_df)
+  }
+
+  # load all the csv files into memory
+  if(verbose){cat(green(italic("loading files into memory..\n")))}
+
+  data_frames <- purrr::map(stations, readr::read_csv, show_col_types = F)
+  # process them with custom function
+  if(verbose){cat(green(italic("re-calculating to daily..\n")))}
+
+  daily_data_frames <- purrr::map(data_frames, hourly2daily)
+  # write them to custom folder
+
+  foldername <- stringr::str_split(path, "/", simplify = T) %>%
+    as.vector() %>% last() %>% paste0("_daily")
+
+  if(outpath %>% is.null()){
+    outpath = paste0(path, "_daily")
+  }else{
+    outpath <- paste0(outpath, "/", foldername)
+  }
+
+  if(verbose){cat(green(italic("copying metadata..\n")))}
+
+
+  out_filepaths <- paste0(outpath, "/", stations_short)
+  dir.create(outpath)
+  quiet <- file.copy(from = metadata, to = paste0(outpath, "/metadata.csv"))
+
+  if(verbose){cat(green(italic("writing files..\n")))}
+
+  for (i in 1:length(daily_data_frames)) {
+    readr::write_csv(daily_data_frames[[i]], file = out_filepaths[i], progress = F)
+  }
+
+  if(verbose){
+    cat("Conversion finished, files written to:\n", underline(blue(outpath)), "\n")
+  }
+
+  return(outpath)
+}
+
+
+#' Create SWAT+ meteo input from MetNo Reanalysis3 data
+#'
+#' Takes data gathered by `get_metno_reanalysis3()` and downscaled by
+#' `reanalysis3_daily()` and creates SWAT+ meteo input files and weather
+#' generators for your SWAT+ input with help from SWATprepR.
+#'
+#' **NOTE** package `SWATprepR` is required for this function
+#'
+#' **NOTE**: the SWAT+ input files must be in your specified 'outpath' for the
+#' function to complete successfully when not writing to the SQL database
+#'
+#' @param path path to daily data provided by `reanalysis3_daily()`
+#' @param start optional parameter to define start date oftimeseries
+#' @param end optional parameter to define end date of timeseries
+#' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to
+#'   update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
+#' @param outpath path to directory where files will be written. If left blank,
+#'   this will be your normal path
+#' @param verbose print status?
+#' @param write_wgn calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))
+#' @param swat_setup path to your SWAT+ setup. (Required!)
+#'
+#' @return path to generated files.
+#' @export
+#'
+#' @author Moritz Shore, Svajunas Plunge
+#'
+#' @importFrom dplyr last nth
+#' @importFrom purrr map
+#' @importFrom readr read_csv
+#' @importFrom stringr str_split str_remove
+#' @importFrom writexl write_xlsx
+#' @importFrom SWATprepR prepare_climate add_weather prepare_wgn load_template
+reanalysis3_swatinput <-
+  function(path,
+           swat_setup,
+           outpath = NULL,
+           write_wgn = TRUE,
+           start = NA,
+           end = NA,
+           sqlite_path = NULL,
+           verbose = FALSE) {
+
+  # Check that prepr is installed
+  if ("SWATprepR" %in% utils::installed.packages()) {
+    # if it is installed, check if it is loaded
+    if ("SWATprepR" %in% (.packages())) {
+      # it is loaded:
+      if (verbose) {
+        cat(green(italic("SWATprepR already loaded!\n")))
+      }
+    } else{
+      # it is not loaded, then load it
+      #requireNamespace("SWATprepR")
+      if (verbose) {
+        cat(green(italic("loading SWATprepR\n")))
+      }
+    }
+    # it is not installed? then require the user to install it.
+  } else{
+    stop(
+      "SWATprepR is required for this function, please install it.
+         \n https://biopsichas.github.io/SWATprepR/index.html"
+    )
+  }
+
+  # get the file paths and differentiate between metadata and data
+  files <- list.files(path, full.names = T)
+  files_short <- list.files(path, full.names = F)
+  stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+  stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+
+  # load the metadata
+  metadata <- readr::read_csv(paste0(path, "/metadata.csv"), show_col_types = F) %>%
+    as.data.frame()
+  metadata$Source = ""
+
+  # Convert to prepR format
+  # in order to use PrepR to create the SWAT weather files, we need to create
+  # an excel template file in the correct format.
+  # This custom read function will read and process the csv files to be in the
+  # format we want them in
+  custom_read <- function(filepath){
+    # read
+    df <- readr::read_csv(filepath, show_col_types = F)
+
+    variables <- colnames(df)
+
+    if("daily" %in% variables){
+      df2 <- data.frame(DATE = df$daily)
+    }else{stop("no date found! cannot create SWAT+ input")}
+
+    if("min_temp" %in% variables){
+      df2$TMP_MIN <- df$min_temp
+      # convert to C
+      df2$TMP_MIN <- df2$TMP_MIN-273.15
+    }
+
+    if("max_temp" %in% variables){
+      df2$TMP_MAX<- df$max_temp
+      # convert to C
+      df2$TMP_MAX <- df2$TMP_MAX-273.15
+    }
+
+    if("precipitation_amount" %in% variables){
+      df2$PCP <- df$precipitation_amount
+    }
+
+    if("integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time" %in% variables){
+      df2$SLR <- df$integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time
+      # convert to MJ
+      df2$SLR <- df2$SLR/1000000
+    }
+
+    if("relative_humidity_2m" %in% variables){
+      df2$RELHUM <- df$relative_humidity_2m
+    }
+
+    if("wind_speed_10m" %in% variables){
+      df2$WNDSPD <- df$wind_speed_10m
+    }
+
+    if("wind_direction_10m" %in% variables){
+      df2$WNDIR <- df$wind_direction_10m
+    }
+    return(df2)
+  }
+
+  # use the custom read function to load them into memory
+  cat(green(italic(("loading data into memory...\n"))))
+  my_data <- purrr::map(stations, custom_read)
+
+   # add station names
+  names(my_data) <- paste0("ID", c(1:length(my_data)))
+  # append the metadata to the front
+  stations_list <- append(list(metadata), my_data)
+  # and set the name of the metadata (prepR format)
+  names(stations_list)[1] <- "Stations"
+
+  # parsing and/or generating outpath and folder/file names
+  parts <-  path %>% stringr::str_split("/") %>% unlist()
+  folder <- parts[which(nchar(parts) > 1)] %>% dplyr::last()
+  # time and date should always be the 4th element.
+  tod <- folder %>% stringr::str_split("_") %>% unlist() %>% dplyr::nth(4)
+  if(outpath %>% is.null()){
+    outpath <- path %>% stringr::str_remove(paste0("/", folder, "/"))
+    }
+
+
+  # writing the excel sheet
+  if(verbose){cat(green(italic(("writing SWATprepR excel sheet\n"))))}
+  xlpath <- paste0(outpath, "/", tod, "_swat_weather_data.xlsx")
+  writexl::write_xlsx(
+    x = stations_list,
+    path = xlpath,
+    col_names = T
+  )
+
+  # loading files into prepR and previewing spatial
+  # loading the template
+  if(verbose){cat(green(italic("loading data into SWATprepR\n")))}
+  # double check if this EPSG code is correct
+
+  meteo_lst <- SWATprepR::load_template(xlpath, epsg_code = 4326)
+
+  metadata_spat <- st_as_sf(metadata, coords = c("Long",
+                                       "Lat"), crs = 4326)
+
+  mystations <- dplyr::tibble(metadata)
+
+
+  my_meteo_lst <- list(stations = mystations , data = my_data)
+
+
+
+  print(mapview::mapview(meteo_lst$stations))
+
+  # if the weather generator should be calculated and written:
+  if(write_wgn){
+    # calculating the weather generator
+    ## !!! which station should we use here? should be a parameter.
+    cat(green(italic(("creating weather generator\n"))))
+    wgn <- SWATprepR::prepare_wgn(
+      meteo_lst,
+      TMP_MAX = meteo_lst$data$ID1$TMP_MAX,
+      TMP_MIN = meteo_lst$data$ID1$TMP_MIN,
+      PCP = meteo_lst$data$ID1$PCP,
+      RELHUM = meteo_lst$data$ID1$RELHUM,
+      WNDSPD = meteo_lst$data$ID1$WNDSPD,
+      SLR = meteo_lst$data$ID1$SLR
+    )
+    # writing the weather gen
+    if(verbose){cat(green(italic("writing weather generator to file in '", outpath, "'\n")))}
+
+    write.csv(wgn$wgn_st, paste0(outpath,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
+    write.csv(wgn$wgn_data, paste0(outpath,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
+  }
+
+  # writing
+  if(is.null(sqlite_path) == FALSE){
+    # write files and add them to project sqlite
+    # TODO: consider enabling fill_missing?
+    if(verbose){cat(green(italic(("adding weather stations to project SQLITE\n"))))}
+    SWATprepR::add_weather(
+      db_path = sqlite_path,
+      meteo_lst = meteo_lst,
+      wgn_lst = wgn,
+      fill_missing = FALSE
+    )
+  }else{
+    # if it is null, then write just the climate files
+    if(verbose){cat(green(italic(("writing weather station files\n"))))}
+    SWATprepR::prepare_climate(meteo_lst,
+                               swat_setup,
+                               period_starts = start,
+                               period_ends = end)
+  }
+}
+
+#' Generate SWAT+ weather input for any watershed in the nordics.
+#'
+#' This function combines 3 `miljotools` functions in a single gridded data
+#' retrieval and processing pipeline to write and assign weather data to a SWAT+
+#' setup. The functions involved are
+#'
+#' 1. `get_metno_reanalysis3()` downloads and processes the hourly gridded
+#' reanalysis data for the nordics
+#'
+#' 2. `reanalysis3_daily()` converts these hourly timeseries into daily.
+#'
+#' 3. `reanalysis3_swatinput()` converts these timeseries into a SWAT+
+#' compatible format as well as generating the weather generator, and updating
+#' SWAT+ input files with the help of the R-package `SWARTprepR`
+#'
+#' For more details please see the help pages of the individual functions. Also
+#' please note the the package `SWATprepR` is required for this pipeline.
+#'
+#' @param area The catchment area to retrieve data for. (must be a shapefile)
+#' @param swat_setup The path to your SWAT+ setup (input files, aka TxtInOut)
+#' @param directory directory to download and process data in
+#' @param from start of the to-be-dowloaded timeseries (ie. and min: "2012-09-01
+#'   10:00:00")
+#' @param to end of the to-be-dowloaded timeseries (ie. and max: "2023-01-31
+#'   10:00:00")
+#' @param area_buffer optional buffer in meters around the provided area
+#' @param verbose print status messages?
+#' @param precision Optional, which precision (integer) should the hourly data
+#'   be rounded down to when converted from daily to hourly. Default is '2'
+#'   decimal places.
+#' @param write_wgn would you like to calculate and write the weather generator?
+#' @param sqlite_path optionally, you can pass the path of your .sqlite file in
+#'   order to update the database with your new met files
+#'
+#' @author Moritz Shore, Svajunas Plunge
+#'
+#' @export
+#'
+swat_weather_input_chain <-
+  function(area,
+           swat_setup,
+           directory = NULL,
+           from = NULL,
+           to = NULL,
+           area_buffer = 1500,
+           verbose = TRUE,
+           precision = 2,
+           write_wgn = TRUE,
+           sqlite_path = NULL) {
+
+    path1 <- get_metno_reanalysis3(
+      area,
+      directory = directory,
+      fromdate =  "2012-09-01 10:00:00",
+      todate = "2012-09-02 20:00:00",
+      area_buffer = area_buffer,
+      preview = verbose
+    )
+
+    path2 <- reanalysis3_daily(
+      path = path1,
+      outpath = directory,
+      verbose = verbose,
+      precision = precision
+    )
+
+
+    path3 <- reanalysis3_swatinput(
+      path = path2,
+      outpath = directory,
+      swat_setup = swat_setup,
+      write_wgn = write_wgn,
+      sqlite_path = sqlite_path,
+      verbose = verbose
+    )
+
+    print("miljotools: pipeline finished!")
   }
