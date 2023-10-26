@@ -30,4 +30,13 @@
   <url>
     <loc>/reference/index.html</loc>
   </url>
+  <url>
+    <loc>/reference/reanalysis3_daily.html</loc>
+  </url>
+  <url>
+    <loc>/reference/reanalysis3_swatinput.html</loc>
+  </url>
+  <url>
+    <loc>/reference/swat_weather_input_chain.html</loc>
+  </url>
 </urlset>
