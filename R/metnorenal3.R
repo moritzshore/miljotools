@@ -887,9 +887,10 @@ reanalysis3_swatinput <-
   }
 
   # use the custom read function to load them into memory
-  cat(green(italic(("loading data into memory...\n"))))
+  if(verbose){cat(green(italic(("loading data into memory...\n"))))}
   my_data <- purrr::map(stations, custom_read)
 
+  if(verbose){cat(green(italic(("converting data into SWATprepR format...\n"))))}
    # add station names
   names(my_data) <- paste0("ID", c(1:length(my_data)))
   # append the metadata to the front
@@ -906,34 +907,62 @@ reanalysis3_swatinput <-
     outpath <- path %>% stringr::str_remove(paste0("/", folder, "/"))
     }
 
+  # recreating metadata format for Svatools
+  metadata_spat <-
+    sf::st_as_sf(dplyr::tibble(metadata),
+                 coords = c("Long",
+                            "Lat"),
+                 crs = 4326)
+  metadata_spat$Long <- metadata$Long
+  metadata_spat$Lat <- metadata$Lat
+  metadata_spat$Source = NA
 
-  # writing the excel sheet
-  if(verbose){cat(green(italic(("writing SWATprepR excel sheet\n"))))}
-  xlpath <- paste0(outpath, "/", tod, "_swat_weather_data.xlsx")
-  writexl::write_xlsx(
-    x = stations_list,
-    path = xlpath,
-    col_names = T
-  )
+  # recreating data format for SWATprepR
 
-  # loading files into prepR and previewing spatial
-  # loading the template
-  if(verbose){cat(green(italic("loading data into SWATprepR\n")))}
-  # double check if this EPSG code is correct
+  # this function splits the dataframe into indiviudal lists, and appends
+  # the date column to each one in tibble form. The column name for the variable
+  # at hand is not assigned here because I could not find a way to do it. It
+  # is done in a later step with for loops
+  data_spanner <- function(station) {
+    step1 <- station %>% as.list()
+    data_wrench <- function(datecol, list) {
+      df <- dplyr::tibble(DATE = datecol, list)
+      names(df) <- c("DATE", "replace")
+      return(df)
+    }
 
-  meteo_lst <- SWATprepR::load_template(xlpath, epsg_code = 4326)
+    # the date col needs to be seperated out, and then is appended to each list
+    # item. It is currently in a slightly deviating format, datetime, but I
+    # dont think it matters, something to check up on though
+    datecol = as.POSIXct(step1$DATE)
+    # we apply our custom function to everything but the date column [-1]
+    step2 <- lapply(step1[-1], data_wrench, datecol = datecol)
 
-  metadata_spat <- st_as_sf(metadata, coords = c("Long",
-                                       "Lat"), crs = 4326)
+    # here we parse out the variable names and apply them to the dataframe
+    the_colnames <- names(step2)
+    for (i in seq_along(the_colnames)) {
+      colnames(step2[[i]]) <- c("DATE", the_colnames[i])
+    }
+    return(step2)
+  }
 
-  mystations <- dplyr::tibble(metadata)
+  # now we need to make a list of lists
+  new_list <- list()
+  for (i in seq_along(my_data)) {
+    # for every station we first manipulate the structure using our custom function
+    modified <- data_spanner(my_data[[i]])
+    # turn it into a list of tibbles
+    modified <- list(modified)
+    # and add it to the overarching list
+    new_list <- c(new_list, modified)
+    # and give it the correct names
+    names(new_list) <- paste0("ID", c(1:length(new_list)))
+  }
 
-
-  my_meteo_lst <- list(stations = mystations , data = my_data)
-
-
-
-  print(mapview::mapview(meteo_lst$stations))
+  # now we add that list to another list of metadata and data, in the final
+  # swatprepR format (NIGHTMARE!)
+  meteo_lst <- list(stations = metadata_spat , data = new_list)
+  if(verbose){print(mapview::mapview(meteo_lst$stations))}
 
   # if the weather generator should be calculated and written:
   if(write_wgn){
