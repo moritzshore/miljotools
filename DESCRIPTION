@@ -27,10 +27,13 @@ Imports:
     readxl,
     sf,
     stringr,
+    euptf2,
     SWATprepR,
     utils,
     writexl
-Remotes: github::biopsichas/SWATprepR
+Remotes: 
+    github::tkdweber/euptf2
+    github::biopsichas/SWATprepR
 Suggests:
     devtools,
     knitr,
