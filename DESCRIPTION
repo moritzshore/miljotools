@@ -30,8 +30,7 @@ Imports:
     SWATprepR,
     utils,
     writexl
-Remotes: 
-    github::biopsichas/SWATprepR
+Remotes: github::biopsichas/SWATprepR
 Suggests:
     devtools,
     knitr,
