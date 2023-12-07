@@ -1,4 +1,4 @@
-# miljotools
+# miljotools <img src="man/figures/logo.png" align="right" height="138"/>
 
 This R package hosts a variety of functions for NIBIO DMN Hydrology and Water Environment. If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
 
