@@ -790,7 +790,6 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom writexl write_xlsx
-#' @importFrom SWATprepR prepare_climate add_weather prepare_wgn load_template
 reanalysis3_swatinput <-
   function(path,
            swat_setup,
@@ -1000,9 +999,9 @@ reanalysis3_swatinput <-
     # if it is null, then write just the climate files
     if(verbose){cat(green(italic(("writing weather station files\n"))))}
     SWATprepR::prepare_climate(meteo_lst,
-                               swat_setup,
-                               period_starts = start,
-                               period_ends = end)
+                    swat_setup,
+                    period_starts = start,
+                    period_ends = end)
   }
 }
 

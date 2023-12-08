@@ -1,14 +1,15 @@
 Type: Package
 Package: miljotools
-Title: An R package hosting a variety of useful functions for environmental data handling and anaylsis
+Title: An R package hosting a variety of useful functions for
+    environmental data handling and anaylsis
 Version: 0.3.1
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
-Description: A few useful functions for environemental data processing and analysis.
+Description: A few useful functions for environemental data processing and
+    analysis.
 License: GPL (>= 3)
 URL: https://moritzshore.github.io/miljotools/
 BugReports: https://github.com/moritzshore/miljotools/issues
-Language: English
 Depends:
     R (>= 4.0)
 Imports:
@@ -27,21 +28,23 @@ Imports:
     readxl,
     sf,
     stringr,
-    euptf2,
-    SWATprepR,
     utils,
     writexl
-Remotes: 
-    github::tkdweber/euptf2
-    github::biopsichas/SWATprepR
 Suggests:
     devtools,
+    euptf2,
     knitr,
+    Rdpack,
     rmarkdown,
-    roxygen2
+    roxygen2,
+    SWATprepR
 VignetteBuilder: 
     knitr
+Remotes: 
+    github::biopsichas/SWATprepR,
+    github::tkdweber/euptf2
 Encoding: UTF-8
+Language: English
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
