@@ -28,20 +28,18 @@ Imports:
     readxl,
     sf,
     stringr,
+    SWATprepR,
     utils,
     writexl
 Suggests:
     devtools,
-    euptf2,
     knitr,
     rmarkdown,
-    roxygen2,
-    SWATprepR
+    roxygen2
 VignetteBuilder: 
     knitr
-Remotes:
+Remotes: 
     github::biopsichas/SWATprepR
-    github::tkdweber/euptf2
 Encoding: UTF-8
 Language: English
 LazyData: true
