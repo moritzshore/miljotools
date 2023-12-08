@@ -33,6 +33,7 @@ Imports:
     writexl
 Suggests:
     devtools,
+    euptf2,
     knitr,
     rmarkdown,
     roxygen2
@@ -40,6 +41,7 @@ VignetteBuilder:
     knitr
 Remotes: 
     github::biopsichas/SWATprepR
+    github::tkdweber/euptf2
 Encoding: UTF-8
 Language: English
 LazyData: true
