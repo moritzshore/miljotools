@@ -1058,8 +1058,8 @@ swat_weather_input_chain <-
     path1 <- get_metno_reanalysis3(
       area,
       directory = directory,
-      fromdate =  "2012-09-01 10:00:00",
-      todate = "2012-09-02 20:00:00",
+      fromdate =  from,
+      todate = to,
       area_buffer = area_buffer,
       preview = verbose
     )
