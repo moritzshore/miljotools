@@ -2,7 +2,7 @@ Type: Package
 Package: miljotools
 Title: An R package hosting a variety of useful functions for
     environmental data handling and anaylsis
-Version: 0.3.1
+Version: 0.3.2
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data processing and
@@ -47,4 +47,4 @@ Encoding: UTF-8
 Language: English
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
