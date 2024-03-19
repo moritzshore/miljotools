@@ -10,7 +10,7 @@ This R package aims to host a variety of functions for and from [NIBIO DMN](http
 
 3.  [Add your own](#add)
 
-4.  [Acknowledgements]
+4.  [Acknowledgements](#ack)
 
 ## Installing `miljotools` <a name="install"></a>
 
@@ -39,7 +39,7 @@ View the "Articles" to get started
 
 If you have a function / code / workflow / script / etc. which you would like to add to this package, please contact the maintainer for developer access.
 
-## Acknowledgements
+## Acknowledgements <a name="ack"></a>
 
 The development of this package was supported by the [NIBIO Environmental Modelling and Measures group](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures?locationfilter=true), under the [Support Tools](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures/support-tools?locationfilter=true) designation.
 
