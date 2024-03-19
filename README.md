@@ -1,6 +1,6 @@
 # miljotools <img src="man/figures/logo.png" align="right" height="138"/>
 
-This R package hosts a variety of functions for NIBIO DMN Hydrology and Water Environment. If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
+This R package aims to host a variety of functions for and from [NIBIO DMN](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources?locationfilter=true), departments [Soil](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/soil-and-land-use?locationfilter=true) and [Water](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/hydrology-and-water-environment?locationfilter=true). If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
 
 **Table of contents**
 
@@ -9,6 +9,8 @@ This R package hosts a variety of functions for NIBIO DMN Hydrology and Water En
 2.  [Tools](#start)
 
 3.  [Add your own](#add)
+
+4.  [Acknowledgements]
 
 ## Installing `miljotools` <a name="install"></a>
 
@@ -36,3 +38,9 @@ View the "Articles" to get started
 ## Add your own <a name="add"></a>
 
 If you have a function / code / workflow / script / etc. which you would like to add to this package, please contact the maintainer for developer access.
+
+## Acknowledgements
+
+The development of this package was supported by the [NIBIO Environmental Modelling and Measures group](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures?locationfilter=true), under the [Support Tools](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures/support-tools?locationfilter=true) designation.
+
+Additionally, this package was in part developed for the [OPTAIN](https://optain.eu/) project and has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 862756.
