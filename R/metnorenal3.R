@@ -15,11 +15,20 @@
 #' This function accesses the THREDDS server of met.no with download queries
 #' formatted from user input. (to be expanded upon)
 #'
+#' The `grid_resolution` parameter lets you choose how many stations to select
+#' from the grid. If for example you pass a "3", then every 3 station will be
+#' selected in both the horizontal and vertical axis, giving you a grid with
+#' stations placed 3km apart from each other on a regular grid. This can help
+#' with downloading data from huge catchments where 1x1km grid size is not
+#' necessary. Please note, no averaging of the "non-selected" grid cells is
+#' performed.
+#'
 #' @param area (string) path to geo-referenced shapefile covering the desired area
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
+#' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
 #' @importFrom abind abind
 #' @importFrom dplyr nth mutate %>%
@@ -31,6 +40,7 @@
 #' @importFrom sf read_sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates st_zm
 #' @importFrom stringr str_pad str_replace_all str_split
 #' @importFrom mapview mapview
+#' @importFrom crayon black bold green italic yellow
 #'
 #' @author Moritz Shore
 #' @export
@@ -59,8 +69,19 @@ get_metno_reanalysis3 <-
            fromdate =  "2012-09-01 10:00:00",
            todate = "2012-09-01 20:00:00",
            area_buffer = 1500,
+           grid_resolution = NULL,
            preview = TRUE
   ){
+
+    if(is.null(grid_resolution)){
+      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
+      grid_resolution = 1
+    }else{
+      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
+      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
+    }
+
+    if(preview == TRUE){verbose = TRUE}
 
     if(directory %>% is.null()){
       directory <- getwd()
@@ -182,26 +203,39 @@ get_metno_reanalysis3 <-
     }
 
 
-    build_query <- function(bounding_coords, swatvars, fromdate, todate){
+    build_query <- function(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose){
 
       index_xmin = bounding_coords$index_xmin
       index_xmax = bounding_coords$index_xmax
       index_ymin = bounding_coords$index_ymin
       index_ymax = bounding_coords$index_ymax
 
+
+      # checking if the grid resolution is small enough to atleast download 1
+      # station.
+      bbox_width = index_xmax - index_xmin
+      bbox_height = index_ymax - index_ymin
+      if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
+      if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
+
+
       # from min x/y to max x/y by step of 1
       x1 = index_xmin
       x2 = index_xmax
-      xstep = 1
+      xstep = grid_resolution
 
       y1 = index_ymin
       y2 = index_ymax
-      ystep = 1
+      ystep = grid_resolution
 
       # timestep not really needed since the files are individual
       time1 = 0
       time2 = 0
       timestep = 1
+
+      # print grid resolution
+      if(verbose){cat(green(italic("fetching with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+
 
       # paste together the vars
       x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
@@ -581,7 +615,7 @@ get_metno_reanalysis3 <-
     bounding_coords <- get_coord_window(area, area_buffer, preview)
 
     print("building query..")
-    queries <- build_query(bounding_coords, swatvars, fromdate, todate)
+    queries <- build_query(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose)
 
     print("creating download folder..")
     foldername <- create_download_folder(directory)
