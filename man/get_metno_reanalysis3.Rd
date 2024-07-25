@@ -10,6 +10,7 @@ get_metno_reanalysis3(
   fromdate = "2012-09-01 10:00:00",
   todate = "2012-09-01 20:00:00",
   area_buffer = 1500,
+  grid_resolution = NULL,
   preview = TRUE
 )
 }
@@ -24,6 +25,8 @@ get_metno_reanalysis3(
 
 \item{area_buffer}{desired buffer around the provided shapefile (in meters, default 1500)}
 
+\item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers. (see help page for more details)}
+
 \item{preview}{generate graphs showing previews of data download? (boolean)}
 }
 \value{
@@ -35,6 +38,15 @@ other file
 \description{
 This function accesses the THREDDS server of met.no with download queries
 formatted from user input. (to be expanded upon)
+}
+\details{
+The \code{grid_resolution} parameter lets you choose how many stations to select
+from the grid. If for example you pass a "3", then every 3 station will be
+selected in both the horizontal and vertical axis, giving you a grid with
+stations placed 3km apart from each other on a regular grid. This can help
+with downloading data from huge catchments where 1x1km grid size is not
+necessary. Please note, no averaging of the "non-selected" grid cells is
+performed.
 }
 \examples{
  # for demonstration purposes, use path of package
