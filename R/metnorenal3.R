@@ -708,11 +708,11 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
   stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
   metadata <- files[which(grepl(x = files,pattern =  "metadata.csv"))]
 
-  # Custom funciton to convert the hourly data to daily data
+  # Custom function to convert the hourly data to daily data
   # certain considerations need to be made when summing or averaging.
   hourly2daily <- function(data){
     # These will potentially need to be expanded
-    sum_these <- "precipitation_amount"
+    sum_these <- c("precipitation_amount", "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time")
     max_these <- "air_temperature_2m"
     min_these <- "air_temperature_2m"
 
@@ -739,7 +739,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
       summarise(across(all_of(min_data_cols), min)) %>%
       dplyr::rename(min_temp = air_temperature_2m)
 
-    # -1 to get rid of the date column and round by precisision
+    # -1 to get rid of the date column and round by precision
     full_df <-
       cbind(
         daily_data[1],
