@@ -215,8 +215,8 @@ get_metno_reanalysis3 <-
       # station.
       bbox_width = index_xmax - index_xmin
       bbox_height = index_ymax - index_ymin
-      if(bbox_width < grid_resolution){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
-      if(bbox_height < grid_resolution){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
+      if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
+      if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
 
 
       # from min x/y to max x/y by step of 1
