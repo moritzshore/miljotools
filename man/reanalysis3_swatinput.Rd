@@ -7,12 +7,12 @@
 reanalysis3_swatinput(
   path,
   swat_setup,
-  outpath = NULL,
   write_wgn = TRUE,
   start = NA,
   end = NA,
   sqlite_path = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  backup = TRUE
 )
 }
 \arguments{
@@ -20,19 +20,18 @@ reanalysis3_swatinput(
 
 \item{swat_setup}{path to your SWAT+ setup. (Required!)}
 
-\item{outpath}{path to directory where files will be written. If left blank,
-this will be your normal path}
-
 \item{write_wgn}{calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))}
 
-\item{start}{optional parameter to define start date oftimeseries}
+\item{start}{optional parameter to define start date of time series}
 
-\item{end}{optional parameter to define end date of timeseries}
+\item{end}{optional parameter to define end date of time series}
 
 \item{sqlite_path}{path to your SWAT+ sqlite file (only needed if you wish to
 update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
 
 \item{verbose}{print status?}
+
+\item{backup}{(logical, defaults to true) creates a backup of your swat folder before modification}
 }
 \value{
 path to generated files.

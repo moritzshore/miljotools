@@ -7,6 +7,7 @@
 swat_weather_input_chain(
   area,
   swat_setup,
+  grid_resolution = 1,
   directory = NULL,
   from = NULL,
   to = NULL,
