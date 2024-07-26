@@ -23,7 +23,7 @@
 #' necessary. Please note, no averaging of the "non-selected" grid cells is
 #' performed.
 #'
-#' @param area (string) path to geo-referenced shapefile covering the desired area
+#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
@@ -31,7 +31,7 @@
 #' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
 #' @importFrom abind abind
-#' @importFrom dplyr nth mutate %>%
+#' @importFrom dplyr nth mutate %>% tibble
 #' @importFrom lubridate year month day hour
 #' @importFrom mapview mapview
 #' @importFrom ncdf4 nc_open ncvar_get nc_close
@@ -41,6 +41,7 @@
 #' @importFrom stringr str_pad str_replace_all str_split
 #' @importFrom mapview mapview
 #' @importFrom crayon black bold green italic yellow
+#' @importFrom utils packageVersion
 #'
 #' @author Moritz Shore
 #' @export
@@ -72,31 +73,6 @@ get_metno_reanalysis3 <-
            grid_resolution = NULL,
            preview = TRUE
   ){
-
-    if(is.null(grid_resolution)){
-      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
-      grid_resolution = 1
-    }else{
-      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
-      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
-    }
-
-    if(preview == TRUE){verbose = TRUE}
-
-    if(directory %>% is.null()){
-      directory <- getwd()
-    }
-
-    if(area_buffer < 1){
-      area_buffer = 1
-    }
-
-
-    # load in the shape file
-    area <- sf::read_sf(area)
-
-    # drop the Z coordinate
-    area <- sf::st_zm(area)
 
     # supporting functions ----
     nc_open_retry <- function(link) {
@@ -132,35 +108,7 @@ get_metno_reanalysis3 <-
       }
     }
 
-    get_coord_window <- function(area, area_buffer, preview){
-
-      # lambert conform conical (the projection used by met reanalysis)
-      projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
-      proj_crs <- sf::st_crs(projection) # replace with sf::crs()
-
-      # Transform the shapefile to the metno projection
-      area <- sf::st_transform(area, crs = proj_crs)
-
-      # Buffer the shapefile to the user defined amount
-      area_buff <- sf::st_buffer(x = area, dist = area_buffer)
-
-      # get the bounding box of this shape
-      wsbox <- sf::st_bbox(area_buff)
-
-      # Grabbing the corners
-      ymin <- wsbox[["ymin"]]
-      ymax <- wsbox[["ymax"]]
-      xmin <- wsbox[["xmin"]]
-      xmax <- wsbox[["xmax"]]
-
-      # previewing coverage
-      if(preview){
-        plot <- mapview::mapview(wsbox, col.region = "blue")+
-          mapview::mapview(area_buff, col.region = "red")+
-          mapview::mapview(area, col.region = "orange")
-
-        print(plot)
-      }
+    get_coord_window <- function(area_path, area_buffer, preview){
 
       # get a base file to find the right x y
       filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
@@ -172,70 +120,150 @@ get_metno_reanalysis3 <-
 
       ncdf4::nc_close(ncin)
 
-      ## Finding the nearest neighbor to each corner
-      # calculate the difference in value
-      x_mn_diff <- abs(x-xmin)
-      x_mx_diff <- abs(x-xmax)
-      y_mn_diff <- abs(y-ymin)
-      y_mx_diff <- abs(y-ymax)
+      # lambert conform conical (the projection used by met reanalysis)
+      projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
+      proj_crs <- sf::st_crs(projection) # replace with sf::crs()
+      # load in the shape file
+      area <- sf::read_sf(area_path)
+      # Transform the shapefile to the metno projection
+      area <- sf::st_transform(area, crs = proj_crs)
 
-      # find the minimum
-      min_diff_xmin <- min(x_mn_diff)
-      min_diff_xmax <- min(x_mx_diff)
-      min_diff_ymin <- min(y_mn_diff)
-      min_diff_ymax <- min(y_mx_diff)
+      # get the geometry type
+      area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
 
-      # find the index of the minimum
-      index_xmin <- which(min_diff_xmin == x_mn_diff)
-      index_xmax <- which(min_diff_xmax == x_mx_diff)
+      if (area_attr == "sfc_POINT") {
+        coordinate <- sf::st_coordinates(area)
+        point_x <- coordinate[1]
+        point_y <- coordinate[2]
 
-      index_ymin <- which(min_diff_ymin == y_mn_diff)
-      index_ymax <- which(min_diff_ymax == y_mx_diff)
+        ## Finding the nearest neighbor to each corner
+        # calculate the difference in value
+        x_diff <- abs(x-point_x)
+        y_diff <- abs(y-point_y)
+
+        # find the minimum
+        min_diff_x <- min(x_diff)
+        min_diff_y <- min(y_diff)
+
+        # find the index of the minimum
+        index_x <- which(min_diff_x == x_diff)
+        index_y <- which(min_diff_y == y_diff)
+
+        if(preview){
+          df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
+                         coords = c("x", "y"),
+                         crs = sf::st_crs(proj_crs))
+          area$name = "provided file"
+          plot = mapview::mapview(df, layer.name = "Nearest Re-analysis Gridpoint", col.regions = "orange")+
+            mapview::mapview(area, layer.name = "User location", col.regions = "blue")
+
+          print(plot)
+
+          cat("Note: Selected grid cell is ")
+          sf::st_distance(df, area) %>% round(0) %>% cat("meters away from desired location \n")
+        }
 
 
+        return(list(index_x = index_x, index_y = index_y))
 
-      return(list(index_xmin = index_xmin,
-                  index_xmax = index_xmax,
-                  index_ymin = index_ymin,
-                  index_ymax = index_ymax,
-                  area_buff = area_buff
-      ))
+      } else{
+        # do the polygon stuff
+        if (area_attr != "sfc_POLYGON"){warning("Shapefile type not 'sfc_POLYGON', problems may occur..")}
+        # drop the Z coordinate
+        area <- sf::st_zm(area)
+        # Buffer the shapefile to the user defined amount
+        area_buff <- sf::st_buffer(x = area, dist = area_buffer)
+        # get the bounding box of this shape
+        wsbox <- sf::st_bbox(area_buff)
+        # Grabbing the corners
+        ymin <- wsbox[["ymin"]]
+        ymax <- wsbox[["ymax"]]
+        xmin <- wsbox[["xmin"]]
+        xmax <- wsbox[["xmax"]]
+
+        # previewing coverage
+        if(preview){
+          plot <- mapview::mapview(wsbox, col.region = "blue")+
+            mapview::mapview(area_buff, col.region = "red")+
+            mapview::mapview(area, col.region = "orange")
+          print(plot)
+        }
+
+        ## Finding the nearest neighbor to each corner
+        # calculate the difference in value
+        x_mn_diff <- abs(x-xmin)
+        x_mx_diff <- abs(x-xmax)
+        y_mn_diff <- abs(y-ymin)
+        y_mx_diff <- abs(y-ymax)
+
+        # find the minimum
+        min_diff_xmin <- min(x_mn_diff)
+        min_diff_xmax <- min(x_mx_diff)
+        min_diff_ymin <- min(y_mn_diff)
+        min_diff_ymax <- min(y_mx_diff)
+
+        # find the index of the minimum
+        index_xmin <- which(min_diff_xmin == x_mn_diff)
+        index_xmax <- which(min_diff_xmax == x_mx_diff)
+
+        index_ymin <- which(min_diff_ymin == y_mn_diff)
+        index_ymax <- which(min_diff_ymax == y_mx_diff)
+
+        return(list(index_xmin = index_xmin,
+                    index_xmax = index_xmax,
+                    index_ymin = index_ymin,
+                    index_ymax = index_ymax,
+                    area_buff = area_buff, area_shp = area
+        ))
+      }
     }
 
+    build_query <- function(bounding_coords, swatvars, fromdate, todate,
+                            grid_resolution, verbose){
 
-    build_query <- function(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose){
-
-      index_xmin = bounding_coords$index_xmin
-      index_xmax = bounding_coords$index_xmax
-      index_ymin = bounding_coords$index_ymin
-      index_ymax = bounding_coords$index_ymax
-
-
-      # checking if the grid resolution is small enough to atleast download 1
-      # station.
-      bbox_width = index_xmax - index_xmin
-      bbox_height = index_ymax - index_ymin
-      if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
-      if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
-
-
-      # from min x/y to max x/y by step of 1
-      x1 = index_xmin
-      x2 = index_xmax
-      xstep = grid_resolution
-
-      y1 = index_ymin
-      y2 = index_ymax
-      ystep = grid_resolution
-
-      # timestep not really needed since the files are individual
+      # time step not really needed since the files are individual
       time1 = 0
       time2 = 0
       timestep = 1
 
-      # print grid resolution
-      if(verbose){cat(green(italic("fetching with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+      if(length(bounding_coords) == 2){
+        # do point routine
+        x = bounding_coords$index_x
+        y = bounding_coords$index_y
 
+        x1 = x
+        x2 = x
+        y1 = y
+        y2 = y
+        xstep = 1
+        ystep = 1
+
+      }else{
+        # do polygon routine
+        index_xmin = bounding_coords$index_xmin
+        index_xmax = bounding_coords$index_xmax
+        index_ymin = bounding_coords$index_ymin
+        index_ymax = bounding_coords$index_ymax
+
+        # checking if the grid resolution is small enough to at least download 1
+        # station.
+        bbox_width = index_xmax - index_xmin
+        bbox_height = index_ymax - index_ymin
+        if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
+        if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
+
+        # from min x/y to max x/y by step of 1
+        x1 = index_xmin
+        x2 = index_xmax
+        xstep = grid_resolution
+
+        y1 = index_ymin
+        y2 = index_ymax
+        ystep = grid_resolution
+
+        # print grid resolution
+        if(verbose){cat(green(italic("fetching with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+        }
 
       # paste together the vars
       x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
@@ -295,7 +323,6 @@ get_metno_reanalysis3 <-
 
     }
 
-
     getncvar <- function(var, ncin_crop) {
       attempt = 0
       vals_crop = NA
@@ -330,8 +357,8 @@ get_metno_reanalysis3 <-
       return(foldername)
     }
 
-    download_ncfiles <-
-      function(directory, foldername, full_urls, filenames, years, swatvars) {
+    download_ncfiles <- function(directory, foldername, full_urls, filenames,
+                                 years, swatvars, geometry_type) {
 
         # download batches per year
         yearbatch <- split(full_urls, f = years)
@@ -382,6 +409,13 @@ get_metno_reanalysis3 <-
             # set column names
             names(vardl) <- swatvars
 
+            if(geometry_type == "point"){
+              mat_dimension = 2
+
+            }
+            if(geometry_type == "polygon"){
+              mat_dimension = 3
+            }
             # for every variable, bind the matrix slice onto the full matrix (dimension 3 --> "along=3")
             for (variable in swatvars) {
               # if the download failed, add a full frame of NAs to stack
@@ -392,10 +426,10 @@ get_metno_reanalysis3 <-
                          nrow = dims[1],
                          ncol = dims[2])
                 mastermatrix[[variable]] <-
-                  abind::abind(mastermatrix[[variable]], na_frame, along = 3)
+                  abind::abind(mastermatrix[[variable]], na_frame, along = mat_dimension)
               } else{
                 mastermatrix[[variable]] <-
-                  abind::abind(mastermatrix[[variable]], vardl[[variable]], along = 3)
+                  abind::abind(mastermatrix[[variable]], vardl[[variable]], along = mat_dimension)
               } # end else
             } # for every var
           } # for every day
@@ -418,6 +452,7 @@ get_metno_reanalysis3 <-
       }
 
     merge_rds <- function(directory, foldername, years){
+
       rdsfiles <- list.files(paste0(directory, "/", foldername), full.names = T)
       rdslist <- purrr::map(rdsfiles, readRDS)
 
@@ -442,7 +477,6 @@ get_metno_reanalysis3 <-
 
       return(list(mastermatrix = mastermatrix, rdsfiles = rdsfiles))
     }
-
 
     crop_dataset <- function(lat_crop, lon_crop, area, area_buff, preview){
       ### removing non touching points
@@ -478,23 +512,10 @@ get_metno_reanalysis3 <-
       return(cover_stations)
     }
 
-
-    write_stations <-
-      function(vardl,
-               cover_stations,
-               swatvars,
-               x_crop,
-               y_crop,
-               lon_crop,
-               lat_crop,
-               alt_crop,
-               mastermatrix,
-               daterange,
-               foldername,
-               rdsfiles,
-               directory,
-               preview,
-               area) {
+    write_stations <- function(vardl, cover_stations, swatvars, x_crop, y_crop,
+                               lon_crop, lat_crop, alt_crop, mastermatrix,
+                               daterange, foldername, rdsfiles, directory,
+                               preview, area) {
         # getting dimensions of the x and y grid
         x_mat <- dim(vardl[[1]])[1]
         y_mat <- dim(vardl[[1]])[2]
@@ -515,7 +536,7 @@ get_metno_reanalysis3 <-
           )
 
         # this rounding thing is a not a great way of doing it, but also not a bad
-        # way, as the results are perfect. it might break though? consider redoing
+        # way, as the results are near perfect. it might break though? consider redoing
         covercoords <- sf::st_coordinates(cover_stations) %>% as.data.frame()
         covercoordcart <- paste0("(", covercoords$X %>% round(0), ",",covercoords$Y %>% round(0), ")")
 
@@ -523,7 +544,7 @@ get_metno_reanalysis3 <-
           for (ycell in c(1:y_mat)) {
 
             # this rounding thing is a not a great way of doing it, but also not a bad
-            # way, as the results are perfect. it might break though? consider redoing
+            # way, as the results are near perfect. it might break though? consider redoing
             statcoords <- paste0("(", x_crop[xcell] %>% round(0), ",", y_crop[ycell] %>% round(0), ")")
 
             # skip writing file if no coverage exists
@@ -584,7 +605,7 @@ get_metno_reanalysis3 <-
         readr::write_csv(metadata[-1,], file = paste0(directory, "/", foldername, "/metadata.csv"))
 
         # status print
-        cat("\nfinished! files have been written to: \n", paste0(directory, "/",foldername, " "), sep = "")
+        cat("\nfinished! files have been written to: \n", paste0(directory, "/",foldername, " \n"), sep = "")
 
         # plot of cropped stations
         if(preview){
@@ -594,12 +615,32 @@ get_metno_reanalysis3 <-
 
         # remove RDS files
         stat <- file.remove(rdsfiles)
-      }
+    }
+
+
 
 
     ### START MAIN FUNCTION ----
 
-    # Add stop if nots (date wrong order)
+    # validates input
+
+    if(is.null(grid_resolution)){
+      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
+      grid_resolution = 1
+    }else{
+      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
+      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
+    }
+
+    if(preview == TRUE){verbose = TRUE}
+
+    if(directory %>% is.null()){
+      directory <- getwd()
+    }
+
+    if(area_buffer < 1){
+      area_buffer = 1
+    }
 
     # all relevant variables (ADD TO FUNCTION PARAMS?)
     swatvars <- c(
@@ -612,7 +653,7 @@ get_metno_reanalysis3 <-
     )
 
     print("getting coordinates..")
-    bounding_coords <- get_coord_window(area, area_buffer, preview)
+    bounding_coords <- get_coord_window(area_path = area, area_buffer, preview)
 
     print("building query..")
     queries <- build_query(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose)
@@ -621,6 +662,8 @@ get_metno_reanalysis3 <-
     foldername <- create_download_folder(directory)
 
     print("starting download")
+    if(bounding_coords %>% length() == 2){geometry_type = "point"}else{geometry_type = "polygon"}
+
     ncdownload <-
       download_ncfiles(
         directory = directory,
@@ -628,7 +671,8 @@ get_metno_reanalysis3 <-
         full_urls = queries$full_urls,
         filenames = queries$filenames,
         years = queries$years,
-        swatvars = swatvars
+        swatvars = swatvars,
+        geometry_type = geometry_type
       )
 
     print("download complete!, merging files..")
@@ -637,34 +681,75 @@ get_metno_reanalysis3 <-
                               foldername = foldername,
                               years = queries$years)
 
-    print("cropping dataset to area coverage..")
-    cover_stations <-
-      crop_dataset(
-        lat_crop = ncdownload$lat_crop,
-        lon_crop = ncdownload$lon_crop,
-        area = area,
-        area_buff = bounding_coords$area_buff,
-        preview = preview
-      )
+    if (geometry_type == "polygon") {
+      print("cropping dataset to area coverage..")
+      cover_stations <-
+        crop_dataset(
+          lat_crop = ncdownload$lat_crop,
+          lon_crop = ncdownload$lon_crop,
+          area = bounding_coords$area_shp,
+          area_buff = bounding_coords$area_buff,
+          preview = preview
+        )
+    }
+
 
     print("writing station data to csv..")
-    write_stations(
-      vardl = ncdownload$vardl,
-      cover_stations = cover_stations,
-      swatvars = swatvars,
-      x_crop = ncdownload$x_crop,
-      y_crop = ncdownload$y_crop,
-      lon_crop = ncdownload$lon_crop,
-      lat_crop = ncdownload$lat_crop,
-      alt_crop = ncdownload$alt_crop,
-      mastermatrix = merged_data$mastermatrix,
-      daterange = queries$daterange,
-      foldername = foldername,
-      directory = directory,
-      rdsfiles = merged_data$rdsfiles,
-      preview = preview,
-      area = area
-    )
+
+    if(geometry_type == "polygon"){
+      write_stations(
+        vardl = ncdownload$vardl,
+        cover_stations = cover_stations,
+        swatvars = swatvars,
+        x_crop = ncdownload$x_crop,
+        y_crop = ncdownload$y_crop,
+        lon_crop = ncdownload$lon_crop,
+        lat_crop = ncdownload$lat_crop,
+        alt_crop = ncdownload$alt_crop,
+        mastermatrix = merged_data$mastermatrix,
+        daterange = queries$daterange,
+        foldername = foldername,
+        directory = directory,
+        rdsfiles = merged_data$rdsfiles,
+        preview = preview,
+        area = bounding_coords$area_shp
+      )
+    }else{
+      matrix <- merged_data$mastermatrix
+      point_df <- lapply(matrix, as.vector) %>% as.data.frame()
+      date = seq(as.POSIXct(fromdate), as.POSIXct(todate), by = "hour") %>% strftime()
+      final_df <- cbind(date, point_df) %>% dplyr::as_tibble()
+      readr::write_csv(x = final_df, file = paste0(directory, "/",foldername, "/metnoreanalysis3_point.csv"))
+      delfile = list.files(paste0(directory,"/",foldername, "/"), pattern = ".rds", full.names = T) %>% file.remove()
+
+      ### metdata file
+      meta_df = c(
+        lat = paste("lat = ", ncdownload$lat_crop),
+        lon = paste("lon = ", ncdownload$lon_crop),
+        x = paste("X =", ncdownload$x_crop),
+        y = paste("Y =", ncdownload$y_crop),
+        elevation = paste("ELEVATION = ", ncdownload$alt_crop)
+      )
+
+      source = paste0(
+        "Data sourced from MetNordic Reanalysis v3 Dataset Meteorologisk institutt, downloaded by miljotools version ",
+        packageVersion("miljotools"),
+        " on ",
+        Sys.time()
+      )
+
+      fileConn <- file(paste0(directory, "/", foldername, "/metadata.txt"))
+      writeLines(
+        c(
+          meta_df,
+          source,
+          "https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset",
+          "https://moritzshore.github.io/miljotools"
+        ),
+        fileConn
+      )
+      close(fileConn)
+    }
 
     return(paste0(directory, "/",foldername))
   }
@@ -697,7 +782,8 @@ get_metno_reanalysis3 <-
 #' @importFrom stringr str_split
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
-  #path <- "C:/Users/mosh/Documents/met_no_dl_20231020191332"
+  # remove trailing "/"
+  path <- paste0(dirname(path), "/", basename(path))
   if(verbose){cat(green(italic("reading files..\n")))}
 
   # get the file paths and differentiate between metadata and data
@@ -706,7 +792,17 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
   stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
 
   stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
+
   metadata <- files[which(grepl(x = files,pattern =  "metadata.csv"))]
+
+  # metadata.txt is generated if the download was only one "point" location.
+  # otherwise it would be metadata.csv. This is how you can tell them apart.
+  if("metadata.txt" %in% stations_short){
+   stations <- stations[which(grepl(x = stations,pattern =  "metadata") == FALSE)]
+   stations_short <- stations_short[which(grepl(x = stations_short,pattern =  "metadata") == FALSE)]
+
+   download_type = "point"
+  }
 
   # Custom function to convert the hourly data to daily data
   # certain considerations need to be made when summing or averaging.
