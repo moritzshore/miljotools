@@ -23,7 +23,7 @@
 #' necessary. Please note, no averaging of the "non-selected" grid cells is
 #' performed.
 #'
-#' @param area (string) path to geo-referenced shapefile covering the desired area
+#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
