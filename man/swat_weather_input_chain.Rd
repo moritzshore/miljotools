@@ -7,6 +7,7 @@
 swat_weather_input_chain(
   area,
   swat_setup,
+  grid_resolution = 1,
   directory = NULL,
   from = NULL,
   to = NULL,
@@ -21,6 +22,8 @@ swat_weather_input_chain(
 \item{area}{The catchment area to retrieve data for. (must be a shapefile)}
 
 \item{swat_setup}{The path to your SWAT+ setup (input files, aka TxtInOut)}
+
+\item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers.}
 
 \item{directory}{directory to download and process data in}
 

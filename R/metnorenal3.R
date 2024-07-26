@@ -708,11 +708,11 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
   stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
   metadata <- files[which(grepl(x = files,pattern =  "metadata.csv"))]
 
-  # Custom funciton to convert the hourly data to daily data
+  # Custom function to convert the hourly data to daily data
   # certain considerations need to be made when summing or averaging.
   hourly2daily <- function(data){
     # These will potentially need to be expanded
-    sum_these <- "precipitation_amount"
+    sum_these <- c("precipitation_amount", "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time")
     max_these <- "air_temperature_2m"
     min_these <- "air_temperature_2m"
 
@@ -739,7 +739,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
       summarise(across(all_of(min_data_cols), min)) %>%
       dplyr::rename(min_temp = air_temperature_2m)
 
-    # -1 to get rid of the date column and round by precisision
+    # -1 to get rid of the date column and round by precision
     full_df <-
       cbind(
         daily_data[1],
@@ -804,15 +804,14 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' function to complete successfully when not writing to the SQL database
 #'
 #' @param path path to daily data provided by `reanalysis3_daily()`
-#' @param start optional parameter to define start date oftimeseries
-#' @param end optional parameter to define end date of timeseries
+#' @param start optional parameter to define start date of time series
+#' @param end optional parameter to define end date of time series
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to
 #'   update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
-#' @param outpath path to directory where files will be written. If left blank,
-#'   this will be your normal path
 #' @param verbose print status?
 #' @param write_wgn calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))
 #' @param swat_setup path to your SWAT+ setup. (Required!)
+#' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
 #'
 #' @return path to generated files.
 #' @export
@@ -824,17 +823,27 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom writexl write_xlsx
+#' @importFrom crayon green italic
 reanalysis3_swatinput <-
   function(path,
            swat_setup,
-           outpath = NULL,
            write_wgn = TRUE,
            start = NA,
            end = NA,
            sqlite_path = NULL,
-           verbose = FALSE) {
+           verbose = FALSE,
+           backup = TRUE) {
 
-  # Check that prepr is installed
+    # create a backup of the SWAT+ setup
+    if(backup){
+      backuppath <- paste0(dirname(swat_setup), "/miljotools_swat_backup")
+      dir.create(backuppath, showWarnings = F)
+      file.copy(swat_setup, backuppath, recursive = T)
+      if(verbose){cat(green(italic("backing up SWAT directory in")), underline(backuppath), "\n")}
+    }
+
+
+  # Check that SWATprepR is installed
   if ("SWATprepR" %in% utils::installed.packages()) {
     # if it is installed, check if it is loaded
     if ("SWATprepR" %in% (.packages())) {
@@ -843,11 +852,9 @@ reanalysis3_swatinput <-
         cat(green(italic("SWATprepR already loaded!\n")))
       }
     } else{
+      if (verbose){cat(green(italic("loading SWATprepR\n")))}
       # it is not loaded, then load it
-      #requireNamespace("SWATprepR")
-      if (verbose) {
-        cat(green(italic("loading SWATprepR\n")))
-      }
+      requireNamespace("SWATprepR")
     }
     # it is not installed? then require the user to install it.
   } else{
@@ -859,8 +866,6 @@ reanalysis3_swatinput <-
 
   # get the file paths and differentiate between metadata and data
   files <- list.files(path, full.names = T)
-  files_short <- list.files(path, full.names = F)
-  stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
   stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
 
   # load the metadata
@@ -868,11 +873,10 @@ reanalysis3_swatinput <-
     as.data.frame()
   metadata$Source = ""
 
-  # Convert to prepR format
-  # in order to use PrepR to create the SWAT weather files, we need to create
-  # an excel template file in the correct format.
-  # This custom read function will read and process the csv files to be in the
-  # format we want them in
+  # Convert to prepR format: in order to use PrepR to create the SWAT weather
+  # files, we need to create an excel template file in the correct format. This
+  # custom read function will read and process the csv files to be in the format
+  # we want them in
   custom_read <- function(filepath){
     # read
     df <- readr::read_csv(filepath, show_col_types = F)
@@ -924,23 +928,14 @@ reanalysis3_swatinput <-
   my_data <- purrr::map(stations, custom_read)
 
   if(verbose){cat(green(italic(("converting data into SWATprepR format...\n"))))}
-   # add station names
+  # add station names
   names(my_data) <- paste0("ID", c(1:length(my_data)))
   # append the metadata to the front
   stations_list <- append(list(metadata), my_data)
   # and set the name of the metadata (prepR format)
   names(stations_list)[1] <- "Stations"
 
-  # parsing and/or generating outpath and folder/file names
-  parts <-  path %>% stringr::str_split("/") %>% unlist()
-  folder <- parts[which(nchar(parts) > 1)] %>% dplyr::last()
-  # time and date should always be the 4th element.
-  tod <- folder %>% stringr::str_split("_") %>% unlist() %>% dplyr::nth(4)
-  if(outpath %>% is.null()){
-    outpath <- path %>% stringr::str_remove(paste0("/", folder, "/"))
-    }
-
-  # recreating metadata format for Svatools
+  # recreating metadata format for SWATprepR
   metadata_spat <-
     sf::st_as_sf(dplyr::tibble(metadata),
                  coords = c("Long",
@@ -952,7 +947,7 @@ reanalysis3_swatinput <-
 
   # recreating data format for SWATprepR
 
-  # this function splits the dataframe into indiviudal lists, and appends
+  # this function splits the dataframe into individual lists, and appends
   # the date column to each one in tibble form. The column name for the variable
   # at hand is not assigned here because I could not find a way to do it. It
   # is done in a later step with for loops
@@ -1012,10 +1007,10 @@ reanalysis3_swatinput <-
       SLR = meteo_lst$data$ID1$SLR
     )
     # writing the weather gen
-    if(verbose){cat(green(italic("writing weather generator to file in '", outpath, "'\n")))}
+    if(verbose){cat(green(italic("writing weather generator to file in '", swat_setup, "'\n")))}
 
-    write.csv(wgn$wgn_st, paste0(outpath,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
-    write.csv(wgn$wgn_data, paste0(outpath,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
+    write.csv(wgn$wgn_st, paste0(swat_setup,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
+    write.csv(wgn$wgn_data, paste0(swat_setup,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
   }
 
   # writing
@@ -1059,6 +1054,7 @@ reanalysis3_swatinput <-
 #'
 #' @param area The catchment area to retrieve data for. (must be a shapefile)
 #' @param swat_setup The path to your SWAT+ setup (input files, aka TxtInOut)
+#' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers.
 #' @param directory directory to download and process data in
 #' @param from start of the to-be-dowloaded timeseries (ie. and min: "2012-09-01
 #'   10:00:00")
@@ -1080,6 +1076,7 @@ reanalysis3_swatinput <-
 swat_weather_input_chain <-
   function(area,
            swat_setup,
+           grid_resolution = 1,
            directory = NULL,
            from = NULL,
            to = NULL,
@@ -1095,7 +1092,8 @@ swat_weather_input_chain <-
       fromdate =  from,
       todate = to,
       area_buffer = area_buffer,
-      preview = verbose
+      preview = verbose,
+      grid_resolution = grid_resolution
     )
 
     path2 <- reanalysis3_daily(
@@ -1108,7 +1106,6 @@ swat_weather_input_chain <-
 
     path3 <- reanalysis3_swatinput(
       path = path2,
-      outpath = directory,
       swat_setup = swat_setup,
       write_wgn = write_wgn,
       sqlite_path = sqlite_path,
