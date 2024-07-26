@@ -804,8 +804,8 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' function to complete successfully when not writing to the SQL database
 #'
 #' @param path path to daily data provided by `reanalysis3_daily()`
-#' @param start optional parameter to define start date oftimeseries
-#' @param end optional parameter to define end date of timeseries
+#' @param start optional parameter to define start date of time series
+#' @param end optional parameter to define end date of time series
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to
 #'   update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
 #' @param outpath path to directory where files will be written. If left blank,
@@ -834,7 +834,7 @@ reanalysis3_swatinput <-
            sqlite_path = NULL,
            verbose = FALSE) {
 
-  # Check that prepr is installed
+  # Check that SWATprepR is installed
   if ("SWATprepR" %in% utils::installed.packages()) {
     # if it is installed, check if it is loaded
     if ("SWATprepR" %in% (.packages())) {
@@ -868,11 +868,10 @@ reanalysis3_swatinput <-
     as.data.frame()
   metadata$Source = ""
 
-  # Convert to prepR format
-  # in order to use PrepR to create the SWAT weather files, we need to create
-  # an excel template file in the correct format.
-  # This custom read function will read and process the csv files to be in the
-  # format we want them in
+  # Convert to prepR format: in order to use PrepR to create the SWAT weather
+  # files, we need to create an excel template file in the correct format. This
+  # custom read function will read and process the csv files to be in the format
+  # we want them in
   custom_read <- function(filepath){
     # read
     df <- readr::read_csv(filepath, show_col_types = F)
@@ -924,7 +923,7 @@ reanalysis3_swatinput <-
   my_data <- purrr::map(stations, custom_read)
 
   if(verbose){cat(green(italic(("converting data into SWATprepR format...\n"))))}
-   # add station names
+  # add station names
   names(my_data) <- paste0("ID", c(1:length(my_data)))
   # append the metadata to the front
   stations_list <- append(list(metadata), my_data)
@@ -952,7 +951,6 @@ reanalysis3_swatinput <-
 
   # recreating data format for SWATprepR
 
-  # this function splits the dataframe into indiviudal lists, and appends
   # the date column to each one in tibble form. The column name for the variable
   # at hand is not assigned here because I could not find a way to do it. It
   # is done in a later step with for loops
