@@ -554,27 +554,32 @@ get_metno_reanalysis3 <-
 
         # remove RDS files
         stat <- file.remove(rdsfiles)
+    }
+
+    validate_input <- function(){
+      if(is.null(grid_resolution)){
+        cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
+        grid_resolution = 1
+      }else{
+        if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
+        if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
       }
+
+      if(preview == TRUE){verbose = TRUE}
+
+      if(directory %>% is.null()){
+        directory <- getwd()
+      }
+
+      if(area_buffer < 1){
+        area_buffer = 1
+      }
+    }
 
     ### START MAIN FUNCTION ----
 
-    if(is.null(grid_resolution)){
-      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
-      grid_resolution = 1
-    }else{
-      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
-      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
-    }
-
-    if(preview == TRUE){verbose = TRUE}
-
-    if(directory %>% is.null()){
-      directory <- getwd()
-    }
-
-    if(area_buffer < 1){
-      area_buffer = 1
-    }
+    # validatges input
+    validate_input()
 
 
     # load in the shape file
