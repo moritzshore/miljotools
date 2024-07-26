@@ -1054,6 +1054,7 @@ reanalysis3_swatinput <-
 #'
 #' @param area The catchment area to retrieve data for. (must be a shapefile)
 #' @param swat_setup The path to your SWAT+ setup (input files, aka TxtInOut)
+#' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers.
 #' @param directory directory to download and process data in
 #' @param from start of the to-be-dowloaded timeseries (ie. and min: "2012-09-01
 #'   10:00:00")

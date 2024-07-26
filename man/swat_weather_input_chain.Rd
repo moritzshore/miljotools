@@ -23,6 +23,8 @@ swat_weather_input_chain(
 
 \item{swat_setup}{The path to your SWAT+ setup (input files, aka TxtInOut)}
 
+\item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers.}
+
 \item{directory}{directory to download and process data in}
 
 \item{from}{start of the to-be-dowloaded timeseries (ie. and min: "2012-09-01
