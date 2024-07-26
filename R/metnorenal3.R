@@ -808,10 +808,10 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @param end optional parameter to define end date of time series
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to
 #'   update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
-#'   this will be your normal path
 #' @param verbose print status?
 #' @param write_wgn calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))
 #' @param swat_setup path to your SWAT+ setup. (Required!)
+#' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
 #'
 #' @return path to generated files.
 #' @export
@@ -823,6 +823,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom writexl write_xlsx
+#' @importFrom crayon green italic
 reanalysis3_swatinput <-
   function(path,
            swat_setup,
@@ -830,7 +831,17 @@ reanalysis3_swatinput <-
            start = NA,
            end = NA,
            sqlite_path = NULL,
-           verbose = FALSE) {
+           verbose = FALSE,
+           backup = TRUE) {
+
+    # create a backup of the SWAT+ setup
+    if(backup){
+      backuppath <- paste0(dirname(swat_setup), "/miljotools_swat_backup")
+      dir.create(backuppath, showWarnings = F)
+      file.copy(swat_setup, backuppath, recursive = T)
+      if(verbose){cat(green(italic("backing up SWAT directory in")), underline(backuppath), "\n")}
+    }
+
 
   # Check that SWATprepR is installed
   if ("SWATprepR" %in% utils::installed.packages()) {
