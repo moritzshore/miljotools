@@ -73,31 +73,6 @@ get_metno_reanalysis3 <-
            preview = TRUE
   ){
 
-    if(is.null(grid_resolution)){
-      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
-      grid_resolution = 1
-    }else{
-      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
-      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
-    }
-
-    if(preview == TRUE){verbose = TRUE}
-
-    if(directory %>% is.null()){
-      directory <- getwd()
-    }
-
-    if(area_buffer < 1){
-      area_buffer = 1
-    }
-
-
-    # load in the shape file
-    area <- sf::read_sf(area)
-
-    # drop the Z coordinate
-    area <- sf::st_zm(area)
-
     # supporting functions ----
     nc_open_retry <- function(link) {
 
@@ -202,8 +177,8 @@ get_metno_reanalysis3 <-
       ))
     }
 
-
-    build_query <- function(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose){
+    build_query <- function(bounding_coords, swatvars, fromdate, todate,
+                            grid_resolution, verbose){
 
       index_xmin = bounding_coords$index_xmin
       index_xmax = bounding_coords$index_xmax
@@ -295,7 +270,6 @@ get_metno_reanalysis3 <-
 
     }
 
-
     getncvar <- function(var, ncin_crop) {
       attempt = 0
       vals_crop = NA
@@ -330,8 +304,8 @@ get_metno_reanalysis3 <-
       return(foldername)
     }
 
-    download_ncfiles <-
-      function(directory, foldername, full_urls, filenames, years, swatvars) {
+    download_ncfiles <- function(directory, foldername, full_urls, filenames,
+                                 years, swatvars) {
 
         # download batches per year
         yearbatch <- split(full_urls, f = years)
@@ -443,7 +417,6 @@ get_metno_reanalysis3 <-
       return(list(mastermatrix = mastermatrix, rdsfiles = rdsfiles))
     }
 
-
     crop_dataset <- function(lat_crop, lon_crop, area, area_buff, preview){
       ### removing non touching points
       # create DF of points
@@ -478,23 +451,10 @@ get_metno_reanalysis3 <-
       return(cover_stations)
     }
 
-
-    write_stations <-
-      function(vardl,
-               cover_stations,
-               swatvars,
-               x_crop,
-               y_crop,
-               lon_crop,
-               lat_crop,
-               alt_crop,
-               mastermatrix,
-               daterange,
-               foldername,
-               rdsfiles,
-               directory,
-               preview,
-               area) {
+    write_stations <- function(vardl, cover_stations, swatvars, x_crop, y_crop,
+                               lon_crop, lat_crop, alt_crop, mastermatrix,
+                               daterange, foldername, rdsfiles, directory,
+                               preview, area) {
         # getting dimensions of the x and y grid
         x_mat <- dim(vardl[[1]])[1]
         y_mat <- dim(vardl[[1]])[2]
@@ -596,8 +556,32 @@ get_metno_reanalysis3 <-
         stat <- file.remove(rdsfiles)
       }
 
-
     ### START MAIN FUNCTION ----
+
+    if(is.null(grid_resolution)){
+      cat(bold("MILJOTOOLS >>"), italic(yellow("'grid_resolution' not chosen, defaulting to 1x1km grid... \n")))
+      grid_resolution = 1
+    }else{
+      if(grid_resolution-floor(grid_resolution)!=0){stop("'grid_resolution' must be an integer!")}
+      if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
+    }
+
+    if(preview == TRUE){verbose = TRUE}
+
+    if(directory %>% is.null()){
+      directory <- getwd()
+    }
+
+    if(area_buffer < 1){
+      area_buffer = 1
+    }
+
+
+    # load in the shape file
+    area <- sf::read_sf(area)
+
+    # drop the Z coordinate
+    area <- sf::st_zm(area)
 
     # Add stop if nots (date wrong order)
 
