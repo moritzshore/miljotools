@@ -852,11 +852,9 @@ reanalysis3_swatinput <-
         cat(green(italic("SWATprepR already loaded!\n")))
       }
     } else{
+      if (verbose){cat(green(italic("loading SWATprepR\n")))}
       # it is not loaded, then load it
-      #requireNamespace("SWATprepR")
-      if (verbose) {
-        cat(green(italic("loading SWATprepR\n")))
-      }
+      requireNamespace("SWATprepR")
     }
     # it is not installed? then require the user to install it.
   } else{
