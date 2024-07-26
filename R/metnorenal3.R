@@ -1080,6 +1080,7 @@ reanalysis3_swatinput <-
 swat_weather_input_chain <-
   function(area,
            swat_setup,
+           grid_resolution = 1,
            directory = NULL,
            from = NULL,
            to = NULL,
@@ -1095,7 +1096,8 @@ swat_weather_input_chain <-
       fromdate =  from,
       todate = to,
       area_buffer = area_buffer,
-      preview = verbose
+      preview = verbose,
+      grid_resolution = grid_resolution
     )
 
     path2 <- reanalysis3_daily(
