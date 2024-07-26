@@ -808,7 +808,6 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @param end optional parameter to define end date of time series
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to
 #'   update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
-#' @param outpath path to directory where files will be written. If left blank,
 #'   this will be your normal path
 #' @param verbose print status?
 #' @param write_wgn calculate and write the weather generator? defaults to true. (for now just based on station #1 (bottom left))
@@ -827,7 +826,6 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 reanalysis3_swatinput <-
   function(path,
            swat_setup,
-           outpath = NULL,
            write_wgn = TRUE,
            start = NA,
            end = NA,
@@ -859,8 +857,6 @@ reanalysis3_swatinput <-
 
   # get the file paths and differentiate between metadata and data
   files <- list.files(path, full.names = T)
-  files_short <- list.files(path, full.names = F)
-  stations_short <- files_short[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
   stations <- files[which(grepl(x = files,pattern =  "metadata.csv") == FALSE)]
 
   # load the metadata
@@ -930,16 +926,7 @@ reanalysis3_swatinput <-
   # and set the name of the metadata (prepR format)
   names(stations_list)[1] <- "Stations"
 
-  # parsing and/or generating outpath and folder/file names
-  parts <-  path %>% stringr::str_split("/") %>% unlist()
-  folder <- parts[which(nchar(parts) > 1)] %>% dplyr::last()
-  # time and date should always be the 4th element.
-  tod <- folder %>% stringr::str_split("_") %>% unlist() %>% dplyr::nth(4)
-  if(outpath %>% is.null()){
-    outpath <- path %>% stringr::str_remove(paste0("/", folder, "/"))
-    }
-
-  # recreating metadata format for Svatools
+  # recreating metadata format for SWATprepR
   metadata_spat <-
     sf::st_as_sf(dplyr::tibble(metadata),
                  coords = c("Long",
@@ -951,6 +938,7 @@ reanalysis3_swatinput <-
 
   # recreating data format for SWATprepR
 
+  # this function splits the dataframe into individual lists, and appends
   # the date column to each one in tibble form. The column name for the variable
   # at hand is not assigned here because I could not find a way to do it. It
   # is done in a later step with for loops
@@ -1010,10 +998,10 @@ reanalysis3_swatinput <-
       SLR = meteo_lst$data$ID1$SLR
     )
     # writing the weather gen
-    if(verbose){cat(green(italic("writing weather generator to file in '", outpath, "'\n")))}
+    if(verbose){cat(green(italic("writing weather generator to file in '", swat_setup, "'\n")))}
 
-    write.csv(wgn$wgn_st, paste0(outpath,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
-    write.csv(wgn$wgn_data, paste0(outpath,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
+    write.csv(wgn$wgn_st, paste0(swat_setup,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
+    write.csv(wgn$wgn_data, paste0(swat_setup,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
   }
 
   # writing
@@ -1108,7 +1096,6 @@ swat_weather_input_chain <-
 
     path3 <- reanalysis3_swatinput(
       path = path2,
-      outpath = directory,
       swat_setup = swat_setup,
       write_wgn = write_wgn,
       sqlite_path = sqlite_path,
