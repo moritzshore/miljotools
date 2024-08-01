@@ -2,7 +2,7 @@ Type: Package
 Package: miljotools
 Title: An R package hosting a variety of useful functions for
     environmental data handling and anaylsis
-Version: 0.3.3
+Version: 0.4.0
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data processing and
