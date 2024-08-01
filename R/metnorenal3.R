@@ -10,18 +10,68 @@
 # https://status.met.no/
 
 
-#' Download data from the metno renanalysis project
+#' Download data from the MetNordic Re-Analysis v3 dataset
 #'
-#' This function accesses the THREDDS server of met.no with download queries
-#' formatted from user input. (to be expanded upon)
+#' The MET Nordic rerun archive version 3 can be accessed using this
+#' function. Please see below for more details.
 #'
-#' The `grid_resolution` parameter lets you choose how many stations to select
-#' from the grid. If for example you pass a "3", then every 3 station will be
-#' selected in both the horizontal and vertical axis, giving you a grid with
-#' stations placed 3km apart from each other on a regular grid. This can help
-#' with downloading data from huge catchments where 1x1km grid size is not
-#' necessary. Please note, no averaging of the "non-selected" grid cells is
-#' performed.
+#' For instructions on how to use this function, you can visit the article on
+#' the [web page](https://moritzshore.github.io/miljotools/articles/metno_reanal.html).
+#'
+#' The [MET Nordic Reanalysis Dataset](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset)
+#' is a reanalysis product from the Meteorologisk institutt (hourly from 2012-09 to
+#' 2023-01). Please inform yourself on the limitations of reanalysis data before
+#' applying this dataset to your needs.This function accesses the THREDDS server
+#' of met.no with download queries formatted from user input:
+#'
+#' `area` should be a path to a **geo-referenced** shapefile (of either a
+#' **polygon** or a **point** geometry) of the area you would like data from.
+#' This area must be at least twice the size of the chosen `grid_resolution`,
+#' which is by default 1 x 1 km. If a point shapefile is given, then the nearest
+#' grid cell is chosen, and data is downloaded from there.
+#'
+#' `directory` is an optional parameter which lets you chose in which directory
+#' the downloads will be stored. If this parameter is not defined, the current
+#' working directory will be used.
+#'
+#' `fromdate` and `todate` are the date and time by which to bound the download
+#' by. required format is: **"2012-09-01 10:00:00"**. The dataset spans from this
+#' date til 2023-01.
+#'
+#' `mn_variables` are the MetNordic Variables which the function should
+#' download, by default this includes the following:
+#'
+#' - "air_temperature_2m",
+#' - "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+#' - "relative_humidity_2m",
+#' - "precipitation_amount",
+#' - "wind_speed_10m",
+#' - "wind_direction_10m"
+#'
+#' There are a few more variables which are not downloaded, these have not been
+#' tested, and some are known to have data gaps which the function currently
+#' cannot deal with, and might cause it to fail. use at own risk, and post an
+#' issue if anything does not work.
+#'
+#' You can read more about these variables on [GitHub (MetNo)](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset)
+#'
+#' `area_buffer` is an optional convienient parameter in which you can  buffer
+#' your polygon shape file by the given amount of meters. This is useful for
+#' downloading stations that are outside of the bounds of your polygon, but are
+#' still relatively close to the border (due to the 1x1km grid). A good (and
+#' default) value for this is 1500 m
+#'
+#' `grid_resolution` lets you choose how many stations to select from the grid.
+#' If for example you pass a "3", then every 3 station will be selected in both
+#' the horizontal and vertical axis, giving you a grid with stations placed 3km
+#' apart from each other on a regular grid. This can help with downloading data
+#' from huge catchments where 1x1km grid size is not necessary. Please note, no
+#' averaging of the "non-selected" grid cells is performed, and the default
+#' value is 1 x 1 km.
+#'
+#' `preview` prints information to the console as to what the function is doing,
+#' as well as plotting interactive maps to the viewer which gives you an idea of
+#' which grid cells were selected relative to the shapefile you provided.
 #'
 #' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area
 #' @param directory (string) path to desired working directory (default: working directory)
@@ -41,28 +91,27 @@
 #' @importFrom sf read_sf st_crs st_transform st_buffer st_bbox st_as_sf st_intersects st_coordinates st_zm
 #' @importFrom stringr str_pad str_replace_all str_split
 #' @importFrom mapview mapview
-#' @importFrom crayon black bold green italic yellow
 #' @importFrom crayon black bold green italic yellow blue
 #' @importFrom utils packageVersion
 #'
 #' @author Moritz Shore
 #' @export
-#' @return Writes .csv files into a folder located at the provided directory.
-#'   One .csv file for each grid point within the (buffered) shape file area.
-#'   Addtionally one metadata file (.csv) is written with the attributes of each
-#'   other file
+#' @return Function returns a path to where .csv files of the download were
+#'   written. One .csv file for each grid point within the (buffered) shape
+#'   file area. Additionally one metadata file (.csv) is written with the
+#'   attributes of each other file
 #'
 #' @examples
-#'  # for demonstration purposes, use path of package
-#'  ##example_file_path <- system.file(package = "miljotools", "/extdata/metno_reanal/watershed.shp")
 #'
-#'  ##get_metno_reanalysis3(
-#'  ##area = example_file_path,
-#'  ##fromdate = "2015-01-01",
-#'  ##todate = "2015-01-02",
-#'  ##area_buffer = 100,
-#'  ##preview = TRUE
-#'  ##)
+#'  if(FALSE){
+#'  get_metno_reanalysis3(
+#'  area = example_file_path,
+#'  fromdate = "2015-01-01",
+#'  todate = "2015-01-02",
+#'  area_buffer = 100,
+#'  preview = TRUE
+#'  )
+#'  }
 #'
 #'
 
@@ -772,11 +821,7 @@ get_metno_reanalysis3 <-
 #' Downscale MetNo Reanalysis3 data to daily resolution
 #'
 #' This function takes the hourly data from get_metno_reanalysis3() and
-#' recalculates it into daily time resolution.
-#'
-#' Warning, this funcitonality requires "svatools" to be installed:
-#'
-#' https://github.com/biopsichas/svatools
+#' recalculates it into daily (temporal) resolution.
 #'
 #' @param path path to output of get_metno_reanalysis3()
 #' @param outpath (optional) path to write the new files to
@@ -907,10 +952,11 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' `reanalysis3_daily()` and creates SWAT+ meteo input files and weather
 #' generators for your SWAT+ input with help from SWATprepR.
 #'
+#' **NOTE** Default parameter value for `mn_variables` in `get_metno_reanalysis3()`  is required for this to work.
+#'
 #' **NOTE** package `SWATprepR` is required for this function
 #'
-#' **NOTE**: the SWAT+ input files must be in your specified 'outpath' for the
-#' function to complete successfully when not writing to the SQL database
+#' https://github.com/biopsichas/SWATprepR
 #'
 #' @param path path to daily data provided by `reanalysis3_daily()`
 #' @param start optional parameter to define start date of time series
@@ -922,7 +968,7 @@ reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision =
 #' @param swat_setup path to your SWAT+ setup. (Required!)
 #' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
 #'
-#' @return path to generated files.
+#' @return Files are generated in provided paths
 #' @export
 #'
 #' @author Moritz Shore, Svajunas Plunge
