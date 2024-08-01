@@ -20,10 +20,5 @@ path of written files
 }
 \description{
 This function takes the hourly data from get_metno_reanalysis3() and
-recalculates it into daily time resolution.
-}
-\details{
-Warning, this funcitonality requires "svatools" to be installed:
-
-https://github.com/biopsichas/svatools
+recalculates it into daily (temporal) resolution.
 }

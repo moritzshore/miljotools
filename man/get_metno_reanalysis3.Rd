@@ -2,13 +2,14 @@
 % Please edit documentation in R/metnorenal3.R
 \name{get_metno_reanalysis3}
 \alias{get_metno_reanalysis3}
-\title{Download data from the metno renanalysis project}
+\title{Download data from the MetNordic Re-Analysis v3 dataset}
 \usage{
 get_metno_reanalysis3(
   area,
   directory = NULL,
   fromdate = "2012-09-01 10:00:00",
   todate = "2012-09-01 20:00:00",
+  mn_variables = NULL,
   area_buffer = 1500,
   grid_resolution = NULL,
   preview = TRUE
@@ -23,6 +24,8 @@ get_metno_reanalysis3(
 
 \item{todate}{(string) date and time for end of time series (ie. "2013-09-01 10:00:00")}
 
+\item{mn_variables}{(vector) Leave blank for deafault (tested) variables. See details for more}
+
 \item{area_buffer}{desired buffer around the provided shapefile (in meters, default 1500)}
 
 \item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers. (see help page for more details)}
@@ -30,35 +33,86 @@ get_metno_reanalysis3(
 \item{preview}{generate graphs showing previews of data download? (boolean)}
 }
 \value{
-Writes .csv files into a folder located at the provided directory.
-One .csv file for each grid point within the (buffered) shape file area.
-Addtionally one metadata file (.csv) is written with the attributes of each
-other file
+Function returns a path to where .csv files of the download were
+written. One .csv file for each grid point within the (buffered) shape
+file area. Additionally one metadata file (.csv) is written with the
+attributes of each other file
 }
 \description{
-This function accesses the THREDDS server of met.no with download queries
-formatted from user input. (to be expanded upon)
+The MET Nordic rerun archive version 3 can be accessed using this
+function. Please see below for more details.
 }
 \details{
-The \code{grid_resolution} parameter lets you choose how many stations to select
-from the grid. If for example you pass a "3", then every 3 station will be
-selected in both the horizontal and vertical axis, giving you a grid with
-stations placed 3km apart from each other on a regular grid. This can help
-with downloading data from huge catchments where 1x1km grid size is not
-necessary. Please note, no averaging of the "non-selected" grid cells is
-performed.
+For instructions on how to use this function, you can visit the article on
+the \href{https://moritzshore.github.io/miljotools/articles/metno_reanal.html}{web page}.
+
+The \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset}{MET Nordic Reanalysis Dataset}
+is a reanalysis product from the Meteorologisk institutt (hourly from 2012-09 to
+2023-01). Please inform yourself on the limitations of reanalysis data before
+applying this dataset to your needs.This function accesses the THREDDS server
+of met.no with download queries formatted from user input:
+
+\code{area} should be a path to a \strong{geo-referenced} shapefile (of either a
+\strong{polygon} or a \strong{point} geometry) of the area you would like data from.
+This area must be at least twice the size of the chosen \code{grid_resolution},
+which is by default 1 x 1 km. If a point shapefile is given, then the nearest
+grid cell is chosen, and data is downloaded from there.
+
+\code{directory} is an optional parameter which lets you chose in which directory
+the downloads will be stored. If this parameter is not defined, the current
+working directory will be used.
+
+\code{fromdate} and \code{todate} are the date and time by which to bound the download
+by. required format is: \strong{"2012-09-01 10:00:00"}. The dataset spans from this
+date til 2023-01.
+
+\code{mn_variables} are the MetNordic Variables which the function should
+download, by default this includes the following:
+\itemize{
+\item "air_temperature_2m",
+\item "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+\item "relative_humidity_2m",
+\item "precipitation_amount",
+\item "wind_speed_10m",
+\item "wind_direction_10m"
+}
+
+There are a few more variables which are not downloaded, these have not been
+tested, and some are known to have data gaps which the function currently
+cannot deal with, and might cause it to fail. use at own risk, and post an
+issue if anything does not work.
+
+You can read more about these variables on \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset}{GitHub (MetNo)}
+
+\code{area_buffer} is an optional convienient parameter in which you can  buffer
+your polygon shape file by the given amount of meters. This is useful for
+downloading stations that are outside of the bounds of your polygon, but are
+still relatively close to the border (due to the 1x1km grid). A good (and
+default) value for this is 1500 m
+
+\code{grid_resolution} lets you choose how many stations to select from the grid.
+If for example you pass a "3", then every 3 station will be selected in both
+the horizontal and vertical axis, giving you a grid with stations placed 3km
+apart from each other on a regular grid. This can help with downloading data
+from huge catchments where 1x1km grid size is not necessary. Please note, no
+averaging of the "non-selected" grid cells is performed, and the default
+value is 1 x 1 km.
+
+\code{preview} prints information to the console as to what the function is doing,
+as well as plotting interactive maps to the viewer which gives you an idea of
+which grid cells were selected relative to the shapefile you provided.
 }
 \examples{
- # for demonstration purposes, use path of package
- ##example_file_path <- system.file(package = "miljotools", "/extdata/metno_reanal/watershed.shp")
 
- ##get_metno_reanalysis3(
- ##area = example_file_path,
- ##fromdate = "2015-01-01",
- ##todate = "2015-01-02",
- ##area_buffer = 100,
- ##preview = TRUE
- ##)
+ if(FALSE){
+ get_metno_reanalysis3(
+ area = example_file_path,
+ fromdate = "2015-01-01",
+ todate = "2015-01-02",
+ area_buffer = 100,
+ preview = TRUE
+ )
+ }
 
 
 }
