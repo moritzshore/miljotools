@@ -27,6 +27,7 @@
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
+#' @param mn_variables (vector) Leave blank for deafault (tested) variables. See details for more
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
 #' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
@@ -41,6 +42,7 @@
 #' @importFrom stringr str_pad str_replace_all str_split
 #' @importFrom mapview mapview
 #' @importFrom crayon black bold green italic yellow
+#' @importFrom crayon black bold green italic yellow blue
 #' @importFrom utils packageVersion
 #'
 #' @author Moritz Shore
@@ -69,6 +71,7 @@ get_metno_reanalysis3 <-
            directory = NULL,
            fromdate =  "2012-09-01 10:00:00",
            todate = "2012-09-01 20:00:00",
+           mn_variables = NULL,
            area_buffer = 1500,
            grid_resolution = NULL,
            preview = TRUE
@@ -218,7 +221,7 @@ get_metno_reanalysis3 <-
       }
     }
 
-    build_query <- function(bounding_coords, swatvars, fromdate, todate,
+    build_query <- function(bounding_coords, mn_variables, fromdate, todate,
                             grid_resolution, verbose){
 
       # time step not really needed since the files are individual
@@ -278,7 +281,7 @@ get_metno_reanalysis3 <-
       # notfull <- c("integral_of_surface_downwelling_longwave_flux_in_air_wrt_time")
 
       # paste together the variable query
-      var_q <- paste0(swatvars, time_q, y_q, x_q, collapse = ",")
+      var_q <- paste0(mn_variables, time_q, y_q, x_q, collapse = ",")
 
       # paste together the full variable query
       var_query <-
@@ -358,7 +361,7 @@ get_metno_reanalysis3 <-
     }
 
     download_ncfiles <- function(directory, foldername, full_urls, filenames,
-                                 years, swatvars, geometry_type) {
+                                 years, mn_variables, geometry_type) {
 
         # download batches per year
         yearbatch <- split(full_urls, f = years)
@@ -383,12 +386,12 @@ get_metno_reanalysis3 <-
           alt_crop <- ncdf4::ncvar_get(ncin_crop,"altitude")
 
           # download all the variables using custom function
-          vardl <- lapply(swatvars, getncvar, ncin_crop = ncin_crop)
+          vardl <- lapply(mn_variables, getncvar, ncin_crop = ncin_crop)
 
           ncdf4::nc_close(ncin_crop)
 
           # set colnames
-          names(vardl) <- swatvars
+          names(vardl) <- mn_variables
 
           # predefile the master matrix
           mastermatrix <- vardl
@@ -402,12 +405,12 @@ get_metno_reanalysis3 <-
             ncin_crop <- nc_open_retry(url[idate])
 
             # download all vars
-            vardl <- lapply(swatvars, getncvar, ncin_crop = ncin_crop)
+            vardl <- lapply(mn_variables, getncvar, ncin_crop = ncin_crop)
 
             ncdf4::nc_close(ncin_crop)
 
             # set column names
-            names(vardl) <- swatvars
+            names(vardl) <- mn_variables
 
             if(geometry_type == "point"){
               mat_dimension = 2
@@ -417,7 +420,7 @@ get_metno_reanalysis3 <-
               mat_dimension = 3
             }
             # for every variable, bind the matrix slice onto the full matrix (dimension 3 --> "along=3")
-            for (variable in swatvars) {
+            for (variable in mn_variables) {
               # if the download failed, add a full frame of NAs to stack
               if (vardl[[variable]] %>% length() == 0) {
                 dims <- mastermatrix[[variable]] %>% dim()
@@ -512,7 +515,7 @@ get_metno_reanalysis3 <-
       return(cover_stations)
     }
 
-    write_stations <- function(vardl, cover_stations, swatvars, x_crop, y_crop,
+    write_stations <- function(vardl, cover_stations, mn_variables, x_crop, y_crop,
                                lon_crop, lat_crop, alt_crop, mastermatrix,
                                daterange, foldername, rdsfiles, directory,
                                preview, area) {
@@ -559,7 +562,7 @@ get_metno_reanalysis3 <-
             master_df <- data.frame(date = daterange)
 
             # building the time series data frame column for each variable
-            for (variable in swatvars) {
+            for (variable in mn_variables) {
               # get the variable out of the list
               varslice <- mastermatrix[[variable]]
               # extract the timeseries for the given cell coordinates
@@ -574,7 +577,7 @@ get_metno_reanalysis3 <-
             clat <- lat_crop[xcell, ycell]
 
             # set the col names
-            colnames(master_df) <- c("date", swatvars)
+            colnames(master_df) <- c("date", mn_variables)
 
             # get the altitude of the cell (for metadata.csv)
             altitude <- alt_crop[xcell, ycell]
@@ -642,21 +645,31 @@ get_metno_reanalysis3 <-
       area_buffer = 1
     }
 
-    # all relevant variables (ADD TO FUNCTION PARAMS?)
-    swatvars <- c(
-      "air_temperature_2m",
-      "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
-      "relative_humidity_2m",
-      "precipitation_amount",
-      "wind_speed_10m",
-      "wind_direction_10m"
-    )
+    if(mn_variables %>% is.null()){
+      # all relevant variables and tested variables
+      mn_variables <- c(
+        "air_temperature_2m",
+        "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+        "relative_humidity_2m",
+        "precipitation_amount",
+        "wind_speed_10m",
+        "wind_direction_10m"
+      )
+      if(preview){
+        cat(bold("downloading default variables:\n"))
+        cat(blue(italic(mn_variables)), sep = "\n")
+      }
+    }else{
+      cat(bold("downloading custom variables:\n"))
+      cat(blue(italic(mn_variables)), sep = "\n")
+    }
+
 
     print("getting coordinates..")
     bounding_coords <- get_coord_window(area_path = area, area_buffer, preview)
 
     print("building query..")
-    queries <- build_query(bounding_coords, swatvars, fromdate, todate, grid_resolution, verbose)
+    queries <- build_query(bounding_coords, mn_variables, fromdate, todate, grid_resolution, verbose)
 
     print("creating download folder..")
     foldername <- create_download_folder(directory)
@@ -671,7 +684,7 @@ get_metno_reanalysis3 <-
         full_urls = queries$full_urls,
         filenames = queries$filenames,
         years = queries$years,
-        swatvars = swatvars,
+        mn_variables = mn_variables,
         geometry_type = geometry_type
       )
 
@@ -700,7 +713,7 @@ get_metno_reanalysis3 <-
       write_stations(
         vardl = ncdownload$vardl,
         cover_stations = cover_stations,
-        swatvars = swatvars,
+        mn_variables = mn_variables,
         x_crop = ncdownload$x_crop,
         y_crop = ncdownload$y_crop,
         lon_crop = ncdownload$lon_crop,
