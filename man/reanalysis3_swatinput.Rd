@@ -34,7 +34,7 @@ update your database). Warning: start and end parameters will be ignored in this
 \item{backup}{(logical, defaults to true) creates a backup of your swat folder before modification}
 }
 \value{
-path to generated files.
+Files are generated in provided paths
 }
 \description{
 Takes data gathered by \code{get_metno_reanalysis3()} and downscaled by
@@ -42,10 +42,11 @@ Takes data gathered by \code{get_metno_reanalysis3()} and downscaled by
 generators for your SWAT+ input with help from SWATprepR.
 }
 \details{
+\strong{NOTE} Default parameter value for \code{mn_variables} in \code{get_metno_reanalysis3()}  is required for this to work.
+
 \strong{NOTE} package \code{SWATprepR} is required for this function
 
-\strong{NOTE}: the SWAT+ input files must be in your specified 'outpath' for the
-function to complete successfully when not writing to the SQL database
+https://github.com/biopsichas/SWATprepR
 }
 \author{
 Moritz Shore, Svajunas Plunge
