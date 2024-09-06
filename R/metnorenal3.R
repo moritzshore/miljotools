@@ -424,6 +424,27 @@ get_metno_reanalysis3 <-
           print(paste0("downloading: ", cbyear))
           url <- yearbatch[[cbyear]]
 
+          ### This is where the switch to netcdf download should take place
+          ### if the user opts for it! (ncdf) (ncdf4) (jessica)
+          savefile = paste(directory, foldername, filenames, sep = "/")
+          if(ncdf){
+            # repeat for all following files
+            for (idate in c(2:length(url))) {
+              # print status
+              cat("\r","downloading files ", " (", idate, "/", length(url), ")", sep = "")
+
+              # open Netcdf file
+              ncin_crop <- nc_open_retry(url[2])
+              test <- nc_create(savename[2], vars = ncin_crop$var, force_v4 = T)
+              nc_close(ncin_crop)
+
+              test <- nc_open(savename[2])
+              nc_close(test)
+            }
+
+            # else: continue as normal
+
+
           ncin_crop <- nc_open_retry(url[1])
           # pre-download first frame to get dimensions set
 
