@@ -428,7 +428,7 @@ get_metno_reanalysis3 <-
           ### if the user opts for it! (ncdf) (ncdf4) (jessica)
           savefiles = paste(directory, foldername, filenames, sep = "/")
           if(ncdf){
-              read_write_ncdf(url, sacvefiles)
+              read_write_ncdf(url, savefiles)
               cat("saved *.nc files here:")
               return("placeholder")
           }

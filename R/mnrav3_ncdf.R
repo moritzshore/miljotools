@@ -20,10 +20,21 @@ read_write_ncdf <- function(url, savefiles){
   # Files
 
   # open first Netcdf file
-  ncin_crop <- nc_open_retry(url[2])
+  ncin_crop <- nc_open_retry(url[1])
 
   # getting numbers
   # do once
+
+  varlist = ncin_crop$var %>% names()
+  varnr = length(varlist)
+  nc_var_list = list()
+
+  for (var_index in 1:varnr) {
+    cat("Getting:", varlist[var_index], "\n")
+    print(ncvar_get(ncin_crop, varlist[var_index]))
+
+  }
+
   lat <- ncvar_get(ncin_crop, "latitude")
   lon <- ncvar_get(ncin_crop, "longitude")
   at2<-ncvar_get(ncin_crop, "air_temperature_2m")
