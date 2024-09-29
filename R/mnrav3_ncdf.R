@@ -14,13 +14,11 @@
 #' @keywords internal
 #'
 #' @examples
-read_write_ncdf <- function(url, savefiles){
+read_write_ncdf <- function(url, savefiles, directory, verbose){
 
   # Download first file to get the dimensios set, then loop through following
   # Files
-
-  ## tODO remove
-  idate = 3
+  idate = 1
   # open first Netcdf file
   ncin_crop <- nc_open_retry(url[idate])
 
@@ -32,18 +30,22 @@ read_write_ncdf <- function(url, savefiles){
 
   # defining dimensions
   mytimedef <- ncdim_def(name = "time", units = "hour", vals =1, unlim = F)
-  myxdef <- ncdim_def(name = "y", units = "m",longname = "projection_y_coordinate",vals = ydim)
-  myydef <- ncdim_def(name = "x", units = "m",longname = "projection_x_coordinate", vals =xdim)
+  myxdef <- ncdim_def(name = "y", units = "m",longname = "projection_y_coordinate",vals = 1:ydim)
+  myydef <- ncdim_def(name = "x", units = "m",longname = "projection_x_coordinate", vals =1:xdim)
 
   # define UTMS
   lat_vals <- ncvar_def("lat_vals", units = "deg", dim = list(myydef,myxdef, mytimedef))
   lon_vals <- ncvar_def("lon_vals", units = "deg", dim = list(myydef,myxdef, mytimedef))
 
+  # Start loop
+  for (idate in c(1:length(url))) {
+  ncin_crop <- nc_open_retry(url[idate])
+
   varlist = ncin_crop$var %>% names()
   varnr = length(varlist)
   nc_var_list = list()
-  nc_def_list = list()
-
+  nc_attr_list = list()
+  var_standard_name = list()
 
   for (var_index in 1:varnr) {
 
@@ -51,6 +53,8 @@ read_write_ncdf <- function(url, savefiles){
     cat(blue("extracting"), underline(varlist[var_index]), blue("data"),"\n", sep = " ")
     nc_var_list[[var_index]] <- ncvar_get(ncin_crop, varlist[var_index])
 
+
+    nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
     # extract variable attributes
     cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
@@ -58,6 +62,8 @@ read_write_ncdf <- function(url, savefiles){
     # define a variable defintion based on the extracted attributes
     # TODO could add chunk sizes which are present on variables that arent lat/long?
     cat(cyan("defining"), underline(varlist[var_index]), cyan("attributes"),"\n", sep = " ")
+    var_standard_name[[var_index]] <- var_attr$standard_name
+
     var_def <- ncvar_def(
       var_attr$standard_name,
       units = var_attr$units,
@@ -79,42 +85,25 @@ read_write_ncdf <- function(url, savefiles){
 
 
   for (var_index in 1:varnr) {
-    cat(green("writing"), underline(varlist[var_index]), green("to file"),"\n", sep = " ")
-    ncvar_put(nc = to_write_nc, varid = varlist[var_index], vals = nc_var_list[[var_index]])
+    cat(green("writing"), underline(var_standard_name[[var_index]]), green("to file"),"\n", sep = " ")
+    ncvar_put(nc = to_write_nc, varid = var_standard_name[[var_index]], vals = nc_var_list[[var_index]])
   }
 
 
   cat(yellow("saving"), underline(filename), yellow("data"),"\n", sep = " ")
-  cat(yellow("closing file #"), underline(idate),"\n", sep = " ")
-
+  cat(yellow("closing file #"), underline(paste0(idate, "/", length(url))), "\n", sep = " ")
+  nc_close(to_write_nc)
   nc_close(ncin_crop)
 
+  }
+  if(list.files(paste0(directory, foldername)) %>% length() == length(url)){
+    cat(bold(bgGreen(">>> finished downloading:"),
+             bgCyan(underline(white(paste(length(url), "files")))),
+             bgGreen("<<<")), "\n", sep = "")
 
-
-  # write
-
-  ncvar_put(helloworld, "temp", vals = at2)
-  ncvar_put(helloworld, "lat_vals", vals = lat)
-  ncvar_put(helloworld, "lon_vals", vals = lon)
-  ncvar_put(helloworld, "time", vals = 1)
-
-  # close
-  nc_close(helloworld)
-
-
-  testing <- nc_open(filename)
-
-  ncvar_get(testing, "temp")
-  ncvar_get(testing, "lat_vals")
-  ncvar_get(testing, "lon_vals")
-
-
-  # repeat for all following files
-  for (idate in c(2:length(url))) {
-    # print status
-    cat("\r","downloading files ", " (", idate, "/", length(url), ")", sep = "")
-
-
+  }else{
+    warning("it seems not all files were donwloaded!: ")
+    cat(red(length(list.files(paste0(directory, foldername))), "/", length(url)), "\n")
+  }
 
   }
-}
