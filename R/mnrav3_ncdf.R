@@ -1,7 +1,9 @@
 ### MNRV3 NCDF Support
 # Date: Sep. 26, 2024
 # Author: Moritz Shore
-# Purpose: Save the server request NCDF files as NCDF instead of converting immediately to dataframes. This is quite overcomplicated because there doesnt seem to be any functional way of opening the server requested files and then just writing them to disk.
+# Description: Code relating towards the manipulation of NCDF4 files without
+# converting the data to dataframe / csv format.
+
 
 #' Read and write ncdf files
 #'
@@ -52,13 +54,14 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
     # extract variable data
     if(verbose){
       cat(blue("extracting"), underline(varlist[var_index]), blue("data"),"\n", sep = " ")
-      nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
       }
 
     nc_var_list[[var_index]] <- ncvar_get(ncin_crop, varlist[var_index])
 
     # extract variable attributes
-    if(verbose){cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
+    if(verbose){
+      nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
+      cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
     # define a variable defintion based on the extracted attributes
     # TODO could add chunk sizes which are present on variables that arent lat/long?
@@ -107,3 +110,27 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
     cat(red(length(list.files(paste0(directory, foldername))), "/", length(url)), "\n")
     }
   }
+
+
+#' converts parameters to CWATM format
+#'
+#' For CWatM climate variables required in netcdf format:#'
+#'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
+#'   - temperature: max, min & average [K], variable name = tas_nor2, tasmax_nor2, tasmin_nor2
+#'   - humidity (relative[%]), variable name = hurs_nor
+#'   - surface pressure [Pa], variable name = ps_nor
+#'   - radiation (short wave & long wave downwards) [W m-2], variable name = rsds_nor, rlds_nor,
+#'   - windspeed [m/s], variable name = wind
+#'
+#'
+#'
+#' @param in
+#' @param out
+#'
+#' @return
+#' @export
+#'
+#' @examples
+convert_to_cwatm <- function(in, out){
+
+}
