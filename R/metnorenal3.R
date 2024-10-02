@@ -81,6 +81,7 @@
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
 #' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
+#' @param ncdf Set this parameter to be `TRUE` if you would like the downloaded files to remain in NCDF format (*.nc).
 #' @importFrom abind abind
 #' @importFrom dplyr nth mutate %>% tibble
 #' @importFrom lubridate year month day hour
@@ -123,42 +124,9 @@ get_metno_reanalysis3 <-
            mn_variables = NULL,
            area_buffer = 1500,
            grid_resolution = NULL,
-           preview = TRUE
+           preview = TRUE,
+           ncdf = FALSE
   ){
-
-    # supporting functions ----
-    nc_open_retry <- function(link) {
-
-      nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
-                          error = function(cond){
-                            warning("failed..")
-                            return(NA)
-                          })
-
-      if(nc_file %>% length() > 1){
-        return(nc_file)
-      } else{
-        print("retry download..")
-        attempt = 1
-        while((attempt < 10) & (length(nc_file) == 1)){
-          Sys.sleep(5)
-          attempt = attempt + 1
-          nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
-                              error = function(cond){
-                                warning("failed..", cond, "retry!")
-                                return(NA)
-                              })
-
-        }
-
-        if(length(nc_file) > 1){
-          print("connection re-established!")
-          return(nc_file)
-        }else{
-          stop("download failed after 10 attempts.")
-        }
-      }
-    }
 
     get_coord_window <- function(area_path, area_buffer, preview){
 
@@ -410,7 +378,8 @@ get_metno_reanalysis3 <-
     }
 
     download_ncfiles <- function(directory, foldername, full_urls, filenames,
-                                 years, mn_variables, geometry_type) {
+                                 years, mn_variables, geometry_type,
+                                 ncdf = FALSE, verbose = FALSE) {
 
         # download batches per year
         yearbatch <- split(full_urls, f = years)
@@ -428,9 +397,10 @@ get_metno_reanalysis3 <-
           ### if the user opts for it! (ncdf) (ncdf4) (jessica)
           savefiles = paste(directory, foldername, filenames, sep = "/")
           if(ncdf){
-              read_write_ncdf(url, savefiles)
-              cat("saved *.nc files here:")
-              return("placeholder")
+              read_write_ncdf(url = url, savefiles = savefiles,
+                              foldername = foldername, directory = directory,
+                              verbose = preview)
+              return(directory)
           }
 
             # else: continue as normal
@@ -746,9 +716,14 @@ get_metno_reanalysis3 <-
         filenames = queries$filenames,
         years = queries$years,
         mn_variables = mn_variables,
-        geometry_type = geometry_type
+        geometry_type = geometry_type, ncdf = ncdf, verbose = preview
       )
 
+    if(ncdf){
+      if(verbose){cat(bold(green("NCDF files finished downloading and are located here:")), "\n",
+                      blue(italic(underline(paste0(directory, "/",foldername)))), "\n")}
+      return(paste0(directory, "/",foldername))
+    }
     print("download complete!, merging files..")
 
     merged_data <- merge_rds(directory = directory,
@@ -1282,3 +1257,36 @@ swat_weather_input_chain <-
     print("miljotools: pipeline finished!")
   }
 
+# supporting functions ----
+nc_open_retry <- function(link) {
+
+  nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
+                      error = function(cond){
+                        warning("failed..")
+                        return(NA)
+                      })
+
+  if(nc_file %>% length() > 1){
+    return(nc_file)
+  } else{
+    print("retry download..")
+    attempt = 1
+    while((attempt < 10) & (length(nc_file) == 1)){
+      Sys.sleep(5)
+      attempt = attempt + 1
+      nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
+                          error = function(cond){
+                            warning("failed..", cond, "retry!")
+                            return(NA)
+                          })
+
+    }
+
+    if(length(nc_file) > 1){
+      print("connection re-established!")
+      return(nc_file)
+    }else{
+      stop("download failed after 10 attempts.")
+    }
+  }
+}
