@@ -666,7 +666,8 @@ get_metno_reanalysis3 <-
       if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
     }
 
-    if(preview == TRUE){verbose = TRUE}
+    # this is truly crap, should fix..
+    if(preview == TRUE){verbose = TRUE}else{verbose = FALSE}
 
     if(directory %>% is.null()){
       directory <- getwd()
@@ -720,7 +721,7 @@ get_metno_reanalysis3 <-
       )
 
     if(ncdf){
-      if(verbose){cat(bold(green("NCDF files finished downloading and are located here:")), "\n",
+      if(preview){cat(bold(green("NCDF files finished downloading and are located here:")), "\n",
                       blue(italic(underline(paste0(directory, "/",foldername)))), "\n")}
       return(paste0(directory, "/",foldername))
     }

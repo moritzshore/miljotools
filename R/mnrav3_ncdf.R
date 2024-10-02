@@ -60,7 +60,6 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
     # extract variable attributes
     if(verbose){cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
-    print(var_attr$standard_name)
     # define a variable defintion based on the extracted attributes
     # TODO could add chunk sizes which are present on variables that arent lat/long?
     if(verbose){cat(cyan("defining"), underline(varlist[var_index]), cyan("attributes"),"\n", sep = " ")}
