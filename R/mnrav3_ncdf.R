@@ -50,11 +50,13 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   for (var_index in 1:varnr) {
 
     # extract variable data
-    if(verbose){cat(blue("extracting"), underline(varlist[var_index]), blue("data"),"\n", sep = " ")}
+    if(verbose){
+      cat(blue("extracting"), underline(varlist[var_index]), blue("data"),"\n", sep = " ")
+      nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
+      }
+
     nc_var_list[[var_index]] <- ncvar_get(ncin_crop, varlist[var_index])
 
-
-    nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
     # extract variable attributes
     if(verbose){cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
