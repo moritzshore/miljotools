@@ -2,7 +2,7 @@
 # Date: Sep. 26, 2024
 # Author: Moritz Shore
 # Description: Code relating towards the manipulation of NCDF4 files without
-# converting the data to dataframe / csv format.
+#              converting the data to dataframe / csv format.
 
 
 #' Read and write ncdf files
@@ -18,6 +18,9 @@
 #' @keywords internal
 #'
 read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FALSE){
+
+  # extra printing for debug purposes
+  DEBUG = FALSE
 
   # determine if any of the passed files have been downloaded already, and if
   # so, remove them from the "to download list"
@@ -54,7 +57,8 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 
   # Start loop
   for (idate in c(1:length(url))) {
-  ncin_crop <- nc_open_retry(url[idate])
+    if(verbose){cat("\r", yellow("downloading file #"), underline(paste0(idate, "/", length(url))), sep = "")}
+    ncin_crop <- nc_open_retry(url[idate])
 
   varlist = ncin_crop$var %>% names()
   varnr = length(varlist)
@@ -65,21 +69,21 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   for (var_index in 1:varnr) {
 
     # extract variable data
-    if(verbose){
+    if(DEBUG){
       cat(blue("extracting"), underline(varlist[var_index]), blue("data"),"\n", sep = " ")
       }
 
     nc_var_list[[var_index]] <- ncvar_get(ncin_crop, varlist[var_index])
 
     # extract variable attributes
-    if(verbose){
+    if(DEBUG){
       # plotting this may cause R session to abort?
       # nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
       cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
     # define a variable defintion based on the extracted attributes
     # TODO could add chunk sizes which are present on variables that arent lat/long?
-    if(verbose){cat(cyan("defining"), underline(varlist[var_index]), cyan("attributes"),"\n", sep = " ")}
+    if(DEBUG){cat(cyan("defining"), underline(varlist[var_index]), cyan("attributes"),"\n", sep = " ")}
     var_standard_name[[var_index]] <- var_attr$standard_name
 
     var_def <- ncvar_def(
@@ -98,24 +102,24 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 
   filename = savefiles[idate]
   # create NC file with the attribute definition list
-  if(verbose){cat(yellow("creating"), underline(filename), yellow("on disc"),"\n", sep = " ")}
+  if(DEBUG){cat(yellow("creating"), underline(filename), yellow("on disc"),"\n", sep = " ")}
   to_write_nc <- nc_create(filename, vars = nc_attr_list)
 
 
   for (var_index in 1:varnr) {
-    if(verbose){cat(green("writing"), underline(var_standard_name[[var_index]]), green("to file"),"\n", sep = " ")}
+    if(DEBUG){cat(green("writing"), underline(var_standard_name[[var_index]]), green("to file"),"\n", sep = " ")}
     ncvar_put(nc = to_write_nc, varid = var_standard_name[[var_index]], vals = nc_var_list[[var_index]])
   }
 
 
-  if(verbose){cat(yellow("saving"), underline(filename), yellow("data"),"\n", sep = " ")}
-  if(verbose){cat(yellow("closing file #"), underline(paste0(idate, "/", length(url))), "\n", sep = " ")}
+  if(DEBUG){cat(yellow("saving"), underline(filename), yellow("data"),"\n", sep = " ")}
+  if(DEBUG){cat(yellow("closing file #"), underline(paste0(idate, "/", length(url))), "\n", sep = " ")}
   nc_close(to_write_nc)
   nc_close(ncin_crop)
 
   }
   if(list.files(paste0(directory, foldername)) %>% length() == length(url)){
-    if(verbose){cat(bold(bgGreen(">>> finished downloading:"),
+    if(verbose){cat(bold(bgGreen("\n>>> finished downloading:"),
              bgCyan(underline(white(paste(length(url), "files")))),
              bgGreen("<<<")), "\n", sep = "")}
 

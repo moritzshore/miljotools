@@ -383,29 +383,30 @@ get_metno_reanalysis3 <-
                                  years, mn_variables, geometry_type,
                                  ncdf = FALSE, verbose = FALSE) {
 
-        # download batches per year
-        yearbatch <- split(full_urls, f = years)
-        filebatch <- split(filenames, f = years)
+      ### This is where the switch to netcdf download should take place
+      ### if the user opts for it! (ncdf4)
+      if(ncdf){
+        savefiles = paste(directory, foldername, filenames, sep = "/")
+        read_write_ncdf(url = full_urls, savefiles = savefiles,
+                        foldername = foldername, directory = directory,
+                        verbose = preview)
+        return(directory)
+      }
 
-        # set list names
-        years_string <- years %>% unique() %>% sort()
-        names(yearbatch) <-  paste0("y", years_string)
+      # else: continue as normal
+      # download batches per year
+      yearbatch <- split(full_urls, f = years)
+      filebatch <- split(filenames, f = years)
+      # set list names
+      years_string <- years %>% unique() %>% sort()
+      names(yearbatch) <-  paste0("y", years_string)
 
         for (cbyear in names(yearbatch)) {
           print(paste0("downloading: ", cbyear))
           url <- yearbatch[[cbyear]]
 
-          ### This is where the switch to netcdf download should take place
-          ### if the user opts for it! (ncdf) (ncdf4) (jessica)
-          savefiles = paste(directory, foldername, filenames, sep = "/")
-          if(ncdf){
-              read_write_ncdf(url = url, savefiles = savefiles,
-                              foldername = foldername, directory = directory,
-                              verbose = preview)
-              return(directory)
-          }
 
-            # else: continue as normal
+
 
 
           ncin_crop <- nc_open_retry(url[1])
