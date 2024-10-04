@@ -9,13 +9,14 @@
 #'
 #' instead of coverting them to dataframe format
 #'
-#' @param url
-#' @param savefiles
-#'
-#' @return
+#' @param url urls to download
+#' @param savefiles paths to save
+#' @importFrom ncdf4 ncdim_def ncvar_def ncvar_get ncatt_get ncvar_put nc_close nc_create
+#' @importFrom crayon underline white red yellow underline bgGreen bgCyan bold magenta cyan
+#' @importFrom dplyr  %>%
+#' @return path to downloaded files
 #' @keywords internal
 #'
-#' @examples
 read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FALSE){
 
   # Download first file to get the dimensios set, then loop through following
@@ -60,7 +61,8 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 
     # extract variable attributes
     if(verbose){
-      nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
+      # plotting this may cause R session to abort?
+      # nc_var_list[[var_index]] %>% image(xlab= varlist[var_index], useRaster = T)
       cat(magenta("extracting"), underline(varlist[var_index]), magenta("attributes"),"\n", sep = " ")}
     var_attr <- ncatt_get(ncin_crop, varlist[var_index])
     # define a variable defintion based on the extracted attributes
@@ -131,6 +133,6 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #' @export
 #'
 #' @examples
-convert_to_cwatm <- function(in, out){
-
-}
+# convert_to_cwatm <- function(in, out){
+#
+# }
