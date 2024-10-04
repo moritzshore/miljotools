@@ -19,6 +19,18 @@
 #'
 read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FALSE){
 
+  # determine if any of the passed files have been downloaded already, and if
+  # so, remove them from the "to download list"
+  already_downloaded_files <- file.exists(savefiles)
+  if(sum(already_downloaded_files) > 0){
+    cat(red(underline(
+      "miljotools thinks ",
+      sum(already_downloaded_files),
+      " files have already been downloaded, and will not try to re-download them..")))
+    url <- url[-which(already_downloaded_files)]
+    savefiles <- savefiles[-which(already_downloaded_files)]
+  }
+
   # Download first file to get the dimensios set, then loop through following
   # Files
   idate = 1

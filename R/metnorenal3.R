@@ -82,6 +82,7 @@
 #' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
 #' @param ncdf Set this parameter to be `TRUE` if you would like the downloaded files to remain in NCDF format (*.nc).
+#' @param continue if `ncdf` is `TRUE`, then you can pass a folder name (in passed directory) here to continue an aborted download session.
 #' @importFrom abind abind
 #' @importFrom dplyr nth mutate %>% tibble
 #' @importFrom lubridate year month day hour
@@ -125,7 +126,8 @@ get_metno_reanalysis3 <-
            area_buffer = 1500,
            grid_resolution = NULL,
            preview = TRUE,
-           ncdf = FALSE
+           ncdf = FALSE,
+           continue = NULL
   ){
 
     get_coord_window <- function(area_path, area_buffer, preview){
@@ -703,8 +705,14 @@ get_metno_reanalysis3 <-
     print("building query..")
     queries <- build_query(bounding_coords, mn_variables, fromdate, todate, grid_resolution, verbose)
 
-    print("creating download folder..")
-    foldername <- create_download_folder(directory)
+    if(is.null(continue) == FALSE){
+      print("continuing download folder..")
+      foldername = continue
+    }else{
+      print("creating download folder..")
+      foldername <- create_download_folder(directory)
+
+    }
 
     print("starting download")
     if(bounding_coords %>% length() == 2){geometry_type = "point"}else{geometry_type = "polygon"}
