@@ -27,14 +27,14 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   already_downloaded_files <- file.exists(savefiles)
   if(sum(already_downloaded_files) > 0){
     cat(red(underline(
-      "miljotools thinks ",
+      "\nmiljotools thinks ",
       sum(already_downloaded_files),
-      " files have already been downloaded, and will not try to re-download them..")))
+      " files have already been downloaded, and will not try to re-download them..\n")))
     url <- url[-which(already_downloaded_files)]
     savefiles <- savefiles[-which(already_downloaded_files)]
   }
 
-  # Download first file to get the dimensios set, then loop through following
+  # Download first file to get the dimensions set, then loop through following
   # Files
   idate = 1
   # open first Netcdf file
@@ -117,6 +117,7 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   nc_close(to_write_nc)
   nc_close(ncin_crop)
 
+
   }
   if(list.files(paste0(directory, foldername)) %>% length() == length(url)){
     if(verbose){cat(bold(bgGreen("\n>>> finished downloading:"),
@@ -142,13 +143,65 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #'
 #'
 #'
-#' @param in
-#' @param out
+#' @param in filepath to folder containing .nc input files
+#' @param out filepath to write CWatM input files
 #'
-#' @return
+#' @importFrom stringr str_split
+#' @importFrom dplyr %>%
+#' @importFrom ncdf4 nc_open ncvar_get
+#' @importFrom abind abind
+#'
+#' @return status code
 #' @export
 #'
 #' @examples
-# convert_to_cwatm <- function(in, out){
+# convert_to_cwatm <- function(inpath, outpath){
+#
+#   cwatm_vars <- c(
+#     "precipitation_amount",
+#     "air_temperature_2m",
+#     "relative_humidity_2m",
+#     "air_pressure_at_sea_level",
+#     "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+#     "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time",
+#     "wind_speed_10m"
+#   )
+#
+#   filepath_full <- list.files(inpath, full.names = T)
+#   parsed <- (list.files(inpath) %>% stringr::str_split("_", simplify = T))[,6] %>% stringr::str_remove(".nc")
+#   date_only <- (parsed %>% stringr::str_split("T", simplify = T))[,1] %>% unique()
+#
+#   for (today in date_only) {
+#     print(today)
+#     today_file_index <- grepl(x = parsed, pattern = today) %>% which()
+#
+#     # if less than 24 files are found that means some are missing
+#     if(today_file_index %>% length() < 24){
+#       if(today == dplyr::first(date_only)){
+#         Warning("first day of download is incomplete, skipping this day")
+#         next()
+#       }
+#       else if(today == dplyr::last(date_only)){
+#         Warning("last day of download is incomplete, skipping this day")
+#         next()
+#       }
+#       stop("the following date is missing some files! [>> ", today, " <<]")
+#     }
+#
+#     files_nc <- map(filepath_full[today_file_index], nc_open)
+#
+#     for (variable in cwatm_vars) {
+#       print(variable)
+#       stack <- map(files_nc, varid = variable, .f = ncvar_get) %>% abind(along = 3)
+#     }
+#
+#   }
+#
+#   # years <- substr(parsed, 1,4)
+#   # months <- substr(parsed, 5,6)
+#   # days <- substr(parsed, 7,8)
 #
 # }
+
+
+
