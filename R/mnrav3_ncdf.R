@@ -27,7 +27,7 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   already_downloaded_files <- file.exists(savefiles)
   if(sum(already_downloaded_files) > 0){
     cat(red(underline(
-      "\nmiljotools thinks ",
+      ">>> miljotools thinks ",
       sum(already_downloaded_files),
       " files have already been downloaded, and will not try to re-download them..\n")))
     url <- url[-which(already_downloaded_files)]
@@ -133,7 +133,7 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 
 #' converts parameters to CWATM format
 #'
-#' For CWatM climate variables required in netcdf format:#'
+#' For CWatM climate variables required in netcdf format:
 #'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
 #'   - temperature: max, min & average [K], variable name = tas_nor2, tasmax_nor2, tasmin_nor2
 #'   - humidity (relative[%]), variable name = hurs_nor
@@ -141,67 +141,136 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #'   - radiation (short wave & long wave downwards) [W m-2], variable name = rsds_nor, rlds_nor,
 #'   - windspeed [m/s], variable name = wind
 #'
+#'   You need to pass the following hourly MetNo Variables to this function:
+#'
+#'    "precipitation_amount" (mm)
+#'    "air_temperature_2m" (K)
+#'    "relative_humidity_2m" (%)
+#'    "air_pressure_at_sea_level" (pa)
+#'    "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time" (W/m^2 s)*
+#'    "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time"  (W/m^2 s)**
+#'    "wind_speed_10m"
+#'
+#'    (*) "integral_of_Y_wrt_X" means int Y dX. The data variable should have an
+#'    axis for X specifying the limits of the integral as bounds. "wrt" means
+#'    with respect to. The surface called "surface" means the lower boundary of
+#'    the atmosphere. "shortwave" means shortwave radiation. Downwelling
+#'    radiation is radiation from above. It does not mean "net downward".
+#'    Surface downwelling shortwave is the sum of direct and diffuse solar
+#'    radiation incident on the surface, and is sometimes called "global
+#'    radiation". When thought of as being incident on a surface, a radiative
+#'    flux is sometimes called "irradiance". In addition, it is identical with
+#'    the quantity measured by a cosine-collector light-meter and sometimes
+#'    called "vector irradiance". In accordance with common usage in geophysical
+#'    disciplines, "flux" implies per unit area, called "flux density" in
+#'    physics.
+#'
+#'    (**) This variable has missing data for most of 2014, 2016, and 14 hours
+#'    in 2019 (see Known data issues)
+#'
+#'     source: https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset
+#'     Date Accessed: 06-10-2024
+#'
+#'
 #'
 #'
 #' @param in filepath to folder containing .nc input files
 #' @param out filepath to write CWatM input files
 #'
-#' @importFrom stringr str_split
+#' @importFrom stringr str_split str_remove
 #' @importFrom dplyr %>%
 #' @importFrom ncdf4 nc_open ncvar_get
 #' @importFrom abind abind
+#' @importFrom purrr map
 #'
 #' @return status code
 #' @export
 #'
 #' @examples
-# convert_to_cwatm <- function(inpath, outpath){
-#
-#   cwatm_vars <- c(
-#     "precipitation_amount",
-#     "air_temperature_2m",
-#     "relative_humidity_2m",
-#     "air_pressure_at_sea_level",
-#     "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
-#     "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time",
-#     "wind_speed_10m"
-#   )
-#
-#   filepath_full <- list.files(inpath, full.names = T)
-#   parsed <- (list.files(inpath) %>% stringr::str_split("_", simplify = T))[,6] %>% stringr::str_remove(".nc")
-#   date_only <- (parsed %>% stringr::str_split("T", simplify = T))[,1] %>% unique()
-#
-#   for (today in date_only) {
-#     print(today)
-#     today_file_index <- grepl(x = parsed, pattern = today) %>% which()
-#
-#     # if less than 24 files are found that means some are missing
-#     if(today_file_index %>% length() < 24){
-#       if(today == dplyr::first(date_only)){
-#         Warning("first day of download is incomplete, skipping this day")
-#         next()
-#       }
-#       else if(today == dplyr::last(date_only)){
-#         Warning("last day of download is incomplete, skipping this day")
-#         next()
-#       }
-#       stop("the following date is missing some files! [>> ", today, " <<]")
-#     }
-#
-#     files_nc <- map(filepath_full[today_file_index], nc_open)
-#
-#     for (variable in cwatm_vars) {
-#       print(variable)
-#       stack <- map(files_nc, varid = variable, .f = ncvar_get) %>% abind(along = 3)
-#     }
-#
-#   }
-#
-#   # years <- substr(parsed, 1,4)
-#   # months <- substr(parsed, 5,6)
-#   # days <- substr(parsed, 7,8)
-#
-# }
+convert_to_cwatm <- function(inpath, outpath){
+
+  # parse the files (to get the daily timestep)
+  filepath_full <- list.files(inpath, full.names = T)
+  parsed <- (list.files(inpath) %>% str_split("_", simplify = T))[,6] %>% str_remove(".nc")
+  date_only <- (parsed %>% str_split("T", simplify = T))[,1] %>% unique()
+
+  # for every day in the time range, upscale the data in the temporal dimension
+  # (hourly to daily)
+  for (today in date_only) {
+
+    # Create an output directory
+    dir.create(outpath)
+
+    print(today)
+    today_file_index <- grepl(x = parsed, pattern = today) %>% which()
+
+    # if less than 24 files are found that means some are missing
+    if(today_file_index %>% length() < 24){
+      if(today == dplyr::first(date_only)){
+        Warning("first day of download is incomplete, skipping this day")
+        next()
+      }
+      else if(today == dplyr::last(date_only)){
+        Warning("last day of download is incomplete, skipping this day")
+        next()
+      }
+      stop("the following date is missing some files! [>> ", today, " <<]")
+    }
+
+    # open all the files at once
+    files_nc <- map(filepath_full[today_file_index], nc_open)
+
+    # extract one to use as a template
+    template_nc <- files_nc[[1]]
+    ### loading the vars
+    # Why not vectorized? because different operations need to be performed on
+    # the various met variables.
+
+
+    pr_stack <- map(files_nc, varid = "precipitation_amount", .f = ncvar_get) %>% abind(along = 3)
+    ta_stack <- map(files_nc, varid = "air_temperature", .f = ncvar_get) %>% abind(along = 3)
+    rh_stack <- map(files_nc, varid = "relative_humidity", .f = ncvar_get) %>% abind(along = 3)
+    ap_stack <- map(files_nc, varid = "air_pressure_at_sea_level", .f = ncvar_get) %>% abind(along = 3)
+    ds_stack <- map(files_nc, varid = "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
+    dl_stack <- map(files_nc, varid = "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
+    ws_stack <- map(files_nc, varid = "wind_speed", .f = ncvar_get) %>% abind(along = 3)
+
+    # for precipitation: sum up along time dimension
+    tot_daily_precip <- rowSums(pr_stack, dims = 2)
+    # Temperature: take min max and average
+    t_max_daily <- apply(ta_stack, MARGIN = c(1, 2), FUN = max)
+    t_min_daily <- apply(ta_stack, MARGIN = c(1, 2), FUN = min)
+    t_avg_daily <- rowMeans(ta_stack, dims = 2)
+    # for RH: take the average
+    rh_avg_daily <- rh_stack %>% rowMeans(dims = 2)
+    # for surface pressure: average
+    sp_avg_daily <- ap_stack %>% rowMeans(dims = 2)
+    # for downwelling long and shortwave: sum and add?
+    ds_sum <- rowSums(ds_stack, dims = 2)
+    dl_sum <- rowSums(dl_stack, dims = 2)
+    tot_rad_daily <- dl_sum + ds_sum
+    # for windpseed: daily mean?
+    avg_ws_daily <- rowMeans(ws_stack, dims = 2)
+
+    nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
+    opened_nc <- nc_create(nc_fp, vars =template_nc$var)
 
 
 
+    cwatm_vars <- c(
+      "precipitation_amount",
+      "air_temperature",
+      "relative_humidity",
+      "air_pressure_at_sea_level",
+      "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+      "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time",
+      "wind_speed"
+    )
+
+
+
+    ncvar_put(nc = opened_nc, varid = cwatm_vars, vals = )
+
+
+  }
+}
