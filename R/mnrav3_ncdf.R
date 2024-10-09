@@ -187,19 +187,22 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #' @export
 #'
 #' @examples
-convert_to_cwatm <- function(inpath, outpath){
+c <- function(inpath, outpath){
+
+  # require(dplyr);require(purrr);require(abind);require(ncdf4);require(stringr)
 
   # parse the files (to get the daily timestep)
   filepath_full <- list.files(inpath, full.names = T)
   parsed <- (list.files(inpath) %>% str_split("_", simplify = T))[,6] %>% str_remove(".nc")
   date_only <- (parsed %>% str_split("T", simplify = T))[,1] %>% unique()
 
+  # Create an output directory
+  dir.create(outpath)
+
   # for every day in the time range, upscale the data in the temporal dimension
   # (hourly to daily)
   for (today in date_only) {
 
-    # Create an output directory
-    dir.create(outpath)
 
     print(today)
     today_file_index <- grepl(x = parsed, pattern = today) %>% which()
@@ -245,15 +248,11 @@ convert_to_cwatm <- function(inpath, outpath){
     rh_avg_daily <- rh_stack %>% rowMeans(dims = 2)
     # for surface pressure: average
     sp_avg_daily <- ap_stack %>% rowMeans(dims = 2)
-    # for downwelling long and shortwave: sum and add?
+    # for downwelling long and shortwave: sum
     ds_sum <- rowSums(ds_stack, dims = 2)
     dl_sum <- rowSums(dl_stack, dims = 2)
-    tot_rad_daily <- dl_sum + ds_sum
     # for windpseed: daily mean?
     avg_ws_daily <- rowMeans(ws_stack, dims = 2)
-
-    nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
-    opened_nc <- nc_create(nc_fp, vars =template_nc$var)
 
 
 
@@ -269,7 +268,34 @@ convert_to_cwatm <- function(inpath, outpath){
 
 
 
+    cwatm_vars <- c("pr_nor2", "tas_nor2", "tasmax_nor2", "tasmin_nor2", "hurs_nor", "ps_nor", "rsds_nor", "rlds_nor", "wind")
+
+
+    for (cwatmvar in cwatm_vars) {
+
+
+
+      nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
+      opened_nc <- nc_create(nc_fp, vars =template_nc$var)
+    }
+    nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
+    opened_nc <- nc_create(nc_fp, vars =template_nc$var)
+
+
+
+    #'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
+    #'   - temperature: max, min & average [K], variable name = tas_nor2, tasmax_nor2, tasmin_nor2
+    #'   - humidity (relative[%]), variable name = hurs_nor
+    #'   - surface pressure [Pa], variable name = ps_nor
+    #'   - radiation (short wave & long wave downwards) [W m-2], variable name = rsds_nor, rlds_nor,
+    #'   - windspeed [m/s], variable name = wind
+    #'
+    map(cwatm_vars, nc = opened_nc, vals = cwatm_vals, ncvar_put)
+
     ncvar_put(nc = opened_nc, varid = cwatm_vars, vals = )
+
+
+    # Questions:
 
 
   }
