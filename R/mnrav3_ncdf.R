@@ -11,7 +11,7 @@
 #'
 #' @param url urls to download
 #' @param savefiles paths to save
-#' @importFrom ncdf4 ncdim_def ncvar_def ncvar_get ncatt_get ncvar_put nc_close nc_create
+#' @importFrom ncdf4 ncdim_def ncvar_def ncvar_get ncatt_get ncvar_put nc_close nc_create ncvar_add
 #' @importFrom crayon underline white red yellow underline bgGreen bgCyan bold magenta cyan
 #' @importFrom dplyr  %>%
 #' @return path to downloaded files
@@ -178,18 +178,20 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #'
 #' @param in filepath to folder containing .nc input files
 #' @param out filepath to write CWatM input files
+#' @param verbose print status?
 #'
 #' @importFrom stringr str_split str_remove
 #' @importFrom dplyr %>%
-#' @importFrom ncdf4 nc_open ncvar_get
+#' @importFrom ncdf4 nc_open ncvar_get ncvar_add ncvar_put
 #' @importFrom abind abind
 #' @importFrom purrr map map2
+#' @importFrom crayon underline yellow
 #'
 #' @return status code
 #' @export
 #'
 #'
-cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath){
+cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
 
   # parse the files (to get the daily timestep)
   filepath_full <- list.files(inpath, full.names = T)
@@ -269,6 +271,9 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath){
     cwatm_units <- c("Kg m-2 s-1", "K", "K", "K", "-", "Pa", "W m-2", "W m-2", "m s-1")
     cwatm_data <- list(pr_nor2, tas_nor2, tasmax_nor2, tasmin_nor2, hurs_nor, ps_nor, rsds_nor, rlds_nor, wind)
 
+
+    if(verbose){cat("\r", yellow("converting hourly ncdf4 to daily "), underline(paste0(today)), sep = "")}
+
     # create the daily file with exisitng defs and dims
     nc_fp <- paste0(outpath, "/mnrv3_", today, ".nc")
     opened_nc <- nc_create(nc_fp, vars = template_nc$var)
@@ -276,9 +281,9 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath){
     # iterate over all the new vars to add them
     for (i in c(1:length(cwatm_vars))) {
       # add the definition
-      opened_nc<-ncdf4::ncvar_add(nc = opened_nc, v = def_list[[i]])
+      opened_nc <- ncvar_add(nc = opened_nc, v = def_list[[i]])
       # add the data
-      ncdf4::ncvar_put(opened_nc, cwatm_vars[i],cwatm_data[[i]])
+      ncvar_put(opened_nc, cwatm_vars[i],cwatm_data[[i]])
     }
 
     nc_close(opened_nc)

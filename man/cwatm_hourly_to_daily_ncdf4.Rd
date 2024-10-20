@@ -4,9 +4,11 @@
 \alias{cwatm_hourly_to_daily_ncdf4}
 \title{converts parameters to daily resolution}
 \usage{
-cwatm_hourly_to_daily_ncdf4(inpath, outpath)
+cwatm_hourly_to_daily_ncdf4(inpath, outpath, verbose = FALSE)
 }
 \arguments{
+\item{verbose}{print status?}
+
 \item{in}{filepath to folder containing .nc input files}
 
 \item{out}{filepath to write CWatM input files}
