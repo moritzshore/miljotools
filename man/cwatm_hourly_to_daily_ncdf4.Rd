@@ -7,11 +7,11 @@
 cwatm_hourly_to_daily_ncdf4(inpath, outpath, verbose = FALSE)
 }
 \arguments{
+\item{inpath}{filepath to folder containing .nc input files}
+
+\item{outpath}{filepath to write CWatM input files}
+
 \item{verbose}{print status?}
-
-\item{in}{filepath to folder containing .nc input files}
-
-\item{out}{filepath to write CWatM input files}
 }
 \value{
 status code
@@ -22,12 +22,12 @@ NOTE this currently only works with hard coded variables.
 \details{
 For CWatM climate variables required in netcdf format:
 \itemize{
-\item precipitation \link{Kg m-2 s-1}, variable name = pr_nor2
-\item temperature: max, min & average \link{K}, variable name = tas_nor2, tasmax_nor2, tasmin_nor2
-\item humidity (relative\link{\%}), variable name = hurs_nor
-\item surface pressure \link{Pa}, variable name = ps_nor
-\item radiation (short wave & long wave downwards) \link{W m-2}, variable name = rsds_nor, rlds_nor,
-\item windspeed \link{m/s}, variable name = wind
+\item precipitation (Kg m-2 s-1), variable name = pr_nor2
+\item temperature: max, min & average (K), variable name = tas_nor2, tasmax_nor2, tasmin_nor2
+\item humidity (relative \%), variable name = hurs_nor
+\item surface pressure (Pa), variable name = ps_nor
+\item radiation (short wave & long wave downwards) (W m-2), variable name = rsds_nor, rlds_nor,
+\item windspeed (m/s), variable name = wind
 }
 
 You need to pass the following hourly MetNo Variables to this function:

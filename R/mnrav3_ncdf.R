@@ -136,12 +136,12 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #' NOTE this currently only works with hard coded variables.
 #'
 #' For CWatM climate variables required in netcdf format:
-#'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
-#'   - temperature: max, min & average [K], variable name = tas_nor2, tasmax_nor2, tasmin_nor2
-#'   - humidity (relative[%]), variable name = hurs_nor
-#'   - surface pressure [Pa], variable name = ps_nor
-#'   - radiation (short wave & long wave downwards) [W m-2], variable name = rsds_nor, rlds_nor,
-#'   - windspeed [m/s], variable name = wind
+#'   - precipitation (Kg m-2 s-1), variable name = pr_nor2
+#'   - temperature: max, min & average (K), variable name = tas_nor2, tasmax_nor2, tasmin_nor2
+#'   - humidity (relative %), variable name = hurs_nor
+#'   - surface pressure (Pa), variable name = ps_nor
+#'   - radiation (short wave & long wave downwards) (W m-2), variable name = rsds_nor, rlds_nor,
+#'   - windspeed (m/s), variable name = wind
 #'
 #'   You need to pass the following hourly MetNo Variables to this function:
 #'
@@ -176,9 +176,9 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #'
 #'
 #'
-#' @param in filepath to folder containing .nc input files
-#' @param out filepath to write CWatM input files
 #' @param verbose print status?
+#' @param inpath filepath to folder containing .nc input files
+#' @param outpath filepath to write CWatM input files
 #'
 #' @importFrom stringr str_split str_remove
 #' @importFrom dplyr %>%
