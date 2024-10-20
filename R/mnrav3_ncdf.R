@@ -131,7 +131,9 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
   }
 
 
-#' converts parameters to CWATM format
+#' converts parameters to daily resolution
+#'
+#' NOTE this currently only works with hard coded variables.
 #'
 #' For CWatM climate variables required in netcdf format:
 #'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
@@ -181,15 +183,13 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #' @importFrom dplyr %>%
 #' @importFrom ncdf4 nc_open ncvar_get
 #' @importFrom abind abind
-#' @importFrom purrr map
+#' @importFrom purrr map map2
 #'
 #' @return status code
 #' @export
 #'
-#' @examples
-convert_to_cwatm <- function(inpath, outpath){
-
-  # require(dplyr);require(purrr);require(abind);require(ncdf4);require(stringr)
+#'
+cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath){
 
   # parse the files (to get the daily timestep)
   filepath_full <- list.files(inpath, full.names = T)
@@ -202,19 +202,17 @@ convert_to_cwatm <- function(inpath, outpath){
   # for every day in the time range, upscale the data in the temporal dimension
   # (hourly to daily)
   for (today in date_only) {
-
-
-    print(today)
+    #print(today)
     today_file_index <- grepl(x = parsed, pattern = today) %>% which()
 
     # if less than 24 files are found that means some are missing
     if(today_file_index %>% length() < 24){
       if(today == dplyr::first(date_only)){
-        Warning("first day of download is incomplete, skipping this day")
+        warning("first day of download is incomplete, skipping this day")
         next()
       }
       else if(today == dplyr::last(date_only)){
-        Warning("last day of download is incomplete, skipping this day")
+        warning("last day of download is incomplete, skipping this day")
         next()
       }
       stop("the following date is missing some files! [>> ", today, " <<]")
@@ -229,7 +227,7 @@ convert_to_cwatm <- function(inpath, outpath){
     # Why not vectorized? because different operations need to be performed on
     # the various met variables.
 
-
+    # TODO: handling for missing solrad.
     pr_stack <- map(files_nc, varid = "precipitation_amount", .f = ncvar_get) %>% abind(along = 3)
     ta_stack <- map(files_nc, varid = "air_temperature", .f = ncvar_get) %>% abind(along = 3)
     rh_stack <- map(files_nc, varid = "relative_humidity", .f = ncvar_get) %>% abind(along = 3)
@@ -239,66 +237,122 @@ convert_to_cwatm <- function(inpath, outpath){
     ws_stack <- map(files_nc, varid = "wind_speed", .f = ncvar_get) %>% abind(along = 3)
 
     # for precipitation: sum up along time dimension
-    tot_daily_precip <- rowSums(pr_stack, dims = 2)
+    pr_nor2 <- rowSums(pr_stack, dims = 2)
     # Temperature: take min max and average
-    t_max_daily <- apply(ta_stack, MARGIN = c(1, 2), FUN = max)
-    t_min_daily <- apply(ta_stack, MARGIN = c(1, 2), FUN = min)
-    t_avg_daily <- rowMeans(ta_stack, dims = 2)
+    tasmax_nor2 <- apply(ta_stack, MARGIN = c(1, 2), FUN = max)
+    tasmin_nor2 <- apply(ta_stack, MARGIN = c(1, 2), FUN = min)
+    tas_nor2 <- rowMeans(ta_stack, dims = 2)
     # for RH: take the average
-    rh_avg_daily <- rh_stack %>% rowMeans(dims = 2)
+    hurs_nor <- rh_stack %>% rowMeans(dims = 2)
     # for surface pressure: average
-    sp_avg_daily <- ap_stack %>% rowMeans(dims = 2)
-    # for downwelling long and shortwave: sum
-    ds_sum <- rowSums(ds_stack, dims = 2)
-    dl_sum <- rowSums(dl_stack, dims = 2)
-    # for windpseed: daily mean?
-    avg_ws_daily <- rowMeans(ws_stack, dims = 2)
+    ps_nor <- ap_stack %>% rowMeans(dims = 2)
+    # for down welling long and shortwave: sum
+    rsds_nor <- rowSums(ds_stack, dims = 2)
+    rlds_nor <- rowSums(dl_stack, dims = 2)
+    # for windspeed: daily mean?
+    wind <- rowMeans(ws_stack, dims = 2)
 
+    # define new NC definitions for the cwatm parameters
+    pr_nor2_def <- ncvar_def("pr_nor2", units = "Kg m-2 s-1", dim = template_nc$dim)
+    tas_nor2_def <- ncvar_def("tas_nor2", units = "K", dim = template_nc$dim)
+    tasmax_nor2_def <- ncvar_def("tasmax_nor2", units = "K", dim = template_nc$dim)
+    tasmin_nor2_def <- ncvar_def("tasmin_nor2", units = "K", dim = template_nc$dim)
+    hurs_nor_def <- ncvar_def("hurs_nor", units = "-", dim = template_nc$dim)
+    ps_nor_def <- ncvar_def("ps_nor", units = "Pa", dim = template_nc$dim)
+    rsds_nor_def <- ncvar_def("rsds_nor", units = "W m-2", dim = template_nc$dim)
+    rlds_nor_def <- ncvar_def("rlds_nor", units = "W m-2", dim = template_nc$dim)
+    wind_def <- ncvar_def("wind", units = "m s-1", dim = template_nc$dim)
 
-
-    cwatm_vars <- c(
-      "precipitation_amount",
-      "air_temperature",
-      "relative_humidity",
-      "air_pressure_at_sea_level",
-      "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
-      "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time",
-      "wind_speed"
-    )
-
-
-
+    # create data lists to iterate over (could be purrr'ed)
+    def_list <- list(pr_nor2_def, tas_nor2_def, tasmax_nor2_def, tasmin_nor2_def, hurs_nor_def, ps_nor_def, rsds_nor_def, rlds_nor_def,wind_def)
     cwatm_vars <- c("pr_nor2", "tas_nor2", "tasmax_nor2", "tasmin_nor2", "hurs_nor", "ps_nor", "rsds_nor", "rlds_nor", "wind")
+    cwatm_units <- c("Kg m-2 s-1", "K", "K", "K", "-", "Pa", "W m-2", "W m-2", "m s-1")
+    cwatm_data <- list(pr_nor2, tas_nor2, tasmax_nor2, tasmin_nor2, hurs_nor, ps_nor, rsds_nor, rlds_nor, wind)
 
+    # create the daily file with exisitng defs and dims
+    nc_fp <- paste0(outpath, "/mnrv3_", today, ".nc")
+    opened_nc <- nc_create(nc_fp, vars = template_nc$var)
 
-    for (cwatmvar in cwatm_vars) {
-
-
-
-      nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
-      opened_nc <- nc_create(nc_fp, vars =template_nc$var)
+    # iterate over all the new vars to add them
+    for (i in c(1:length(cwatm_vars))) {
+      # add the definition
+      opened_nc<-ncdf4::ncvar_add(nc = opened_nc, v = def_list[[i]])
+      # add the data
+      ncdf4::ncvar_put(opened_nc, cwatm_vars[i],cwatm_data[[i]])
     }
-    nc_fp <- paste0(outpath, "/temp_cwatm_prep_", today, ".nc")
-    opened_nc <- nc_create(nc_fp, vars =template_nc$var)
 
-
-
-    #'   - precipitation [Kg m-2 s-1], variable name = pr_nor2
-    #'   - temperature: max, min & average [K], variable name = tas_nor2, tasmax_nor2, tasmin_nor2
-    #'   - humidity (relative[%]), variable name = hurs_nor
-    #'   - surface pressure [Pa], variable name = ps_nor
-    #'   - radiation (short wave & long wave downwards) [W m-2], variable name = rsds_nor, rlds_nor,
-    #'   - windspeed [m/s], variable name = wind
-    #'
-    map(cwatm_vars, nc = opened_nc, vals = cwatm_vals, ncvar_put)
-
-    ncvar_put(nc = opened_nc, varid = cwatm_vars, vals = )
-
-
-    # Questions:
-
-
+    nc_close(opened_nc)
   }
+  return(outpath)
+}
+
+
+#' Convert to CWatM format
+#'
+#' This function takes daily files created by `mnrv3_hourly_to_daily_ncdf4` and
+#' converts them into the format required for CWatM
+#'
+#' @param input location of files generated by `mnrv3_hourly_to_daily_ncdf4`
+#' @param output location of files to be generated by this function.
+#'
+#' @return the path of generated files
+#'
+#' @importFrom stringr str_remove_all str_split
+#' @importFrom purrr map map2
+#' @importFrom ncdf4 nc_open ncvar_get ncdim_def ncvar_def nc_create ncvar_put nc_close
+#' @importFrom abind abind
+#' @importFrom dplyr %>%
+#'
+#' @export
+#'
+#'
+convert_to_cwatm <- function(input, output){
+
+  dir.create(output)
+  # determine the correct format for the time dimension
+  # "days since 1901-01-01 00:00:00.0"
+  # UNSTABLE!
+  daily_filenames <- (list.files(input) %>% str_split(pattern = "_", simplify = T))[,2] %>% str_remove_all(".nc")
+  dateformat <- paste0(substring(daily_filenames, 1,4), "-", substring(daily_filenames, 5,6), "-", substring(daily_filenames, 7,8)) %>% as.Date()
+  dayssince1901 <- (dateformat-as.Date("1901-01-01")) %>% as.numeric()
+
+  # load in all the nc files
+  daily_files <- map(list.files(input, full.names = T), nc_open)
+
+  # use first file as template
+  nc_template <- daily_files[[1]]
+
+  # get dimensions
+  lat <- ncvar_get(nc_template, "y")
+  lon <- ncvar_get(nc_template, "x")
+  ydim <- dim(lat)
+  xdim <- dim(lon)
+
+  # defining dimensions to match example file
+  timedef <- ncdim_def(name = "time", units = "days since 1901-01-01 00:00:00.0",
+    vals = dayssince1901, unlim = F, calendar = "proleptic_gregorian")
+
+  xdef <- ncdim_def(name = "y", units = "meters",longname = "projection_y_coordinate",vals = 1:ydim)
+  ydef <- ncdim_def(name = "x", units = "meters",longname = "projection_x_coordinate", vals =1:xdim)
+
+  # define UTMS
+  lat_vals <- ncvar_def("lat_vals", units = "deg", dim = list(ydef,xdef, timedef))
+  lon_vals <- ncvar_def("lon_vals", units = "deg", dim = list(ydef,xdef, timedef))
+
+  cwatm_definitions <- map2(cwatm_vars, cwatm_units, ~ ncvar_def(name = .x, units = .y, dim = list(ydef,xdef, timedef)))
+
+
+  # create, extract,  write, close data to new NC files per variable
+  for (i in c(1:length(cwatm_vars))) {
+   opened_nc <- nc_create(filename = paste0(output,cwatm_vars[i],".nc"), vars = list(lat_vals, lon_vals, cwatm_definitions[[i]]))
+   data_extracted <-lapply(daily_files, varid = cwatm_vars[i], ncvar_get) %>% abind(along = 3)
+   ncvar_put(opened_nc, varid = cwatm_vars[i], vals = data_extracted)
+   nc_close(opened_nc)
+  }
+
+  # close daily files.
+  map(daily_files, nc_close)
+  return(output)
 }
 
 
