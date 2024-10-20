@@ -344,6 +344,7 @@ convert_to_cwatm <- function(input, output){
   lat_vals <- ncvar_def("lat_vals", units = "deg", dim = list(ydef,xdef, timedef))
   lon_vals <- ncvar_def("lon_vals", units = "deg", dim = list(ydef,xdef, timedef))
 
+  # this gives notes in RMD check
   cwatm_definitions <- map2(cwatm_vars, cwatm_units, ~ ncvar_def(name = .x, units = .y, dim = list(ydef,xdef, timedef)))
 
 
