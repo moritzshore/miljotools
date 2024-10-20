@@ -319,7 +319,7 @@ get_metno_reanalysis3 <-
                var_q)
 
       # create the daterange
-      daterange <- seq(as.POSIXct(fromdate, tz = "CET"), as.POSIXct(todate, tz = "CET"), by="hour")
+      daterange <- seq(as_datetime(fromdate), as_datetime(todate), by="hour")
       years <- lubridate::year(daterange)
       months <- lubridate::month(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
       days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
