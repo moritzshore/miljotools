@@ -187,7 +187,7 @@ read_write_ncdf <- function(url, savefiles, directory, foldername, verbose = FAL
 #' @export
 #'
 #' @examples
-c <- function(inpath, outpath){
+convert_to_cwatm <- function(inpath, outpath){
 
   # require(dplyr);require(purrr);require(abind);require(ncdf4);require(stringr)
 
@@ -300,3 +300,23 @@ c <- function(inpath, outpath){
 
   }
 }
+
+
+
+
+# TODO: add this crap to the processing function (missing longrad)
+
+# if the downloaded file worked, then we need to add an empty frame of NA
+# values here, by downloading a new file from a working year (2021), and
+# setting the frame to NA and adding it to the downloaded NC file
+# x1 <- split[1] %>% stringr::str_split(pattern = "\\?x", simplify = TRUE)
+# good_base_file = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2021/03/03/met_analysis_1_0km_nordic_20210303T13Z.nc"
+# good_base_link = paste0(good_base_file, "?x", x1[2],",", (split[2:5] %>% paste(collapse = ",")), ",", split[longwave_index])
+#
+# na_frame <- nc_open(good_base_link)
+#
+# na_frame$var$integral_of_surface_downwelling_longwave_flux_in_air_wrt_time
+#
+# new_nc_file
+#
+# ncdf4::ncvar_add(new_nc_file, na_frame$var$integral_of_surface_downwelling_longwave_flux_in_air_wrt_time)
