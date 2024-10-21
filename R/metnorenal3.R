@@ -1281,6 +1281,7 @@ nc_open_retry <- function(link) {
     return(nc_file)
   } else{
     mt_print(TRUE, "nc_open_retry", "retrying donwload with out longwave radiation")
+
     # https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters
     # find the location in the link where longwave radiation is, and remove it,
     # then try to open the file wihtout this variable.
@@ -1300,6 +1301,7 @@ nc_open_retry <- function(link) {
     return(new_nc_file)
   } else{
     mt_print(TRUE, "nc_open_retry", "retrying donwload..")
+
     attempt = 1
     while ((attempt < 10) & (length(nc_file) == 1)) {
       Sys.sleep(5)

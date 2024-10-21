@@ -204,6 +204,7 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
   # for every day in the time range, upscale the data in the temporal dimension
   # (hourly to daily)
   cati = 0
+  longwave_missing_counter = 0
   for (today in date_only) {
     cati = cati+1
     #print(today)
@@ -231,14 +232,35 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     # Why not vectorized? because different operations need to be performed on
     # the various met variables.
 
-    # TODO: handling for missing solrad.
+    # TODO: generalize this
     pr_stack <- map(files_nc, varid = "precipitation_amount", .f = ncvar_get) %>% abind(along = 3)
     ta_stack <- map(files_nc, varid = "air_temperature", .f = ncvar_get) %>% abind(along = 3)
     rh_stack <- map(files_nc, varid = "relative_humidity", .f = ncvar_get) %>% abind(along = 3)
     ap_stack <- map(files_nc, varid = "air_pressure_at_sea_level", .f = ncvar_get) %>% abind(along = 3)
     ds_stack <- map(files_nc, varid = "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
-    dl_stack <- map(files_nc, varid = "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
     ws_stack <- map(files_nc, varid = "wind_speed", .f = ncvar_get) %>% abind(along = 3)
+
+
+    # Special routine for when the dataset does not include longwave radiation:
+    # First, extract a big list of all the variables in each timestep, then
+    # check if in the 24hrs, every file contains longwave radiation. If it does
+    # continue as normal, if not assign NA values to the matrix.
+    get_nc_vars_vec <- function(nc){nc$var %>% names() %>% return()}
+    varmatrix<-lapply(files_nc, get_nc_vars_vec)
+    # if all hours of the day have data for longwave, then create a data cube
+    # it and sum it together. otherwise, extract the dimension of the data and
+    # assign it to NA.
+    if (grepl(x = varmatrix, pattern = "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time") %>% all()) {
+      dl_stack <- map(files_nc, varid = "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
+      rlds_nor <- rowSums(dl_stack, dims = 2)
+    } else{
+      # special behavior if longwave is not present
+      longwave_missing_counter = longwave_missing_counter+1
+      temp_stack <- map(files_nc, varid = "latitude", .f = ncvar_get) %>% abind(along = 3)
+      rlds_nor <- matrix(NA,
+                         nrow = dim(temp_stack)[1],
+                         ncol = dim(temp_stack)[2])
+    }
 
     # close all the nc file
     map(files_nc, nc_close)
@@ -255,7 +277,6 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     ps_nor <- ap_stack %>% rowMeans(dims = 2)
     # for down welling long and shortwave: sum
     rsds_nor <- rowSums(ds_stack, dims = 2)
-    rlds_nor <- rowSums(dl_stack, dims = 2)
     # for windspeed: daily mean?
     wind <- rowMeans(ws_stack, dims = 2)
 
@@ -293,8 +314,12 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
 
     nc_close(opened_nc)
   }
+  cat("\n")
   mt_print(verbose, "cwatm_hourly_to_daily_ncdf4","finished!")
 
+  if(longwave_missing_counter>0){
+    warning(longwave_missing_counter, " days had missing longwave radiation, NA raster has been added to these frames. ")
+  }
   return(outpath)
 }
 
@@ -320,7 +345,8 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
 #'
 #'
 convert_to_cwatm <- function(input, output, verbose = FALSE){
-
+  cwatm_vars <- c("pr_nor2", "tas_nor2", "tasmax_nor2", "tasmin_nor2", "hurs_nor", "ps_nor", "rsds_nor", "rlds_nor", "wind")
+  cwatm_units <- c("Kg m-2 s-1", "K", "K", "K", "-", "Pa", "W m-2", "W m-2", "m s-1")
   mt_print(verbose, "convert_to_cwatm", "creating output directory...")
 
   dir.create(output)
@@ -361,7 +387,6 @@ convert_to_cwatm <- function(input, output, verbose = FALSE){
   lat_vals <- ncvar_def("lat_vals", units = "deg", dim = list(ydef,xdef, timedef))
   lon_vals <- ncvar_def("lon_vals", units = "deg", dim = list(ydef,xdef, timedef))
 
-  # this gives notes in RMD check
   cwatm_definitions <- map2(cwatm_vars, cwatm_units, ~ ncvar_def(name = .x, units = .y, dim = list(ydef,xdef, timedef)))
 
 
@@ -376,6 +401,7 @@ convert_to_cwatm <- function(input, output, verbose = FALSE){
 
   # close daily files.
   mt_print(verbose, "convert_to_cwatm","closing...", paste(length(daily_files), "files"))
+  cat("\n")
   map(daily_files, nc_close)
   mt_print(verbose, "convert_to_cwatm","finished!")
 
