@@ -1,3 +1,18 @@
+#' custom print function for miljotools
+#'
+#' @param verbose print or not
+#' @param function_name function name string
+#' @param text  string 1
+#' @param text2  string 2
+#' @param rflag in place replacement flag
+#'
+#' @return nothing
+#' @keywords internal
+#'
+#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline
+#'
+#'
+#'
 mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) {
   miljotheme <- bold$bgGreen
   tools_theme <- bold$italic$bgBlue
