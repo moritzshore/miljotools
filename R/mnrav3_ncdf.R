@@ -206,6 +206,7 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
   cati = 0
   longwave_missing_counter = 0
   for (today in date_only) {
+    #today = date_only[1]
     cati = cati+1
     #print(today)
     today_file_index <- grepl(x = parsed, pattern = today) %>% which()
@@ -239,6 +240,9 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     ap_stack <- map(files_nc, varid = "air_pressure_at_sea_level", .f = ncvar_get) %>% abind(along = 3)
     ds_stack <- map(files_nc, varid = "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", .f = ncvar_get) %>% abind(along = 3)
     ws_stack <- map(files_nc, varid = "wind_speed", .f = ncvar_get) %>% abind(along = 3)
+
+    lat_stack <- map(files_nc, varid = "latitude", .f = ncvar_get) %>% abind(along = 3)
+    lon_stack <- map(files_nc, varid = "longitude", .f = ncvar_get) %>% abind(along = 3)
 
 
     # Special routine for when the dataset does not include longwave radiation:
@@ -278,9 +282,13 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     # for down welling long and shortwave: sum
     rsds_nor <- rowSums(ds_stack, dims = 2)
     # for windspeed: daily mean?
+
+    lat_slice <- lat_stack[,,1]
+    lon_slice <- lon_stack[,,1]
+
     wind <- rowMeans(ws_stack, dims = 2)
 
-    # define new NC definitions for the cwatm parameters
+    # define new NC definitions for the variables
     pr_nor2_def <- ncvar_def("pr_nor2", units = "Kg m-2 s-1", dim = template_nc$dim)
     tas_nor2_def <- ncvar_def("tas_nor2", units = "K", dim = template_nc$dim)
     tasmax_nor2_def <- ncvar_def("tasmax_nor2", units = "K", dim = template_nc$dim)
@@ -290,6 +298,9 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     rsds_nor_def <- ncvar_def("rsds_nor", units = "W m-2", dim = template_nc$dim)
     rlds_nor_def <- ncvar_def("rlds_nor", units = "W m-2", dim = template_nc$dim)
     wind_def <- ncvar_def("wind", units = "m s-1", dim = template_nc$dim)
+
+
+
 
     # create data lists to iterate over (could be purrr'ed)
     def_list <- list(pr_nor2_def, tas_nor2_def, tasmax_nor2_def, tasmin_nor2_def, hurs_nor_def, ps_nor_def, rsds_nor_def, rlds_nor_def,wind_def)
@@ -312,6 +323,16 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
       ncvar_put(opened_nc, cwatm_vars[i],cwatm_data[[i]])
     }
 
+    # add the lat and long data
+
+    # define lat and long
+    # TODO, also do the correct projection here?
+    lat_vals <- template_nc %>% ncvar_get("latitude")
+    long_vals <- template_nc %>% ncvar_get("longitude")
+    ncvar_put(opened_nc,varid = "latitude",vals = lat_slice)
+    ncvar_put(opened_nc,varid = "longitude",vals = lon_slice)
+
+    # close the file and move on to next day
     nc_close(opened_nc)
   }
   cat("\n")
