@@ -328,7 +328,7 @@ cwatm_hourly_to_daily_ncdf4 <- function(inpath, outpath, verbose = FALSE){
     # define lat and long
     # TODO, also do the correct projection here?
     lat_vals <- template_nc %>% ncvar_get("latitude")
-    long_vals <- template_nc %>% ncvar_get("longitude")
+    lon_vals <- template_nc %>% ncvar_get("longitude")
     ncvar_put(opened_nc,varid = "latitude",vals = lat_slice)
     ncvar_put(opened_nc,varid = "longitude",vals = lon_slice)
 
@@ -392,10 +392,10 @@ convert_to_cwatm <- function(input, output, verbose = FALSE){
   mt_print(verbose, "convert_to_cwatm", "defining dimensions...")
 
   # get dimensions
-  lat <- ncvar_get(nc_template, "y")
-  lon <- ncvar_get(nc_template, "x")
-  ydim <- dim(lat)
-  xdim <- dim(lon)
+  x <- ncvar_get(nc_template, "y")
+  y <- ncvar_get(nc_template, "x")
+  ydim <- dim(x)
+  xdim <- dim(y)
 
   # defining dimensions to match example file
   timedef <- ncdim_def(name = "time", units = "days since 1901-01-01 00:00:00.0",
@@ -404,9 +404,13 @@ convert_to_cwatm <- function(input, output, verbose = FALSE){
   xdef <- ncdim_def(name = "y", units = "meters",longname = "projection_y_coordinate",vals = 1:ydim)
   ydef <- ncdim_def(name = "x", units = "meters",longname = "projection_x_coordinate", vals =1:xdim)
 
-  # define UTMS
-  lat_vals <- ncvar_def("lat_vals", units = "deg", dim = list(ydef,xdef, timedef))
-  lon_vals <- ncvar_def("lon_vals", units = "deg", dim = list(ydef,xdef, timedef))
+  # define geographic coordinates
+  lat_def <- ncvar_def("lat_vals", units = "deg", dim = list(ydef,xdef))
+  lon_def <- ncvar_def("lon_vals", units = "deg", dim = list(ydef,xdef))
+
+  # get geographic coordinates
+  lat_vals <- ncvar_get(nc_template, "latitude")
+  lon_vals <- ncvar_get(nc_template, "longitude")
 
   cwatm_definitions <- map2(cwatm_vars, cwatm_units, ~ ncvar_def(name = .x, units = .y, dim = list(ydef,xdef, timedef)))
 
@@ -414,9 +418,13 @@ convert_to_cwatm <- function(input, output, verbose = FALSE){
   # create, extract,  write, close data to new NC files per variable
   for (i in c(1:length(cwatm_vars))) {
     mt_print(verbose, "convert_to_cwatm","creating...",cwatm_vars[i])
-   opened_nc <- nc_create(filename = paste0(output,"/", cwatm_vars[i],".nc"), vars = list(lat_vals, lon_vals, cwatm_definitions[[i]]))
+   opened_nc <- nc_create(filename = paste0(output,"/", cwatm_vars[i],".nc"), vars = list(lat_def, lon_def, cwatm_definitions[[i]]))
    data_extracted <-lapply(daily_files, varid = cwatm_vars[i], ncvar_get) %>% abind(along = 3)
    ncvar_put(opened_nc, varid = cwatm_vars[i], vals = data_extracted)
+   # putlatlon
+   ncvar_put(opened_nc, varid = "lat_vals", vals = lat_vals)
+   ncvar_put(opened_nc, varid = "lon_vals", vals = lon_vals)
+
    nc_close(opened_nc)
   }
 
