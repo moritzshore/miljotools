@@ -1,0 +1,36 @@
+---
+title: Thermopluviograms"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Thermopluviograms}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+bibliography: ../vignettes/references.bib
+csl: ../vignettes/apa-5th-edition.csl
+
+---
+
+Author:  Moritz Shore
+Date:  01.06.2022
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include=FALSE}
+library(miljotools)
+```
+
+## Introduction
+
+This tutorial will show you how to create Thermopluviograms and Extreme rainfall plots using climate data from the norwegian climate service and observed data from SeNorge. To get started, we will grab data from SeNorge.
+
+### SeNorge
+
+1. Go to senorge.no
