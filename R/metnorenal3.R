@@ -81,9 +81,11 @@
 #' @param area_buffer desired buffer around the provided shapefile (in meters, default 1500)
 #' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers. (see help page for more details)
 #' @param preview generate graphs showing previews of data download? (boolean)
+#' @param ncdf Set this parameter to be `TRUE` if you would like the downloaded files to remain in NCDF format (*.nc).
+#' @param continue if `ncdf` is `TRUE`, then you can pass a folder name (in passed directory) here to continue an aborted download session.
 #' @importFrom abind abind
 #' @importFrom dplyr nth mutate %>% tibble
-#' @importFrom lubridate year month day hour
+#' @importFrom lubridate year month day hour as_datetime
 #' @importFrom mapview mapview
 #' @importFrom ncdf4 nc_open ncvar_get nc_close
 #' @importFrom purrr map
@@ -123,42 +125,10 @@ get_metno_reanalysis3 <-
            mn_variables = NULL,
            area_buffer = 1500,
            grid_resolution = NULL,
-           preview = TRUE
+           preview = TRUE,
+           ncdf = FALSE,
+           continue = NULL
   ){
-
-    # supporting functions ----
-    nc_open_retry <- function(link) {
-
-      nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
-                          error = function(cond){
-                            warning("failed..")
-                            return(NA)
-                          })
-
-      if(nc_file %>% length() > 1){
-        return(nc_file)
-      } else{
-        print("retry download..")
-        attempt = 1
-        while((attempt < 10) & (length(nc_file) == 1)){
-          Sys.sleep(5)
-          attempt = attempt + 1
-          nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
-                              error = function(cond){
-                                warning("failed..", cond, "retry!")
-                                return(NA)
-                              })
-
-        }
-
-        if(length(nc_file) > 1){
-          print("connection re-established!")
-          return(nc_file)
-        }else{
-          stop("download failed after 10 attempts.")
-        }
-      }
-    }
 
     get_coord_window <- function(area_path, area_buffer, preview){
 
@@ -349,7 +319,7 @@ get_metno_reanalysis3 <-
                var_q)
 
       # create the daterange
-      daterange <- seq(as.POSIXct(fromdate, tz = "CET"), as.POSIXct(todate, tz = "CET"), by="hour")
+      daterange <- seq(as_datetime(fromdate), as_datetime(todate), by="hour")
       years <- lubridate::year(daterange)
       months <- lubridate::month(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
       days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
@@ -410,19 +380,34 @@ get_metno_reanalysis3 <-
     }
 
     download_ncfiles <- function(directory, foldername, full_urls, filenames,
-                                 years, mn_variables, geometry_type) {
+                                 years, mn_variables, geometry_type,
+                                 ncdf = FALSE, verbose = FALSE) {
 
-        # download batches per year
-        yearbatch <- split(full_urls, f = years)
-        filebatch <- split(filenames, f = years)
+      ### This is where the switch to netcdf download should take place
+      ### if the user opts for it! (ncdf4)
+      if(ncdf){
+        savefiles = paste(directory, foldername, filenames, sep = "/")
+        read_write_ncdf(url = full_urls, savefiles = savefiles,
+                        foldername = foldername, directory = directory,
+                        verbose = preview)
+        return(directory)
+      }
 
-        # set list names
-        years_string <- years %>% unique() %>% sort()
-        names(yearbatch) <-  paste0("y", years_string)
+      # else: continue as normal
+      # download batches per year
+      yearbatch <- split(full_urls, f = years)
+      filebatch <- split(filenames, f = years)
+      # set list names
+      years_string <- years %>% unique() %>% sort()
+      names(yearbatch) <-  paste0("y", years_string)
 
         for (cbyear in names(yearbatch)) {
           print(paste0("downloading: ", cbyear))
           url <- yearbatch[[cbyear]]
+
+
+
+
 
           ncin_crop <- nc_open_retry(url[1])
           # pre-download first frame to get dimensions set
@@ -684,7 +669,8 @@ get_metno_reanalysis3 <-
       if(grid_resolution < 1){stop("`grid_resolution` must be greater than 1 km")}
     }
 
-    if(preview == TRUE){verbose = TRUE}
+    # this is truly crap, should fix..
+    if(preview == TRUE){verbose = TRUE}else{verbose = FALSE}
 
     if(directory %>% is.null()){
       directory <- getwd()
@@ -720,8 +706,14 @@ get_metno_reanalysis3 <-
     print("building query..")
     queries <- build_query(bounding_coords, mn_variables, fromdate, todate, grid_resolution, verbose)
 
-    print("creating download folder..")
-    foldername <- create_download_folder(directory)
+    if(is.null(continue) == FALSE){
+      print("continuing download folder..")
+      foldername = continue
+    }else{
+      print("creating download folder..")
+      foldername <- create_download_folder(directory)
+
+    }
 
     print("starting download")
     if(bounding_coords %>% length() == 2){geometry_type = "point"}else{geometry_type = "polygon"}
@@ -734,9 +726,14 @@ get_metno_reanalysis3 <-
         filenames = queries$filenames,
         years = queries$years,
         mn_variables = mn_variables,
-        geometry_type = geometry_type
+        geometry_type = geometry_type, ncdf = ncdf, verbose = preview
       )
 
+    if(ncdf){
+      if(preview){cat(bold(green("NCDF files finished downloading and are located here:")), "\n",
+                      blue(italic(underline(paste0(directory, "/",foldername)))), "\n")}
+      return(paste0(directory, "/",foldername))
+    }
     print("download complete!, merging files..")
 
     merged_data <- merge_rds(directory = directory,
@@ -1269,3 +1266,57 @@ swat_weather_input_chain <-
 
     print("miljotools: pipeline finished!")
   }
+
+# supporting functions ----
+nc_open_retry <- function(link) {
+
+  nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
+                      error = function(cond){
+                        warning("failed..")
+                        return(NA)
+                      })
+
+
+  if (nc_file %>% length() > 1) {
+    return(nc_file)
+  } else{
+    mt_print(TRUE, "nc_open_retry", "retrying donwload with out longwave radiation")
+
+    # https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters
+    # find the location in the link where longwave radiation is, and remove it,
+    # then try to open the file wihtout this variable.
+    split = link %>% stringr::str_split(",", simplify = T)
+    longwave_index <- grepl(x = split, pattern =  "longwave") %>% which()
+    new_link = paste(split[-longwave_index], collapse = ",")
+    new_nc_file <- tryCatch(
+      expr = {ncdf4::nc_open(new_link)},
+      error = function(cond) {
+        warning("failed..", cond, "retry!")
+        return(NA)})
+    }
+
+  if (length(new_nc_file)>1) {
+    mt_print(TRUE, "nc_open_retry", "download sans longradiation succeeded!")
+    warning("file missing longwave radiation")
+    return(new_nc_file)
+  } else{
+    mt_print(TRUE, "nc_open_retry", "retrying donwload..")
+
+    attempt = 1
+    while ((attempt < 10) & (length(nc_file) == 1)) {
+      Sys.sleep(5)
+      attempt = attempt + 1
+      nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
+        error = function(cond) {
+          warning("failed..", cond, "retry!")
+          return(NA)})
+    }
+
+    if (length(nc_file) > 1) {
+      mt_print(TRUE, "nc_open_retry", "connection re-established!")
+      return(nc_file)
+    } else{
+      stop("download failed after 10 attempts.")
+    }
+  }
+}

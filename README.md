@@ -44,3 +44,12 @@ If you have a function / code / workflow / script / etc. which you would like to
 The development of this package was supported by the [NIBIO Environmental Modelling and Measures group](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures?locationfilter=true), under the [Support Tools](https://www.nibio.no/en/subjects/environment/environmental-modelling-and-measures/support-tools?locationfilter=true) designation.
 
 Additionally, this package was in part developed for the [OPTAIN](https://optain.eu/) project and has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 862756.
+
+Finally, the logo is heavily inspired (celebrating) the old <img src="https://github.com/user-attachments/assets/cc004282-b64d-4357-8350-a3a48f279053" width="70" title="BioForsk"/> logo
+
+![Artboard 1@150x-8](https://github.com/user-attachments/assets/e05d7984-a936-4114-8fc9-954444589a67)
+
+![image](https://github.com/user-attachments/assets/01563fb1-4300-4480-bfaf-3e6bd026814a)
+
+
+

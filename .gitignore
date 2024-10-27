@@ -6,3 +6,4 @@ _pkgdown.yaml
 inst/doc
 /doc/
 /Meta/
+.RData
