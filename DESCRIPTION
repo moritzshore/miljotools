@@ -29,6 +29,7 @@ Imports:
     sf,
     stringr,
     utils,
+    vroom,
     writexl
 Suggests:
     devtools,
