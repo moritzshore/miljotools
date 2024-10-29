@@ -16,7 +16,9 @@ Imports:
     abind,
     crayon,
     dplyr,
+    fs,
     ggplot2,
+    ggrepel,
     ggtern,
     lubridate,
     mapview,
@@ -28,6 +30,7 @@ Imports:
     readxl,
     sf,
     stringr,
+    tibble,
     utils,
     vroom,
     writexl

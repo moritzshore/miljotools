@@ -293,6 +293,11 @@ tpg_import_data <- function(modelled_climate, observed_pr_path, observed_tm_path
 tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_model_runs, verbose){
   # sum by model and year
 
+  # RMD check appeastment
+  .data <- YEAR <- MODEL <- sum_precip_hist <- mean_temp_hist <-  sum_precip_rcp45   <-
+    mean_temp_rcp45  <- sum_precip_rcp85 <- mean_temp_rcp85  <- VAR <- hist_rr <- hist_tm <- rcp45_rr <- rcp45_tm  <-
+    rcp85_rr <- rcp85_tm <- NULL
+
   # precip
   precip_year <- total_data %>% # take the full dataframe
     dplyr::filter(.data$VAR == "RR") %>% # Filter only precipitation
@@ -390,6 +395,8 @@ tpg_plot <- function(experiments,
                      yaxisrange,
                      xlab,
                      left_yaxis_only) {
+  # RCMD check appeasement
+  EXP <- . <- mean_temp <- sum_precip <- chosen <- MODEL <- NULL
 
   custom_axis_theme <- ggplot2::theme(
     legend.position = "none",
