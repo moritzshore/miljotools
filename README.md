@@ -42,7 +42,9 @@ View the "Articles" to get started
 
 2.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
-3.  Coming soon..
+3.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+ 
+4.  More to come...
 
 ## Add your own <a name="add"></a>
 

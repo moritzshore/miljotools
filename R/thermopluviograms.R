@@ -37,6 +37,10 @@
 #' @importFrom dplyr %>% select filter group_by summarise if_else
 #' @importFrom vroom vroom
 #' @importFrom lubridate year
+#' @importFrom ggrepel geom_label_repel
+#' @importFrom fs dir_ls
+#' @importFrom tibble tibble
+#' @importFrom stats reorder
 #' @export
 #'
 #'
@@ -531,7 +535,7 @@ tpg_plot <- function(experiments,
     subtitle = paste0(location, ", ", timerange, ". Scenario: " ,current_experiment)
     yaxis = "Extreme Rainfall Events"
     # the plot
-    xtreme_plot <- xtreme_rain2 %>% ggplot2::ggplot(ggplot2::aes(x = reorder(MODEL, get(current_experiment)), y = get(current_experiment),color = "black") )+ggplot2::theme_bw()+
+    xtreme_plot <- xtreme_rain2 %>% ggplot2::ggplot(ggplot2::aes(x = stats::reorder(MODEL, get(current_experiment)), y = get(current_experiment),color = "black") )+ggplot2::theme_bw()+
       ggplot2::geom_col(ggplot2::aes(fill = chosen),position = "dodge", width = .7)+
       ggplot2::ylab(yaxis)+
       # TODO replace this with par?
