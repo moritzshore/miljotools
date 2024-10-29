@@ -14,8 +14,9 @@
 #' Date:  01.06.2022
 #' Author:  Moritz Shore
 #'
-#' @param modelled_climate location of climate files (i.e. "Climate_Data/Modelled/")
-#' @param observed_climate location of observed data
+#' @param modelled_climate filepath of climate files (i.e. "Climate_Data/Modelled/")
+#' @param observed_pr filepath of observed precipitation data (.csv)
+#' @param observed_tm filepath of the observed mean temperature data (.csv)
 #' @param outpath outpath for plotting
 #' @param location location of plot (is used for file naming) (string)
 #' @param ref_startdate reference period start (ie."1971-01-01")
@@ -33,14 +34,15 @@
 #' @param xlab  x axis label. (ie. "Mean Annual Temperature)", u00B0 is degree symbol)
 #'
 #' @return path to generated files
-#' @importFrom dplyr %>%
+#' @importFrom dplyr %>% select filter group_by summarise if_else
 #' @importFrom vroom vroom
 #' @importFrom lubridate year
 #' @export
 #'
 #'
 thermopluviogram <- function(modelled_climate,
-                             observed_climate,
+                             observed_pr,
+                             observed_tm,
                              outpath,
                              location,
                              ref_startdate,
@@ -59,22 +61,35 @@ thermopluviogram <- function(modelled_climate,
 
   ## Setup
 #
-#   ## testing par set
-#   modelled_climate  = "C:/Users/mosh/Documents/GIT/thermopluviograms/Climate_Data/Modelled/"
-#   observed_climate =  "C:/Users/mosh/Documents/GIT/thermopluviograms/Climate_Data/Observed/"
-#   outpath = "C:/Users/mosh/Documents/thermoplots"
-#
-#   location = "testingmt"
-#
-#   ref_startdate = "1971-01-01"
-#   ref_enddate = "2005-12-31"
-#   obs_startdate = "2041-01-01"
-#   obs_enddate = "2070-12-31"
-#   fixed_axis = T
-#   axis_font_size = 7
-#   yaxisrange = c(800,1100)
-#   xaxisrange = c(4.5, 8.5)
-#   xlab = "Mean Annual Temperature (\u00B0C)"
+  ## testing par set
+  # modelled_climate  = "C:/Users/mosh/Documents/GIT/thermopluviograms/Climate_Data/Modelled/"
+  # observed_pr =  "C:/Users/mosh/Documents/GIT/thermopluviograms/Climate_Data/Observed/senorge_pr.csv"
+  # observed_tm =  "C:/Users/mosh/Documents/GIT/thermopluviograms/Climate_Data/Observed/senorge_temp.csv"
+  #
+  # outpath = "C:/Users/mosh/Documents/thermoplots"
+  #
+  # location = "testingmt"
+  #
+  # ref_startdate = "1971-01-01"
+  # ref_enddate = "2005-12-31"
+  # obs_startdate = "2041-01-01"
+  # obs_enddate = "2070-12-31"
+  # fixed_axis = T
+  # axis_font_size = 7
+  # yaxisrange = c(800,1100)
+  # xaxisrange = c(4.5, 8.5)
+  # xlab = "Mean Annual Temperature (\u00B0C)"
+  # chosen_model_runs = NULL
+  #
+  # verbose = TRUE
+  # chosen_model_runs = NULL
+  # experiments = c("hist", "rcp45","rcp85")
+  # left_yaxis_only = FALSE
+  # fixed_axis = TRUE
+  # axis_font_size = 7
+  # yaxisrange = c(800, 1100)
+  # xaxisrange = c(4.5, 8.5)
+  # xlab = "Mean Annual Temperature (\u00B0C)"
 
   # years of the reference period, in vector form
   ref_daterange.y = lubridate::year(seq.Date(
@@ -110,7 +125,8 @@ thermopluviogram <- function(modelled_climate,
                         "\n...with a reference period from", ref_enddate, "to", ref_startdate,
                         "\n...for location named", location,
                         "\n...using modelled data from", modelled_climate,
-                        "\n...and observed data from", observed_climate,
+                        "\n...and observed precipitation data from", observed_pr,
+                        "\n...and observed temperature data from", observed_tm,
                         "\n...and generating for the experiments", (experiments %>% paste(collapse = ", ")),
                         "\n...with an x axis range from", xaxisrange[1], "to", xaxisrange[2], "labelled:", xlab,
                         "\n...with a y axis range from ", yaxisrange[1], "to", yaxisrange[2], "and plotting only the leftmost label?", left_yaxis_only,
@@ -123,36 +139,48 @@ thermopluviogram <- function(modelled_climate,
   mt_print(verbose, "thermopluviogram", "generating thermopluviograms...", status_print)
   mt_print(verbose, "thermopluviogram", "importing data...")
 
-  total_data <- tpg_import_data(modelled_climate, observed_climate, ref_daterange.d, verbose)
+  total_data <- tpg_import_data(
+    modelled_climate = modelled_climate,
+    observed_pr_path = observed_pr,
+    observed_tm_path = observed_tm,
+    ref_daterange.d = ref_daterange.d,
+    verbose = verbose
+  )
 
   mt_print(verbose, "thermopluviogram", "calculating statisics...")
-  stat_calc <- tpg_calc_stat(total_data, ref_daterange.y, obs_daterange.y, chosen_model_runs, verbose)
+  stat_calc <- tpg_calc_stat(
+    total_data = total_data,
+    ref_daterange.y = ref_daterange.y,
+    obs_daterange.y = obs_daterange.y,
+    chosen_model_runs = chosen_model_runs,
+    verbose = verbose
+  )
 
   mt_print(verbose, "thermopluviogram", "generating plots...")
   returnplot <- tpg_plot(
-    experiments,
-    ref_startdate,
-    ref_enddate,
-    obs_startdate,
-    obs_enddate,
-    per_stat =  stat_calc$per_stat,
-    xtreme_rain =  stat_calc$xtreme_rain,
-    location,
-    outpath,
-    chosen_model_runs,
-    xaxisrange,
-    axis_font_size,
-    verbose,
-    yaxisrange,
-    xlab,
-    left_yaxis_only
+    experiments = experiments,
+    ref_startdate = ref_startdate,
+    ref_enddate = ref_enddate,
+    obs_startdate = obs_startdate,
+    obs_enddate = obs_enddate,
+    per_stat = stat_calc$per_stat,
+    xtreme_rain = stat_calc$xtreme_rain,
+    location = location,
+    outpath = outpath,
+    chosen_model_runs = chosen_model_runs,
+    xaxisrange = xaxisrange,
+    axis_font_size = axis_font_size,
+    verbose = verbose,
+    yaxisrange = yaxisrange,
+    xlab = xlab,
+    left_yaxis_only = left_yaxis_only
   )
 
   returnplot %>% return()
 }
 
-tpg_import_data <- function(modelled_climate, observed_climate, ref_daterange.d, verbose){
-  # Modelled data import ----
+tpg_import_data <- function(modelled_climate, observed_pr_path, observed_tm_path, ref_daterange.d, verbose){
+  # Modelled data import
   mt_print(verbose, "thermopluviogram", "loading modelled data from ", modelled_climate)
   # read in file paths of the chosen location (bad code)
   modelled_data <- modelled_climate %>% fs::dir_ls() %>%
@@ -186,17 +214,15 @@ tpg_import_data <- function(modelled_climate, observed_climate, ref_daterange.d,
   modelled_data$date <- as.Date(modelled_data$date)
 
   # drop the path/ID column now that its been parsed
-  modelled_data <- modelled_data %>% select(-1) # -1 removes the first column
+  modelled_data <- modelled_data %>% dplyr::select(-1) # -1 removes the first column
 
   # Measured Data Import
-
-  mt_print(verbose, "thermopluviogram", "loading observed data from ", observed_climate)
   # import observed data from senorge
-  # TODO make this generalized
-  tm_path <- paste0(observed_climate, "/temperature.csv")
-  pr_path <- paste0(observed_climate, "/precipitation.csv")
-  observed_tm <- vroom(tm_path, comment = "#",na= "65535", show_col_types = F)
-  observed_pr <- vroom(pr_path, comment = "#", na = "65535", show_col_types = F)
+  mt_print(verbose, "thermopluviogram", "loading observed precipitation data from ", observed_pr_path)
+  observed_pr <- vroom::vroom(observed_pr_path, comment = "#",na= "65535", show_col_types = F)
+
+  mt_print(verbose, "thermopluviogram", "loading observed temperature data from ", observed_tm_path)
+  observed_tm <- vroom::vroom(observed_tm_path, comment = "#", na = "65535", show_col_types = F)
 
   mt_print(verbose, "thermopluviogram", "post-processing observed data")
 
@@ -205,7 +231,7 @@ tpg_import_data <- function(modelled_climate, observed_climate, ref_daterange.d,
   observed_pr$Date <-as.Date(observed_pr$Date, format = "%d.%m.%Y")
 
   # merge two measurements
-  observed <- left_join(x = observed_tm, y = observed_pr,by="Date")
+  observed <- dplyr::left_join(x = observed_tm, y = observed_pr,by="Date")
 
   # fix column names
   colnames(observed) <- c("date", "tm", "pr")
@@ -265,7 +291,7 @@ tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_m
 
   # precip
   precip_year <- total_data %>% # take the full dataframe
-    dplyr::filter(VAR == "RR") %>% # Filter only precipitation
+    dplyr::filter(.data$VAR == "RR") %>% # Filter only precipitation
     dplyr::group_by(.data$YEAR, .data$MODEL) %>% # Group by year and model
     dplyr::summarise(sum_precip_hist = sum(.data$hist, na.rm = T), # Sum per year per model
               sum_precip_rcp45 = sum(.data$rcp45, na.rm = T),
@@ -278,9 +304,9 @@ tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_m
 
   # temp
   tm_year <- total_data %>%
-    filter(VAR == "TM") %>%
-    group_by(.data$YEAR, .data$MODEL) %>%
-    summarise(mean_temp_hist = mean(.data$hist, na.rm = T),
+    dplyr::filter(.data$VAR == "TM") %>%
+    dplyr::group_by(.data$YEAR, .data$MODEL) %>%
+    dplyr::summarise(mean_temp_hist = mean(.data$hist, na.rm = T),
               mean_temp_rcp45 = mean(.data$rcp45, na.rm = T),
               mean_temp_rcp85 = mean(.data$rcp85, na.rm = T))
 
@@ -288,24 +314,24 @@ tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_m
   yearly_stat <- cbind(tm_year, precip_year[c(3,4,5)])
 
   # mean into total time period (in this case 30years) by model for hist
-  refper_stat <- yearly_stat %>% filter(YEAR %in% ref_daterange.y) %>%
-    group_by(MODEL) %>% # only group by model this time, thus collapsing the 30 year time periods.
-    summarise(sum_precip  = mean(sum_precip_hist, na.rm = T),
+  refper_stat <- yearly_stat %>% dplyr::filter(YEAR %in% ref_daterange.y) %>%
+    dplyr::group_by(MODEL) %>% # only group by model this time, thus collapsing the 30 year time periods.
+    dplyr::summarise(sum_precip  = mean(sum_precip_hist, na.rm = T),
               mean_temp= mean(mean_temp_hist, na.rm = T)-273.15) # convert back into C from kelvin
 
   # mean into total time period (in this case 30years) by model for rcp45
-  obsper_stat_rcp45 <- yearly_stat %>% filter(YEAR %in% obs_daterange.y) %>%
-    group_by(MODEL) %>% # only group by model this time, thus collapsing the 30 year time periods.
-    summarise(sum_precip = mean(sum_precip_rcp45, na.rm = T),
+  obsper_stat_rcp45 <- yearly_stat %>% dplyr::filter(YEAR %in% obs_daterange.y) %>%
+    dplyr::group_by(MODEL) %>% # only group by model this time, thus collapsing the 30 year time periods.
+    dplyr::summarise(sum_precip = mean(sum_precip_rcp45, na.rm = T),
               mean_temp = mean(mean_temp_rcp45, na.rm = T)-273.15)
 
   # add the quasi-historical model run "measured" onto the bottom of this
   obsper_stat_rcp45 <- rbind(obsper_stat_rcp45, refper_stat[which(refper_stat$MODEL=="Measured"),])
 
   # mean into total time period (in this case 30years) by model for rcp85
-  obsper_stat_rcp85 <- yearly_stat %>% filter(YEAR %in% obs_daterange.y) %>%
-    group_by(MODEL) %>%
-    summarise(sum_precip = mean(sum_precip_rcp85, na.rm = T),
+  obsper_stat_rcp85 <- yearly_stat %>% dplyr::filter(YEAR %in% obs_daterange.y) %>%
+    dplyr::group_by(MODEL) %>%
+    dplyr::summarise(sum_precip = mean(sum_precip_rcp85, na.rm = T),
               mean_temp = mean(mean_temp_rcp85, na.rm = T)-273.15)
   # add the quasi-historical model run "measured" onto the bottom of this
   obsper_stat_rcp85 <- rbind(obsper_stat_rcp85, refper_stat[which(refper_stat$MODEL=="Measured"),])
@@ -317,14 +343,13 @@ tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_m
 
   # and recombine (havent figured out a better way to do this)
   per_stat <- rbind(refper_stat, obsper_stat_rcp45, obsper_stat_rcp85)
-  per_stat$chosen = if_else(per_stat$MODEL %in% chosen_model_runs, "chosen", "not chosen")
+  per_stat$chosen = dplyr::if_else(per_stat$MODEL %in% chosen_model_runs, "chosen", "not chosen")
   per_stat$chosen[which(per_stat$MODEL == "Measured")] = "Measured"
-
 
   # extreme rain statistics calc
 
-  total_data_rr <-total_data %>% filter(VAR == "RR")
-  total_data_tm <- total_data %>% filter(VAR == "TM")
+  total_data_rr <-total_data %>% dplyr::filter(VAR == "RR")
+  total_data_tm <- total_data %>% dplyr::filter(VAR == "TM")
 
   colnames(total_data_rr) <- c("date", "hist_rr", "rcp45_rr", "rcp85_rr", "GCM", "RCM", "VAR", "MODEL", "TYPE", "YEAR")
 
@@ -333,8 +358,8 @@ tpg_calc_stat <- function(total_data, ref_daterange.y, obs_daterange.y, chosen_m
 
   total_data_bc <- cbind(total_data_rr, total_data_tm)
   xtreme_rain <- total_data_bc %>%
-    group_by(MODEL) %>%
-    summarise(hist = length(which(hist_rr>25 & hist_tm > 273.15)),
+    dplyr::group_by(MODEL) %>%
+    dplyr::summarise(hist = length(which(hist_rr>25 & hist_tm > 273.15)),
               rcp45 =length(which(rcp45_rr>25 & rcp45_tm > 273.15)),
               rcp85 =length(which(rcp85_rr>25 & rcp85_tm > 273.15)),
     )
@@ -406,7 +431,7 @@ tpg_plot <- function(experiments,
     if(current_experiment != "hist"){per_stat2 <-  per_stat[-which(per_stat$MODEL=="Measured"),]}else{per_stat2 = per_stat}
 
     # create plot with only the data of the current experiment
-    plot <- per_stat2 %>% filter(EXP == current_experiment) %>% ggplot2::ggplot(data = .) +
+    plot <- per_stat2 %>% dplyr::filter(EXP == current_experiment) %>% ggplot2::ggplot(data = .) +
 
       # Scatter plot points
     ggplot2::geom_point(
@@ -465,7 +490,7 @@ tpg_plot <- function(experiments,
     custom_axis_theme
 
     # remove y axis if not the leftmost graph in the paper
-    if(current_experiment != "hist"){
+    if(current_experiment != "hist" && left_yaxis_only){
       plot <- plot + ggplot2::theme(axis.title.y = ggplot2::element_blank()) +
         ggplot2::theme(axis.text.y = ggplot2::element_blank())
     }
@@ -489,7 +514,7 @@ tpg_plot <- function(experiments,
 
 
     # BIOWATER CHOSEN MODELS/VARIABLES
-    xtreme_rain$chosen = if_else(xtreme_rain$MODEL %in% chosen_model_runs, "chosen", "not chosen")
+    xtreme_rain$chosen = dplyr::if_else(xtreme_rain$MODEL %in% chosen_model_runs, "chosen", "not chosen")
     xtreme_rain$chosen[which(xtreme_rain$MODEL == "Measured")] = "Measured"
 
 

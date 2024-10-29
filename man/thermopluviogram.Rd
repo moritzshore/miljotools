@@ -6,7 +6,8 @@
 \usage{
 thermopluviogram(
   modelled_climate,
-  observed_climate,
+  observed_pr,
+  observed_tm,
   outpath,
   location,
   ref_startdate,
@@ -25,9 +26,11 @@ thermopluviogram(
 )
 }
 \arguments{
-\item{modelled_climate}{location of climate files (i.e. "Climate_Data/Modelled/")}
+\item{modelled_climate}{filepath of climate files (i.e. "Climate_Data/Modelled/")}
 
-\item{observed_climate}{location of observed data}
+\item{observed_pr}{filepath of observed precipitation data (.csv)}
+
+\item{observed_tm}{filepath of the observed mean temperature data (.csv)}
 
 \item{outpath}{outpath for plotting}
 
@@ -63,9 +66,14 @@ thermopluviogram(
 path to generated files
 }
 \description{
-todo: describe file struture
+Combines climate data from \href{https://klimaservicesenter.no/}{Norsk Klima Service Center} and observed data to produce
+\href{https://www.dwd.de/EN/ourservices/jahresthermo/jahresthermo.html}{"Thermopluviograms"}.
 }
 \details{
+https://www.senorge.no/PrecTempMap
+
+todo: describe file struture
+
 Generates thermopluviograms and extreme rain index plots from NVE
 not flexible. only works with current source data structure.
 
