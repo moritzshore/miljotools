@@ -9,7 +9,7 @@
 #' @return nothing
 #' @keywords internal
 #'
-#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline
+#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan
 #'
 #'
 #'
@@ -19,6 +19,8 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
 
   if (function_name == "cwatm_hourly_to_daily_ncdf4") {
     f_theme  <- bgYellow$black$bold
+  }else if(function_name == "thermopluviogram"){
+    f_theme = bgWhite$cyan$bold
   } else{
     f_theme <- bgCyan$black$bold
 

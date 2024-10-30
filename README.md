@@ -1,16 +1,25 @@
 # miljotools <img src="man/figures/logo.png" align="right" height="138"/>
 
-This R package aims to host a variety of functions for and from [NIBIO DMN](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources?locationfilter=true), departments [Soil](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/soil-and-land-use?locationfilter=true) and [Water](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/hydrology-and-water-environment?locationfilter=true). If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
+This un-offocial R package aims to host a variety of functions for and from [NIBIO DMN](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources?locationfilter=true), departments [Soil](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/soil-and-land-use?locationfilter=true) and [Water](https://www.nibio.no/en/about-eng/our-divisions/division-of-environment-and-natural-resources/hydrology-and-water-environment?locationfilter=true). If any bugs or problems are encountered, please open a new [issue](https://github.com/moritzshore/miljotools/issues) and we will attempt to resolve it.
+
 
 **Table of contents**
 
-1.  [Installing miljotools](#install)
+1. [Introduction](#introduction)
 
-2.  [Tools](#start)
+2.  [Installing miljotools](#install)
 
-3.  [Add your own](#add)
+3.  [Tools](#start)
 
-4.  [Acknowledgements](#ack)
+4.  [Add your own](#add)
+
+5.  [Acknowledgements](#ack)
+
+## Introduction <a name="introduction"></a>
+
+A large fraction of the workload for a “modeler” in environmental sciences consists of “workflows”. These workflows typically revolve around getting data, converting data, processing data before actually using the data in a model. Even once used, data needs to be post-processed before it can bring meaningful insight. As such, coding, scripting, automation “tools” are used by many employees at NIBIO. However, the use of these tools is often restricted to either the author, or the small network of close colleagues, even if they could be useful to a wide variety of researchers at NIBIO (or even the global research community). Miljotools aims to partially remedy the fragmentation useful “tools” by providing a repository of generalized and documented functions, workflows, scripts, etc. These are provided in an open-source R package “miljotools”
+
+Note: This unofficial side project is still in its infancy, and currently does not encompass much functionality. If you would like to contribute, please reach out to the maintainer for developer access and/or assistance in implementation.
 
 ## Installing `miljotools` <a name="install"></a>
 
@@ -33,7 +42,9 @@ View the "Articles" to get started
 
 2.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
-3.  Coming soon..
+3.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+ 
+4.  More to come...
 
 ## Add your own <a name="add"></a>
 
