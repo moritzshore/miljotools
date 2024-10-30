@@ -242,6 +242,7 @@ Having a look at the data:
 ```{r ncimage}
 ncfile <- ncdf4::nc_open("cwatm/tasmax_nor2.nc")
 tasmax <- ncdf4::ncvar_get(ncfile, "tasmax_nor2")
+ncdf4::nc_close(ncfile)
 image(tasmax[,,1])
 ```
 

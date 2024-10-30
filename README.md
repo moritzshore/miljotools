@@ -58,9 +58,9 @@ Additionally, this package was in part developed for the [OPTAIN](https://optai
 
 Finally, the logo is heavily inspired (celebrating) the old <img src="https://github.com/user-attachments/assets/cc004282-b64d-4357-8350-a3a48f279053" width="70" title="BioForsk"/> logo
 
-![Artboard 1@150x-8](https://github.com/user-attachments/assets/e05d7984-a936-4114-8fc9-954444589a67)
+![](https://github.com/user-attachments/assets/e05d7984-a936-4114-8fc9-954444589a67)
 
-![image](https://github.com/user-attachments/assets/01563fb1-4300-4480-bfaf-3e6bd026814a)
+![](https://github.com/user-attachments/assets/01563fb1-4300-4480-bfaf-3e6bd026814a)
 
 
 
