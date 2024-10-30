@@ -248,7 +248,7 @@ image(tasmax[,,1])
 #### Cleanup
 
 ```{r}
-require(magrittr)
+require(dplyr)
 unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "miljotools_swat_backup", "ncdf_daily", "ncdf_example"), recursive = T)
 
 list.files(pattern = "met_no_dl*") %>% unlink(recursive = T)
