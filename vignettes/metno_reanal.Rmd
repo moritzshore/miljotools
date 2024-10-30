@@ -18,6 +18,8 @@ Author: Moritz Shore
 
 Date: October, 2023
 
+Last Update: October 29th, 2024
+
 ## Introduction
 
 The MET Nordic Reanalysis Dataset is a reanalysis product from the
@@ -43,6 +45,8 @@ knitr::include_graphics("../man/figures/domain.png")
     short+longwave radiation (downwelling), land area fraction, and
     altitude
 
+## Usage
+
 ### Input
 
 To access the data for a specific region of the Nordics, you need to
@@ -50,7 +54,7 @@ provide the following as input:
 
 1.  A path to a geo-referenced
     [shapefile](https://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm)
-    (single polygon) of the desired area
+    (single polygon or point) of the desired area
 
 2.  A directory where you would like to save the data (default: working
     directory)
@@ -59,13 +63,27 @@ provide the following as input:
 
 4.  An ending date and time
 
-Optionally, you can pass additional parameters to either buffer your
-shapefile, or to preview the data you are downloading.
+Optionally, you can pass additional parameters to buffer your shapefile,
+choose your variables, resolution, to preview the data you are
+downloading, or to download the files in NetCDF format. See the
+[man-page](https://moritzshore.github.io/miljotools/reference/get_metno_reanalysis3.html)
+for more information
 
-```{r example, eval = FALSE}
+#### Downloading Example Data
+
+Downloading an example shape file from a public repository:
+
+```{r}
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/skuterud_shp.zip", destfile = "skuterud_shp.zip")
+unzip("skuterud_shp.zip")
+skuterud_shp = "skuterud_shp/skuterud_wb.shp"
+```
+
+Downloading two days with the default function:
+
+```{r example, eval = TRUE}
 download_folder <- get_metno_reanalysis3(
-area = "C:/Users/morit/Documents/met_no/skuterud_wb.shp",
-directory = "C:/Users/mosh/Documents/met_no",
+area = skuterud_shp,
 fromdate = "2015-01-01 00:00:00",
 todate = "2015-01-31 00:00:00", 
 area_buffer = 1500,
