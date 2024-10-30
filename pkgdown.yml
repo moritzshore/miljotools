@@ -1,8 +1,8 @@
-pandoc: 3.1.1
-pkgdown: 2.0.7
+pandoc: '3.2'
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   metno_reanal: metno_reanal.html
   Norwegian_Soil_Classification: Norwegian_Soil_Classification.html
-last_built: 2024-03-19T15:36Z
-
+  thermopluviograms: thermopluviograms.html
+last_built: 2024-10-30T11:15Z

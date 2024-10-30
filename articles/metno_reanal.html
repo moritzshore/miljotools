@@ -12,21 +12,19 @@
 <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="MET Nordic Reanalysis Dataset">
-<meta property="og:description" content="miljotools">
-<meta property="og:image" content="/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -40,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">miljotools</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.0</span>
       </span>
     </div>
 
@@ -52,7 +50,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -62,6 +60,9 @@
     <li>
       <a href="../articles/Norwegian_Soil_Classification.html">Soil Classification</a>
     </li>
+    <li>
+      <a href="../articles/thermopluviograms.html">Thermopluviograms</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -69,7 +70,7 @@
 <li>
   <a href="https://github.com/moritzshore/miljotools/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -80,7 +81,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -95,8 +96,9 @@
 
     
     
-<p>Author: Moritz Shore</p>
-<p>Date: October, 2023</p>
+<p><u>Author</u>: Moritz Shore</p>
+<p><u>Date</u>: October, 2023</p>
+<p><u>Last Update</u>: October 29th, 2024</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -123,6 +125,10 @@ short+longwave radiation (downwelling), land area fraction, and
 altitude</p></li>
 </ul>
 </div>
+</div>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
 <div class="section level3">
 <h3 id="input">Input<a class="anchor" aria-label="anchor" href="#input"></a>
 </h3>
@@ -130,34 +136,70 @@ altitude</p></li>
 provide the following as input:</p>
 <ol style="list-style-type: decimal">
 <li><p>A path to a geo-referenced <a href="https://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm" class="external-link">shapefile</a>
-(single polygon) of the desired area</p></li>
+(single polygon or point) of the desired area</p></li>
 <li><p>A directory where you would like to save the data (default:
 working directory)</p></li>
 <li><p>A starting date and time</p></li>
 <li><p>An ending date and time</p></li>
 </ol>
-<p>Optionally, you can pass additional parameters to either buffer your
-shapefile, or to preview the data you are downloading.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">download_folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3</a></span><span class="op">(</span></span>
-<span>area <span class="op">=</span> <span class="st">"C:/Users/morit/Documents/met_no/skuterud_wb.shp"</span>,</span>
-<span>directory <span class="op">=</span> <span class="st">"C:/Users/mosh/Documents/met_no"</span>,</span>
-<span>fromdate <span class="op">=</span> <span class="st">"2015-01-01 00:00:00"</span>,</span>
-<span>todate <span class="op">=</span> <span class="st">"2015-01-31 00:00:00"</span>, </span>
-<span>area_buffer <span class="op">=</span> <span class="fl">1500</span>,</span>
-<span>preview <span class="op">=</span> <span class="cn">T</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
-</h3>
+<p>Optionally, you can pass additional parameters to buffer your
+shapefile, choose your variables, resolution, to preview the data you
+are downloading, or to download the files in NetCDF format. See the <a href="https://moritzshore.github.io/miljotools/reference/get_metno_reanalysis3.html" class="external-link">man-page</a>
+for more information</p>
 <div class="figure" style="text-align: center">
 <img src="../reference/figures/output.png" alt="Figure 2. Processing the shapefile and downloading relevant grid points." width="50%" height="50%"><p class="caption">
 Figure 2. Processing the shapefile and downloading relevant grid points.
 </p>
 </div>
+<p>Downloading an example shape file from a <a href="https://gitlab.nibio.no/moritzshore/example-files" class="external-link">public
+repository</a>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip"</span>, destfile <span class="op">=</span> <span class="st">"cs10_basin.zip"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span><span class="st">"cs10_basin.zip"</span><span class="op">)</span></span>
+<span><span class="va">cs10_basin</span> <span class="op">=</span> <span class="st">"cs10_basin/cs10_basin.shp"</span></span></code></pre></div>
+<p>Downloading one day with the default function:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://moritzshore.github.io/miljotools/" class="external-link">miljotools</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: miljotools</span></span></code></pre>
+<pre><code><span><span class="co">## Registered S3 methods overwritten by 'ggtern':</span></span>
+<span><span class="co">##   method           from   </span></span>
+<span><span class="co">##   grid.draw.ggplot ggplot2</span></span>
+<span><span class="co">##   plot.ggplot      ggplot2</span></span>
+<span><span class="co">##   print.ggplot     ggplot2</span></span></code></pre>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">download_folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3</a></span><span class="op">(</span></span>
+<span>area <span class="op">=</span> <span class="va">cs10_basin</span>,</span>
+<span>fromdate <span class="op">=</span> <span class="st">"2015-01-01 00:00:00"</span>,</span>
+<span>todate <span class="op">=</span> <span class="st">"2015-01-02 00:00:00"</span>, </span>
+<span>area_buffer <span class="op">=</span> <span class="fl">1500</span>,</span>
+<span>preview <span class="op">=</span> <span class="cn">T</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="font-weight: bold;">MILJOTOOLS &gt;&gt;</span> <span style="color: #BBBB00; font-style: italic;">'grid_resolution' not chosen, defaulting to 1x1km grid... </span></span></span>
+<span><span class="co"><span style="color: #BBBB00; font-style: italic;">## </span><span style="font-weight: bold;">downloading default variables:</span></span></span>
+<span><span class="co"><span style="font-weight: bold;">## </span><span style="color: #0000BB; font-style: italic;">air_temperature_2m</span></span></span>
+<span><span class="co">## <span style="color: #0000BB; font-style: italic;">integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time</span></span></span>
+<span><span class="co">## <span style="color: #0000BB; font-style: italic;">relative_humidity_2m</span></span></span>
+<span><span class="co">## <span style="color: #0000BB; font-style: italic;">precipitation_amount</span></span></span>
+<span><span class="co">## <span style="color: #0000BB; font-style: italic;">wind_speed_10m</span></span></span>
+<span><span class="co">## <span style="color: #0000BB; font-style: italic;">wind_direction_10m</span></span></span>
+<span><span class="co">## [1] "getting coordinates.."</span></span>
+<span><span class="co">## [1] "building query.."</span></span>
+<span><span class="co">## <span style="color: #00BB00; font-style: italic;">fetching with grid size of </span><span style="color: #000000; font-weight: bold; font-style: italic;">1</span><span style="color: #00BB00; font-style: italic;"> x </span><span style="color: #000000; font-weight: bold; font-style: italic;">1</span><span style="color: #00BB00; font-style: italic;"> km </span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## </span>[1] "creating download folder.."</span></span>
+<span><span class="co">## [1] "starting download"</span></span>
+<span><span class="co">## [1] "downloading: y2015"</span></span>
+<span><span class="co">## downloading files  (2/25)downloading files  (3/25)downloading files  (4/25)downloading files  (5/25)downloading files  (6/25)downloading files  (7/25)downloading files  (8/25)downloading files  (9/25)downloading files  (10/25)downloading files  (11/25)downloading files  (12/25)downloading files  (13/25)downloading files  (14/25)downloading files  (15/25)downloading files  (16/25)downloading files  (17/25)downloading files  (18/25)downloading files  (19/25)downloading files  (20/25)downloading files  (21/25)downloading files  (22/25)downloading files  (23/25)downloading files  (24/25)downloading files  (25/25)</span></span>
+<span><span class="co">## [1] "download complete!, merging files.."</span></span>
+<span><span class="co">## [1] "cropping dataset to area coverage.."</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in CPL_crs_from_input(x): GDAL Message 1: +init=epsg:XXXX syntax is</span></span>
+<span><span class="co">## deprecated. It might return a CRS with a non-EPSG compliant axis order.</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "writing station data to csv.."</span></span>
+<span><span class="co">## writing files... (2/122)writing files... (3/122)writing files... (4/122)writing files... (5/122)writing files... (6/122)writing files... (7/122)writing files... (8/122)writing files... (9/122)writing files... (10/122)writing files... (11/122)writing files... (12/122)writing files... (13/122)writing files... (14/122)writing files... (15/122)writing files... (16/122)writing files... (17/122)writing files... (18/122)writing files... (19/122)writing files... (20/122)writing files... (21/122)writing files... (22/122)writing files... (23/122)writing files... (24/122)writing files... (25/122)writing files... (26/122)writing files... (27/122)writing files... (28/122)writing files... (29/122)writing files... (30/122)writing files... (31/122)writing files... (32/122)writing files... (33/122)writing files... (34/122)writing files... (35/122)writing files... (36/122)writing files... (37/122)writing files... (38/122)writing files... (39/122)writing files... (40/122)writing files... (41/122)writing files... (42/122)writing files... (43/122)writing files... (44/122)writing files... (45/122)writing files... (46/122)writing files... (47/122)writing files... (48/122)writing files... (49/122)writing files... (50/122)writing files... (51/122)writing files... (52/122)writing files... (53/122)writing files... (54/122)writing files... (55/122)writing files... (56/122)writing files... (57/122)writing files... (58/122)writing files... (59/122)writing files... (60/122)writing files... (61/122)writing files... (62/122)writing files... (63/122)writing files... (64/122)writing files... (65/122)writing files... (66/122)writing files... (67/122)writing files... (68/122)writing files... (69/122)writing files... (70/122)writing files... (71/122)writing files... (72/122)writing files... (73/122)writing files... (74/122)writing files... (75/122)writing files... (76/122)writing files... (77/122)writing files... (78/122)writing files... (79/122)writing files... (80/122)writing files... (81/122)writing files... (82/122)writing files... (83/122)writing files... (84/122)writing files... (85/122)writing files... (86/122)writing files... (87/122)writing files... (88/122)writing files... (89/122)writing files... (90/122)writing files... (91/122)writing files... (92/122)writing files... (93/122)writing files... (94/122)writing files... (95/122)writing files... (96/122)writing files... (97/122)writing files... (98/122)writing files... (99/122)writing files... (100/122)writing files... (101/122)writing files... (102/122)writing files... (103/122)writing files... (104/122)writing files... (105/122)writing files... (106/122)writing files... (107/122)writing files... (108/122)writing files... (109/122)writing files... (110/122)writing files... (111/122)writing files... (112/122)writing files... (113/122)writing files... (114/122)writing files... (115/122)writing files... (116/122)writing files... (117/122)writing files... (118/122)writing files... (119/122)writing files... (120/122)writing files... (121/122)writing files... (122/122)</span></span>
+<span><span class="co">## writing metadata..</span></span>
+<span><span class="co">## finished! files have been written to: </span></span>
+<span><span class="co">## C:/Users/mosh/Documents/GIT/miljotools/vignettes/met_no_dl_20241030121619</span></span></code></pre>
 <p>As output you will receive a separate .csv file for each grid point.
-This .csv file contains the meteorological data as a timeseries, with a
+This .csv file contains the meteorological data as a time series, with a
 column for each variable. Additionally one metadata file is created
 listing the properties of each grid point (such as coordinates)</p>
 <p><strong>Note:</strong> Currently, this function must request the data
@@ -167,7 +209,7 @@ and as such the download can take quite a few hours. We are working with
 met.no to improve this situation.</p>
 </div>
 <div class="section level3">
-<h3 id="conversion-to-daily-data">Conversion to Daily Data<a class="anchor" aria-label="anchor" href="#conversion-to-daily-data"></a>
+<h3 id="converting-to-daily">Converting to Daily<a class="anchor" aria-label="anchor" href="#converting-to-daily"></a>
 </h3>
 <p>If you would prefer to have your data in a daily format, you can use
 the <code><a href="../reference/reanalysis3_daily.html">reanalysis3_daily()</a></code> function. This function merely
@@ -175,14 +217,21 @@ requires the path of the download folder as created by
 <code><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3()</a></code>. You can pass a precision parameter
 which determines to which decimal point the hourly data will be averaged
 / summed to.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">daily_data_path</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="../reference/reanalysis3_daily.html">reanalysis3_daily</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">download_folder</span>,</span>
-<span>                    outpath <span class="op">=</span> <span class="st">"C:/Users/mosh/Documents/met_no"</span>,</span>
-<span>                    precision <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>We can convert the data set to daily resolution as follows:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">daily_path</span> <span class="op">=</span> <span class="fu"><a href="../reference/reanalysis3_daily.html">reanalysis3_daily</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">download_folder</span>,</span>
+<span>                               outpath <span class="op">=</span> <span class="st">"../vignettes"</span>,</span>
+<span>                               verbose <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BB00; font-style: italic;">reading files..</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## loading files into memory..</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## re-calculating to daily..</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## copying metadata..</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## writing files..</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## </span>Conversion finished, files written to:</span></span>
+<span><span class="co">##  <span style="color: #0000BB; text-decoration: underline;">../vignettes/met_no_dl_20241030121619_daily</span></span></span></code></pre>
 </div>
 <div class="section level3">
-<h3 id="swat-input-generation-from-daily-reanalysis3-data">SWAT+ input generation from daily Reanalysis3 data<a class="anchor" aria-label="anchor" href="#swat-input-generation-from-daily-reanalysis3-data"></a>
+<h3 id="creating-swat-input">Creating SWAT+ input<a class="anchor" aria-label="anchor" href="#creating-swat-input"></a>
 </h3>
 <p>If you would like to generate SWAT+ meteo input from the daily data
 as downloaded <code><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3()</a></code> and converted from
@@ -193,9 +242,306 @@ weather generator. It also can update your SWAT+ input files to match
 the new weather stations, or update your <code>.sqlite</code> database.
 To do this, the function heavily utilizes <code>SWATprepR</code> which
 needs to be installed before use. This can be done <a href="https://biopsichas.github.io/SWATprepR/" class="external-link">here</a>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/reanalysis3_swatinput.html">reanalysis3_swatinput</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">daily_data_path</span>,</span>
-<span>                      swat_setup <span class="op">=</span> <span class="st">"C:/path/to/swat/txtinout"</span><span class="op">)</span></span></code></pre></div>
+<p>We can create input files for the SWAT+ model using the daily files.
+For this we will need to get a SWAT+ setup to modify, which we will
+download from the same GitLab Repository. Additionally, we will download
+some pre-downloaded reanalysis files generated by
+<code>miljotools</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip"</span>, destfile <span class="op">=</span> <span class="st">"cs10_txt.zip"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span><span class="st">"cs10_txt.zip"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/krak_daily.zip"</span>, destfile <span class="op">=</span> <span class="st">"krak_daily.zip"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span><span class="st">"krak_daily.zip"</span><span class="op">)</span></span>
+<span><span class="va">example_daily_files</span> <span class="op">=</span> <span class="st">"krak_daily"</span></span>
+<span><span class="va">cs10_txt_path</span> <span class="op">=</span> <span class="st">"cs10_txt"</span></span></code></pre></div>
+<p>Now we are ready to run the function:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reanalysis3_swatinput.html">reanalysis3_swatinput</a></span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="va">example_daily_files</span>,</span>
+<span>  swat_setup <span class="op">=</span> <span class="va">cs10_txt_path</span>,</span>
+<span>  write_wgn <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">T</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BB00; font-style: italic;">backing up SWAT directory in</span> <span style="text-decoration: underline;">./miljotools_swat_backup</span> </span></span>
+<span><span class="co">## <span style="color: #00BB00; font-style: italic;">loading SWATprepR</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## </span></span></span></code></pre>
+<pre><code><span><span class="co">## Loading required namespace: SWATprepR</span></span></code></pre>
+<pre><code><span><span class="co">## Registered S3 methods overwritten by 'ggpp':</span></span>
+<span><span class="co">##   method                  from   </span></span>
+<span><span class="co">##   heightDetails.titleGrob ggplot2</span></span>
+<span><span class="co">##   widthDetails.titleGrob  ggplot2</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BB00; font-style: italic;">loading data into memory...</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## converting data into SWATprepR format...</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## creating weather generator</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## </span></span></span></code></pre>
+<pre><code><span><span class="co">## Warning in SWATprepR::prepare_wgn(meteo_lst, TMP_MAX = meteo_lst$data$ID1$TMP_MAX, : These variables MAXHHR are missing for some of the stations.</span></span>
+<span><span class="co">##       Closest stations with data will be used to fill existing gaps. MAXHHR will be calculated by PCP*0.38. </span></span>
+<span><span class="co">##  Please use optional function parameters, if you want specific data to be used in filling missing variables for stations.</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Working on station ID1:sta_x1_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID2:sta_x1_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID3:sta_x1_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID4:sta_x1_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID5:sta_x1_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID6:sta_x1_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID7:sta_x2_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID8:sta_x2_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID9:sta_x2_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID10:sta_x2_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID11:sta_x2_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID12:sta_x2_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID13:sta_x2_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID14:sta_x2_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID15:sta_x2_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID16:sta_x2_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID17:sta_x2_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID18:sta_x2_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID19:sta_x2_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID20:sta_x2_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID21:sta_x2_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID22:sta_x2_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID23:sta_x3_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID24:sta_x3_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID25:sta_x3_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID26:sta_x3_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID27:sta_x3_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID28:sta_x3_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID29:sta_x3_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID30:sta_x3_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID31:sta_x3_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID32:sta_x3_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID33:sta_x3_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID34:sta_x3_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID35:sta_x3_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID36:sta_x3_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID37:sta_x3_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID38:sta_x3_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID39:sta_x3_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID40:sta_x4_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID41:sta_x4_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID42:sta_x4_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID43:sta_x4_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID44:sta_x4_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID45:sta_x4_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID46:sta_x4_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID47:sta_x4_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID48:sta_x4_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID49:sta_x4_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID50:sta_x4_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID51:sta_x4_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID52:sta_x4_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID53:sta_x4_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID54:sta_x4_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID55:sta_x4_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID56:sta_x4_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID57:sta_x5_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID58:sta_x5_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID59:sta_x5_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID60:sta_x5_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID61:sta_x5_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID62:sta_x5_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID63:sta_x5_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID64:sta_x5_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID65:sta_x5_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID66:sta_x5_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID67:sta_x5_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID68:sta_x5_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID69:sta_x5_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID70:sta_x5_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID71:sta_x5_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID72:sta_x5_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID73:sta_x5_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID74:sta_x6_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID75:sta_x6_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID76:sta_x6_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID77:sta_x6_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID78:sta_x6_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID79:sta_x6_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID80:sta_x6_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID81:sta_x6_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID82:sta_x6_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID83:sta_x6_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID84:sta_x6_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID85:sta_x6_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID86:sta_x6_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID87:sta_x6_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID88:sta_x6_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID89:sta_x6_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID90:sta_x7_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID91:sta_x7_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID92:sta_x7_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID93:sta_x7_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID94:sta_x7_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID95:sta_x7_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID96:sta_x7_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID97:sta_x7_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID98:sta_x7_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID99:sta_x7_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID100:sta_x7_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID101:sta_x8_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID102:sta_x8_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID103:sta_x8_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID104:sta_x8_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID105:sta_x8_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID106:sta_x8_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID107:sta_x8_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID108:sta_x8_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID109:sta_x8_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID110:sta_x9_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID111:sta_x9_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID112:sta_x9_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID113:sta_x9_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID114:sta_x9_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID115:sta_x9_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID116:sta_x9_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID117:sta_x9_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID118:sta_x10_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID119:sta_x10_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID120:sta_x10_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID121:sta_x10_y13"</span></span>
+<span><span class="co">## <span style="color: #00BB00; font-style: italic;">writing weather generator to file in ' cs10_txt '</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## writing weather station files</span></span></span>
+<span><span class="co"><span style="color: #00BB00; font-style: italic;">## </span></span></span></code></pre>
+<pre><code><span><span class="co">## Warning in prepare_wgn(meteo_lst): These variables MAXHHR are missing for some of the stations.</span></span>
+<span><span class="co">##       Closest stations with data will be used to fill existing gaps. MAXHHR will be calculated by PCP*0.38. </span></span>
+<span><span class="co">##  Please use optional function parameters, if you want specific data to be used in filling missing variables for stations.</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Working on station ID1:sta_x1_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID2:sta_x1_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID3:sta_x1_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID4:sta_x1_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID5:sta_x1_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID6:sta_x1_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID7:sta_x2_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID8:sta_x2_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID9:sta_x2_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID10:sta_x2_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID11:sta_x2_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID12:sta_x2_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID13:sta_x2_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID14:sta_x2_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID15:sta_x2_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID16:sta_x2_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID17:sta_x2_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID18:sta_x2_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID19:sta_x2_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID20:sta_x2_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID21:sta_x2_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID22:sta_x2_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID23:sta_x3_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID24:sta_x3_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID25:sta_x3_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID26:sta_x3_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID27:sta_x3_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID28:sta_x3_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID29:sta_x3_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID30:sta_x3_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID31:sta_x3_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID32:sta_x3_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID33:sta_x3_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID34:sta_x3_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID35:sta_x3_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID36:sta_x3_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID37:sta_x3_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID38:sta_x3_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID39:sta_x3_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID40:sta_x4_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID41:sta_x4_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID42:sta_x4_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID43:sta_x4_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID44:sta_x4_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID45:sta_x4_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID46:sta_x4_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID47:sta_x4_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID48:sta_x4_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID49:sta_x4_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID50:sta_x4_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID51:sta_x4_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID52:sta_x4_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID53:sta_x4_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID54:sta_x4_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID55:sta_x4_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID56:sta_x4_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID57:sta_x5_y1"</span></span>
+<span><span class="co">## [1] "Working on station ID58:sta_x5_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID59:sta_x5_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID60:sta_x5_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID61:sta_x5_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID62:sta_x5_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID63:sta_x5_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID64:sta_x5_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID65:sta_x5_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID66:sta_x5_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID67:sta_x5_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID68:sta_x5_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID69:sta_x5_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID70:sta_x5_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID71:sta_x5_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID72:sta_x5_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID73:sta_x5_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID74:sta_x6_y2"</span></span>
+<span><span class="co">## [1] "Working on station ID75:sta_x6_y3"</span></span>
+<span><span class="co">## [1] "Working on station ID76:sta_x6_y4"</span></span>
+<span><span class="co">## [1] "Working on station ID77:sta_x6_y5"</span></span>
+<span><span class="co">## [1] "Working on station ID78:sta_x6_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID79:sta_x6_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID80:sta_x6_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID81:sta_x6_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID82:sta_x6_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID83:sta_x6_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID84:sta_x6_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID85:sta_x6_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID86:sta_x6_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID87:sta_x6_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID88:sta_x6_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID89:sta_x6_y17"</span></span>
+<span><span class="co">## [1] "Working on station ID90:sta_x7_y6"</span></span>
+<span><span class="co">## [1] "Working on station ID91:sta_x7_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID92:sta_x7_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID93:sta_x7_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID94:sta_x7_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID95:sta_x7_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID96:sta_x7_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID97:sta_x7_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID98:sta_x7_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID99:sta_x7_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID100:sta_x7_y16"</span></span>
+<span><span class="co">## [1] "Working on station ID101:sta_x8_y7"</span></span>
+<span><span class="co">## [1] "Working on station ID102:sta_x8_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID103:sta_x8_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID104:sta_x8_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID105:sta_x8_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID106:sta_x8_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID107:sta_x8_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID108:sta_x8_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID109:sta_x8_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID110:sta_x9_y8"</span></span>
+<span><span class="co">## [1] "Working on station ID111:sta_x9_y9"</span></span>
+<span><span class="co">## [1] "Working on station ID112:sta_x9_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID113:sta_x9_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID114:sta_x9_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID115:sta_x9_y13"</span></span>
+<span><span class="co">## [1] "Working on station ID116:sta_x9_y14"</span></span>
+<span><span class="co">## [1] "Working on station ID117:sta_x9_y15"</span></span>
+<span><span class="co">## [1] "Working on station ID118:sta_x10_y10"</span></span>
+<span><span class="co">## [1] "Working on station ID119:sta_x10_y11"</span></span>
+<span><span class="co">## [1] "Working on station ID120:sta_x10_y12"</span></span>
+<span><span class="co">## [1] "Working on station ID121:sta_x10_y13"</span></span>
+<span><span class="co">## [1] "weather-wgn.cli file was successfully written."</span></span>
+<span><span class="co">## [1] "weather-sta.cli file was successfully written."</span></span>
+<span><span class="co">## [1] "pcp files were successfully written."</span></span>
+<span><span class="co">## [1] "tmp files were successfully written."</span></span>
+<span><span class="co">## [1] "slr files were successfully written."</span></span>
+<span><span class="co">## [1] "hmd files were successfully written."</span></span>
+<span><span class="co">## [1] "wnd files were successfully written."</span></span>
+<span><span class="co">## [1] "Updated weather stations in aquifer.con file."</span></span>
+<span><span class="co">## [1] "Updated weather stations in hru.con file."</span></span>
+<span><span class="co">## [1] "Updated weather stations in reservoir.con file."</span></span>
+<span><span class="co">## [1] "Updated weather stations in chandeg.con file."</span></span>
+<span><span class="co">## [1] "Updated weather stations in rout_unit.con file."</span></span>
+<span><span class="co">## [1] "time.sim file was successfully written."</span></span>
+<span><span class="co">## [1] "Climate data were successfully written in cs10_txt"</span></span></code></pre>
+<pre><code><span><span class="co">##            used  (Mb) gc trigger  (Mb) max used  (Mb)</span></span>
+<span><span class="co">## Ncells  5662552 302.5   10631591 567.8 10631591 567.8</span></span>
+<span><span class="co">## Vcells 19389343 148.0   31098546 237.3 31098546 237.3</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="reanalysis-to-swat-input-pipeline">Reanalysis to SWAT+ input pipeline<a class="anchor" aria-label="anchor" href="#reanalysis-to-swat-input-pipeline"></a>
@@ -203,24 +549,120 @@ needs to be installed before use. This can be done <a href="https://biopsichas.g
 <p>The aforementioned three function can be linked together with the
 <code><a href="../reference/swat_weather_input_chain.html">swat_weather_input_chain()</a></code>. It simply runs the three
 functions in parallel, allowing you to generate and apply weather data
-to your SWAT+ project with one line of code.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+to your SWAT+ project with one line of code. For run-time’s sake, the
+following code is not executed here.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/swat_weather_input_chain.html">swat_weather_input_chain</a></span><span class="op">(</span></span>
-<span>  area <span class="op">=</span> <span class="st">"C:/Users/mosh/Documents/skuterud_wb.shp"</span>,</span>
-<span>  swat_setup <span class="op">=</span> <span class="st">"C:/path/to/swat/txtinout"</span>,</span>
-<span>  directory <span class="op">=</span> <span class="st">"path/to/working/directory"</span>,</span>
+<span>  area <span class="op">=</span> <span class="st">"cs10_basin/cs10_basin.shp"</span>,</span>
+<span>  swat_setup <span class="op">=</span> <span class="st">"cs10_txt"</span>,</span>
 <span>  from <span class="op">=</span> <span class="st">"2013-01-01 00:00:00"</span>,</span>
 <span>  to <span class="op">=</span> <span class="st">"2022-12-31 00:00:00"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="ncdf4-and-cwatm">NCDF4 and CWATM<a class="anchor" aria-label="anchor" href="#ncdf4-and-cwatm"></a>
+</h3>
+<p>To provide input files for the <a href="https://cwatm.iiasa.ac.at/" class="external-link">CWATM model</a>, downloading the
+reanalysis files needed to be done in such a way that the original
+NetCDF4 format (*.nc) was retained. This can be done using the regular
+<code><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3()</a></code> function, if the flag
+<code>ncdf</code> is set to <code>TRUE</code> as shown below:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cwatm_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"precipitation_amount"</span>,</span>
+<span>  <span class="st">"air_temperature_2m"</span>,</span>
+<span>  <span class="st">"relative_humidity_2m"</span>,</span>
+<span>  <span class="st">"air_pressure_at_sea_level"</span>,</span>
+<span>  <span class="st">"integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time"</span>,</span>
+<span>  <span class="st">"integral_of_surface_downwelling_longwave_flux_in_air_wrt_time"</span>,</span>
+<span>  <span class="st">"wind_speed_10m"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="va">download_path</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_metno_reanalysis3.html">get_metno_reanalysis3</a></span><span class="op">(</span></span>
+<span>  area <span class="op">=</span> <span class="va">cs10_basin</span>,</span>
+<span>  mn_variables <span class="op">=</span> <span class="va">cwatm_vars</span>,</span>
+<span>  fromdate <span class="op">=</span> <span class="st">"2015-01-01 00:00:00"</span>,</span>
+<span>  todate <span class="op">=</span> <span class="st">"2015-01-03 00:00:00"</span>,</span>
+<span>  ncdf <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>  preview <span class="op">=</span> <span class="cn">F</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The NetCDF4 files can be converted to daily resolution using the
+<code><a href="../reference/cwatm_hourly_to_daily_ncdf4.html">cwatm_hourly_to_daily_ncdf4()</a></code> function. Currently this
+function is hard coded to only work with the CWATM variables (hence the
+function prefix). This should be resolved over time to handle any
+reanalysis variables (<a href="https://github.com/moritzshore/miljotools/issues/24" class="external-link">#24</a>).</p>
+<p>In this demonstration, we will again use example files to reduce run
+times</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/ncdf_example.zip"</span>, destfile <span class="op">=</span> <span class="st">"ncdf4_example.zip"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span>zipfile <span class="op">=</span> <span class="st">"ncdf4_example.zip"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">daily_path</span> <span class="op">=</span> <span class="fu"><a href="../reference/cwatm_hourly_to_daily_ncdf4.html">cwatm_hourly_to_daily_ncdf4</a></span><span class="op">(</span>inpath <span class="op">=</span> <span class="st">"ncdf_example"</span>,</span>
+<span>                            outpath <span class="op">=</span> <span class="st">"ncdf_daily"</span>,</span>
+<span>                            verbose <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #BBBB00; font-weight: bold;">cwatm_hourly_to_daily_ncdf4</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; converting day... </span><span style="color: #000000; text-decoration: underline;">20150101 (33.33%)</span><span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #BBBB00; font-weight: bold;">cwatm_hourly_to_daily_ncdf4</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; converting day... </span><span style="color: #000000; text-decoration: underline;">20150102 (66.67%)</span></span></span></code></pre>
+<pre><code><span><span class="co">## Warning in cwatm_hourly_to_daily_ncdf4(inpath = "ncdf_example", outpath =</span></span>
+<span><span class="co">## "ncdf_daily", : last day of download is incomplete, skipping this day</span></span></code></pre>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #BBBB00; font-weight: bold;">cwatm_hourly_to_daily_ncdf4</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; finished! </span></span></span></code></pre>
+<p>To convert the daily ncdf4 files into CWATM compatible input files,
+one can use the <code><a href="../reference/convert_to_cwatm.html">convert_to_cwatm()</a></code> function (working
+prototype, nearly finished).</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/convert_to_cwatm.html">convert_to_cwatm</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">daily_path</span>, output <span class="op">=</span> <span class="st">"cwatm"</span>, verbose <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating output directory... </span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; parsing time dimension defitions... </span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; loading files... </span><span style="color: #000000; text-decoration: underline;">2</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; defining dimensions... </span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">pr_nor2</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">tas_nor2</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">tasmax_nor2</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">tasmin_nor2</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">hurs_nor</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">ps_nor</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">rsds_nor</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">rlds_nor</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; creating... </span><span style="color: #000000; text-decoration: underline;">wind</span></span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; closing... </span><span style="color: #000000; text-decoration: underline;">2 files</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="color: #000000; background-color: #00BBBB; font-weight: bold;">convert_to_cwatm</span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; finished! </span></span></span></code></pre>
+<pre><code><span><span class="co">## [1] "cwatm"</span></span></code></pre>
+<p>Having a look at the data:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ncfile</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_open.html" class="external-link">nc_open</a></span><span class="op">(</span><span class="st">"cwatm/tasmax_nor2.nc"</span><span class="op">)</span></span>
+<span><span class="va">tasmax</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">ncfile</span>, <span class="st">"tasmax_nor2"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span><span class="va">tasmax</span><span class="op">[</span>,,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p><img src="metno_reanal_files/figure-html/ncimage-1.png" width="700"></p>
+<div class="section level4">
+<h4 id="cleanup">Cleanup<a class="anchor" aria-label="anchor" href="#cleanup"></a>
+</h4>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: dplyr</span></span></code></pre>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'dplyr'</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     filter, lag</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:base':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     intersect, setdiff, setequal, union</span></span></code></pre>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"krak_daily"</span>, <span class="st">"cwatm"</span>, <span class="st">"cs10_txt"</span>, <span class="st">"cs10_basin"</span>, <span class="st">"miljotools_swat_backup"</span>, <span class="st">"ncdf_daily"</span>, <span class="st">"ncdf_example"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"met_no_dl*"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span>recursive <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.remove</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"krak_daily.zip"</span>, <span class="st">"cs10_txt.zip"</span>, <span class="st">"cs10_basin.zip"</span>, <span class="st">"ncdf4_example.zip"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] TRUE TRUE TRUE TRUE</span></span></code></pre>
+</div>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -233,16 +675,16 @@ to your SWAT+ project with one line of code.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
