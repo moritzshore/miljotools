@@ -386,18 +386,20 @@ get_metno_reanalysis3 <-
       ### This is where the switch to netcdf download should take place
       ### if the user opts for it! (ncdf4)
       if(ncdf){
-        savefiles = paste(directory, foldername, filenames, sep = "/")
+        # savefiles = paste(directory, foldername, filenames, sep = "/")
         # The commented out funciton is now legacy code because it did not work
         # with projections. the new attempt uses `download_metnordic()`
         # read_write_ncdf(url = full_urls, savefiles = savefiles,
         #                 foldername = foldername, directory = directory,
         #                 verbose = preview)
-        paste0(directory, "/mndl") %>% dir.create()
+        print("downloading.. switch to the 'Plots' tab to see data")
+        dldir <-  paste0(directory, "/MetNordicDownload", format(Sys.time(),"%m_%d_%Y_%H-%M-%S"), "/")
+        dir.create(dldir)
         for (url in full_urls) {
           paste0(directory, "/mndl")
           download_metnordic(
             url = url,
-            outdir = paste0(directory, "/mndl"),
+            outdir = dldir,
             vars = mn_variables,
             overwrite = FALSE,
             preview = verbose

@@ -19,15 +19,25 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
-aggregate_day_metnodric <- function(directory, day, outpath, overwrite = TRUE, preview = TRUE) {
+aggregate_day_metnodric <- function(directory, variable, day, outpath, overwrite = TRUE, preview = TRUE) {
+  # testing par set
+  # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
+  # day = "20150902"
+  # variable = "precipitation_amount"
+  # outpath = "../staging_ground/test_miljotools/mndl_day"
+
   # START
+  # filter to day:
   short_fp <- list.files(directory, pattern = day)
   long_fp <- list.files(directory, pattern = day, full.names = T)
+  # filter to variable
+  short_fp <- short_fp[grepl(x = short_fp, pattern = variable) %>% which()]
+  long_fp <- long_fp[grepl(x = long_fp, pattern = variable) %>% which()]
+
   dir.create(outpath)
 
-
   if(length(short_fp)!= 24){
-    warning("only", length(short), "hours detected on", day, "skipping...")
+    warning("only", length(short_fp), "hours detected on", day, "skipping...")
     return(FALSE)
   }
 
@@ -62,14 +72,36 @@ aggregate_day_metnodric <- function(directory, day, outpath, overwrite = TRUE, p
       return(FALSE)
     }
   }
-
+  ### SWITCH CASE
+  # here we need to hard code what should be done with each variable
   # precipitation should be summed
-  if (var_name == "precipitation_amount") {
+  if (var_name == "air_pressure_at_sea_level") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if(var_name == "air_temperature_2m") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "cloud_area_fraction") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time") {
     flat_cube <- rowSums(datacube, dims = 2)
+  }else if (var_name == "precipitation_amount") {
+    flat_cube <- rowSums(datacube, dims = 2)
+  }else if (var_name == "relative_humidity_2m	") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "wind_speed_10m") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "wind_direction_10m") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "altitude") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else if (var_name == "land_area_fraction") {
+    flat_cube <- rowMeans(datacube, dims = 2)
+  }else{
+    stop("variable either does not exist or is not yet hard coded, open an issue on the GitHub!")
   }
+
   # plot
   if (preview) {
-    print(flat_cube %>% image(main = paste0(var_name, " ", day)))
+    image(flat_cube, main = paste0(var_name, " ", day))
   }
 
   ### Elaborate NC file definition scheme: (mostly copied from `download_metnordic()`)

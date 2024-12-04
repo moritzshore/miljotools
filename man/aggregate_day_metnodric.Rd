@@ -6,6 +6,7 @@
 \usage{
 aggregate_day_metnodric(
   directory,
+  variable,
   day,
   outpath,
   overwrite = TRUE,
@@ -26,7 +27,7 @@ String: path to written file
 }
 \description{
 This function takes 24 hourly files from the same day and converts them to
-an hourly format
+an daily format
 }
 \examples{
 # TODO
