@@ -83,14 +83,16 @@ download_metnordic <- function(url, outdir, vars, overwrite = FALSE, preview = T
     dlname <- ncatt_get(ncin,variable,"standard_name")
     dunits <- ncatt_get(ncin,variable,"units")
     current_var_def <- ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
-    print(paste0("DEBUG: defining ", variable))
+
+    date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
+    print(paste0("DEBUG: ", variable, " ", date))
+
     ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,proj_def),force_v4=TRUE)
 
     # Getting variable
     var_array <- ncvar_get(ncin,variable)
     # print a preview of the file
     if(preview){
-      date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
       grid <- expand.grid(x=x, y=y)
       cutpts <- seq(min(var_array),max(var_array), length = 10)
       if(all(cutpts == 0)){ cutpts <- c(1:10)}
