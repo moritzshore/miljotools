@@ -393,7 +393,7 @@ get_metno_reanalysis3 <-
         #                 foldername = foldername, directory = directory,
         #                 verbose = preview)
         print("downloading.. switch to the 'Plots' tab to see data")
-        dldir <-  paste0(directory, "/MetNordicDownload", format(Sys.time(),"%m_%d_%Y_%H-%M-%S"), "/")
+        dldir <-  paste0(directory, "/metnordicdownalod", format(Sys.time(),"%m_%d_%Y_%H-%M-%S"), "/")
         dir.create(dldir)
         for (url in full_urls) {
           paste0(directory, "/mndl")

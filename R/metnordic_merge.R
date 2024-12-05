@@ -4,7 +4,7 @@
 #' variable. The input data should be the output data of `metnordic_aggregate()`
 #'
 #' @param folderpath outpath of files from `metnordic_aggregate()`
-#' @param variable MetNordic variable to be used
+#' @param variable MetNordic variable to be used (don't forget suffix such as 'mean', 'sum', 'min', or 'max')
 #' @param outpath Folderpath where to write files
 #' @param overwrite overwrite existing file?
 #'
@@ -60,7 +60,7 @@ metnordic_merge <- function(folderpath, variable, outpath, overwrite = FALSE) {
   # create the file path to be written, check if it already exists. if the
   # overwrite flag is enabled, then the existing file is delted to be created
   # again. if not, the function skips this file.
-  write_fp <- paste0("met_analysis_1_0km_nordic_", variable, "_", daterange, ".nc")
+  write_fp <- paste0("MetNordic_", variable, "_", daterange, ".nc")
   full_write_fp <- paste0(outpath, "/", write_fp)
   dir.create(outpath, showWarnings = F)
   if(file.exists(full_write_fp)){
