@@ -7,6 +7,7 @@
 metnordic_aggregate(
   directory,
   variable,
+  method,
   day,
   outpath,
   overwrite = TRUE,
@@ -15,6 +16,8 @@ metnordic_aggregate(
 }
 \arguments{
 \item{directory}{String: Path to the source files}
+
+\item{method}{method of aggregation (mean, min, max, sum)}
 
 \item{day}{String: day to convert (ie. "20150901")}
 

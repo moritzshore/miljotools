@@ -5,6 +5,7 @@
 #'
 #' @param directory String: Path to the source files
 #' @param day String: day to convert (ie. "20150901")
+#' @param method method of aggregation (mean, min, max, sum)
 #' @param outpath String: path to directory of to be created files
 #' @param preview Logical: plot map?
 #'
@@ -19,7 +20,7 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
-metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = TRUE, preview = TRUE) {
+metnordic_aggregate <- function(directory, variable, method, day, outpath, overwrite = TRUE, preview = TRUE) {
   # testing par set
   # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
   # day = "20150902"
@@ -60,7 +61,7 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
 
   # this will break if proper file structure is not maintained!
   var_name <-  (templatenc$var %>% names())[1]
-  write_fp <- paste0("met_analysis_1_0km_nordic_", day, "-", var_name, ".nc")
+  write_fp <- paste0("met_analysis_1_0km_nordic_", day, "_", var_name, "_", method, ".nc")
   full_write_fp <- paste0(outpath, "/", write_fp)
   if(file.exists(full_write_fp)){
     if(overwrite){
@@ -72,32 +73,18 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
       return(FALSE)
     }
   }
-  ### SWITCH CASE
-  # here we need to hard code what should be done with each variable
-  # precipitation should be summed
-  # TODO: add add min max mean sum as a par instead of doing this switch case
-  if (var_name == "air_pressure_at_sea_level") {
+
+  # here the method of aggregation for the data cube is implemented.
+  if (method == "mean") {
     flat_cube <- rowMeans(datacube, dims = 2)
-  }else if(var_name == "air_temperature_2m") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "cloud_area_fraction") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time") {
+  } else if (method == "sum") {
     flat_cube <- rowSums(datacube, dims = 2)
-  }else if (var_name == "precipitation_amount") {
-    flat_cube <- rowSums(datacube, dims = 2)
-  }else if (var_name == "relative_humidity_2m	") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "wind_speed_10m") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "wind_direction_10m") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "altitude") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else if (var_name == "land_area_fraction") {
-    flat_cube <- rowMeans(datacube, dims = 2)
-  }else{
-    stop("variable either does not exist or is not yet hard coded, open an issue on the GitHub!")
+  } else if (method == "max") {
+    flat_cube <- apply(datacube, MARGIN = c(1, 2), FUN = max)
+  } else if (method == "min") {
+    flat_cube <- apply(datacube, MARGIN = c(1, 2), FUN = min)
+  } else{
+    stop("parameter 'method' not supported! please only use min, max, mean or sum")
   }
 
   # plot
@@ -135,9 +122,17 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
   dlname <- "Lambert_Conform_Conical"
   proj_def <- ncvar_def("lambert_conformal_conic","1",NULL,NULL,longname=dlname,prec="char")
 
+  var_name_andmethod <- paste0(var_name,"_", method) # this will save the aggregation method in the var name
 
   dunits <- ncatt_get(templatenc,var_name,"units")
-  current_var_def <- ncvar_def(var_name,dunits$value,list(xdim,ydim,timedim),fillvalue,var_name,prec="double")
+  current_var_def <- ncvar_def(
+    name = var_name_andmethod,
+    units = dunits$value,
+    dim = list(xdim, ydim, timedim),
+    missval = fillvalue,
+    longname = var_name,
+    prec = "double"
+  )
 
   nc_close(templatenc)
 
@@ -156,8 +151,8 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
   ncatt_put(ncout,"y","axis","Y")
   ncatt_put(ncout,"y","standard_name","projection_y_coordinate")
   ncatt_put(ncout,"y","_CoordinateAxisType","GeoY")
-  ncatt_put(ncout, var_name,"grid_mapping", "lambert_conformal_conic")
-  ncatt_put(ncout, var_name,"coordinates", "lat lon")
+  ncatt_put(ncout, var_name_andmethod,"grid_mapping", "lambert_conformal_conic")
+  ncatt_put(ncout, var_name_andmethod,"coordinates", "lat lon")
 
   # put the CRS attributes
   projname <- "lambert_conformal_conic"
@@ -181,7 +176,7 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
   ncatt_put(ncout,"lambert_conformal_conic","_CoordinateAxisTypes","GeoX GeoY")
 
   # add global attributes
-  ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",var_name, "(daily)"))
+  ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",var_name_andmethod, "(daily)"))
   ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
   ncatt_put(ncout,0,"institution",ins_text)
   history <- paste("Creaed ", date())
