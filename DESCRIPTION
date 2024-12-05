@@ -20,6 +20,7 @@ Imports:
     ggplot2,
     ggrepel,
     ggtern,
+    lattice,
     lubridate,
     mapview,
     ncdf4,

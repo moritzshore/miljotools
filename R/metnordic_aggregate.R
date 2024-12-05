@@ -5,7 +5,7 @@
 #'
 #' @param directory String: Path to the source files
 #' @param day String: day to convert (ie. "20150901")
-#' @param outpath String: path to write file
+#' @param outpath String: path to directory of to be created files
 #' @param preview Logical: plot map?
 #'
 #' @return String: path to written file
@@ -34,7 +34,7 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
   short_fp <- short_fp[grepl(x = short_fp, pattern = variable) %>% which()]
   long_fp <- long_fp[grepl(x = long_fp, pattern = variable) %>% which()]
 
-  dir.create(outpath)
+  dir.create(outpath, showWarnings = F)
 
   if(length(short_fp)!= 24){
     warning("only", length(short_fp), "hours detected on", day, "skipping...")
