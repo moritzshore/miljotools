@@ -23,7 +23,7 @@
 #' @importFrom RColorBrewer brewer.pal
 metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
   # url <- "https://thredds.met.no/thredds/dodsC/metpparchivev3/2012/09/01/met_analysis_1_0km_nordic_20120901T10Z.nc?x[448:1:652],y[868:1:1071],latitude[868:1:1071][448:1:652],longitude[868:1:1071][448:1:652],altitude[868:1:1071][448:1:652],air_temperature_2m[0:1:0][868:1:1071][448:1:652],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][868:1:1071][448:1:652],relative_humidity_2m[0:1:0][868:1:1071][448:1:652],precipitation_amount[0:1:0][868:1:1071][448:1:652],wind_speed_10m[0:1:0][868:1:1071][448:1:652],wind_direction_10m[0:1:0][868:1:1071][448:1:652]"
-
+  # TODO: add nc_open_retry
 
   # create filename and check if it already does. if it does, do not download.
   filename <- ((url %>% stringr::str_split(pattern = ".nc", simplify = T))[1,1] %>% stringr::str_split("/", simplify = T)) %>% as.list() %>% last()
