@@ -388,7 +388,7 @@ get_metno_reanalysis3 <-
       if(ncdf){
         # savefiles = paste(directory, foldername, filenames, sep = "/")
         # The commented out funciton is now legacy code because it did not work
-        # with projections. the new attempt uses `download_metnordic()`
+        # with projections. the new attempt uses `metnordic_download()`
         # read_write_ncdf(url = full_urls, savefiles = savefiles,
         #                 foldername = foldername, directory = directory,
         #                 verbose = preview)
@@ -397,7 +397,7 @@ get_metno_reanalysis3 <-
         dir.create(dldir)
         for (url in full_urls) {
           paste0(directory, "/mndl")
-          download_metnordic(
+          metnordic_download(
             url = url,
             outdir = dldir,
             vars = mn_variables,
