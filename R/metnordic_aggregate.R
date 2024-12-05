@@ -19,7 +19,7 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
-aggregate_day_metnodric <- function(directory, variable, day, outpath, overwrite = TRUE, preview = TRUE) {
+metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = TRUE, preview = TRUE) {
   # testing par set
   # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
   # day = "20150902"

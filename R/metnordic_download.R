@@ -21,7 +21,7 @@
 #' @importFrom stringr str_remove str_replace str_replace
 #' @importFrom lattice levelplot
 #' @importFrom RColorBrewer brewer.pal
-download_metnordic <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
+metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
   # url <- "https://thredds.met.no/thredds/dodsC/metpparchivev3/2012/09/01/met_analysis_1_0km_nordic_20120901T10Z.nc?x[448:1:652],y[868:1:1071],latitude[868:1:1071][448:1:652],longitude[868:1:1071][448:1:652],altitude[868:1:1071][448:1:652],air_temperature_2m[0:1:0][868:1:1071][448:1:652],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][868:1:1071][448:1:652],relative_humidity_2m[0:1:0][868:1:1071][448:1:652],precipitation_amount[0:1:0][868:1:1071][448:1:652],wind_speed_10m[0:1:0][868:1:1071][448:1:652],wind_direction_10m[0:1:0][868:1:1071][448:1:652]"
 
 
