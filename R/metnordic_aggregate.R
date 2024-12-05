@@ -75,6 +75,7 @@ metnordic_aggregate <- function(directory, variable, day, outpath, overwrite = T
   ### SWITCH CASE
   # here we need to hard code what should be done with each variable
   # precipitation should be summed
+  # TODO: add add min max mean sum as a par instead of doing this switch case
   if (var_name == "air_pressure_at_sea_level") {
     flat_cube <- rowMeans(datacube, dims = 2)
   }else if(var_name == "air_temperature_2m") {
