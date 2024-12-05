@@ -2,11 +2,11 @@
 #'
 #' This function retrieves the coordinate window for downloading MetNordic files
 #'
-#' @param area_path path to shapefile of extent / point
+#' @param area_path path to shapefile of extent / point (this must have point or polygon geometry!)
 #' @param area_buffer buffer in m to place around extent / point
 #' @param preview Logical: preview the coord window?
 #'
-#' @return
+#' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
 #'
 #' @examples
@@ -15,7 +15,7 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
 
   # get a base file to find the right x y
   filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
-  ncin <- nc_open_retry(filename)
+  ncin <- nc_open_stable(filename)
 
 
   x <- ncdf4::ncvar_get(ncin, "x")
@@ -25,15 +25,15 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
 
   # lambert conform conical (the projection used by met reanalysis)
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
-  proj_crs <- sf::st_crs(projection) # replace with sf::crs()
-  # load in the shape file
+  proj_crs <- sf::st_crs(projection)
   area <- sf::read_sf(area_path)
   # Transform the shapefile to the metno projection
   area <- sf::st_transform(area, crs = proj_crs)
 
-  # get the geometry type
+  # get the geometry type (either point or polygon)
   area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
 
+  # routine for if a point was passed
   if (area_attr == "sfc_POINT") {
     coordinate <- sf::st_coordinates(area)
     point_x <- coordinate[1]
@@ -70,12 +70,17 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
     return(list(index_x = index_x, index_y = index_y))
 
   } else{
-    # do the polygon stuff
+    # routine for if the polygon was passed.
+    # this warns you if you might not have the right geometry
     if (area_attr != "sfc_POLYGON"){warning("Shapefile type not 'sfc_POLYGON', problems may occur..")}
-    # drop the Z coordinate
+    # drop the Z coordinate (extra stability)
     area <- sf::st_zm(area)
     # Buffer the shapefile to the user defined amount
-    area_buff <- sf::st_buffer(x = area, dist = area_buffer)
+    if(area_buffer > 0){
+      area_buff <- sf::st_buffer(x = area, dist = area_buffer)
+    } else{
+      area_buff <- area
+    }
     # get the bounding box of this shape
     wsbox <- sf::st_bbox(area_buff)
     # Grabbing the corners
@@ -108,15 +113,12 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
     # find the index of the minimum
     index_xmin <- which(min_diff_xmin == x_mn_diff)
     index_xmax <- which(min_diff_xmax == x_mx_diff)
-
     index_ymin <- which(min_diff_ymin == y_mn_diff)
     index_ymax <- which(min_diff_ymax == y_mx_diff)
 
     return(list(index_xmin = index_xmin,
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,
-                index_ymax = index_ymax,
-                area_buff = area_buff, area_shp = area
-    ))
+                index_ymax = index_ymax))
   }
 }
