@@ -9,7 +9,7 @@
 #' @return nothing
 #' @keywords internal
 #'
-#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan
+#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan white
 #'
 #'
 #'
@@ -22,7 +22,7 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
   }else if(function_name == "thermopluviogram"){
     f_theme = bgWhite$cyan$bold
   } else{
-    f_theme <- bgCyan$black$bold
+    f_theme <- bgCyan$white$bold
 
   }
   text_theme <- italic$yellow

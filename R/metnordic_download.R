@@ -85,8 +85,6 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     current_var_def <- ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
 
     date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
-    print(paste0("DEBUG: ", date, " ", variable))
-
     ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,proj_def),force_v4=TRUE)
 
     # Getting variable
@@ -142,13 +140,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     history <- paste("Creaed by miljotools version",packageVersion("miljotools"), "on", date())
     ncatt_put(ncout,0,"history",history)
     ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
-
     ncatt_put(ncout,0,"Conventions","CF=1.6")
     ncatt_put(ncout,0,"source URL",url)
-
-
-    # Get a summary of the created file:
-    # if(preview){print(ncout)}
 
     # close the file, writing data to disk
     nc_close(ncout)
