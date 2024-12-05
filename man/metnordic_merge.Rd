@@ -9,7 +9,7 @@ metnordic_merge(folderpath, variable, outpath, overwrite = FALSE)
 \arguments{
 \item{folderpath}{outpath of files from \code{metnordic_aggregate()}}
 
-\item{variable}{MetNordic variable to be used}
+\item{variable}{MetNordic variable to be used (don't forget suffix such as 'mean', 'sum', 'min', or 'max')}
 
 \item{outpath}{Folderpath where to write files}
 
