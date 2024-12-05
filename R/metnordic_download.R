@@ -85,7 +85,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     current_var_def <- ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
 
     date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
-    print(paste0("DEBUG: ", variable, " ", date))
+    print(paste0("DEBUG: ", date, " ", variable))
 
     ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,proj_def),force_v4=TRUE)
 
