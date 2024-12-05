@@ -1,4 +1,17 @@
-get_coord_window <- function(area_path, area_buffer, preview){
+#' Get MetNordic Coordinate Window
+#'
+#' This function retrieves the coordinate window for downloading MetNordic files
+#'
+#' @param area_path path to shapefile of extent / point
+#' @param area_buffer buffer in m to place around extent / point
+#' @param preview Logical: preview the coord window?
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' # TODO
+metnordic_coordwindow <- function(area_path, area_buffer, preview){
 
   # get a base file to find the right x y
   filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
