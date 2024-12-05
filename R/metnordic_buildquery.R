@@ -1,25 +1,44 @@
-build_query <- function(bounding_coords, mn_variables, fromdate, todate,
+#' Build MetNordic Download Query
+#'
+#' This function builds the URL queries for downloading MetNordic Data through
+#' the OPENDAP protocol. The requirements for this function to work are the
+#' bounding coordinates as divined by function `metnordic_coordwindow()`, the
+#' variables of interest, the starting and ending dates and the desired grid
+#' resolution
+#'
+#' @param bounding_coords as determined by `metnordic_coordwindow()`
+#' @param mn_variables MetNordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
+#' @param fromdate ie. "2019-01-01 00:00:00"
+#' @param todate ie. "2020-12-31 23:00:00"
+#' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
+#' @param verbose print to console?
+#'
+#' @returns charater vector of all the OPENDAP URLs to download.
+#' @export
+#'
+#' @examples
+#' # TODO
+metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
                         grid_resolution, verbose){
 
   # time step not really needed since the files are individual
   time1 = 0
   time2 = 0
   timestep = 1
-
+  # do point routine if true:
   if(length(bounding_coords) == 2){
-    # do point routine
     x = bounding_coords$index_x
     y = bounding_coords$index_y
-
     x1 = x
     x2 = x
     y1 = y
     y2 = y
     xstep = 1
     ystep = 1
+    # if 4, do polygon routine
+  }else if(length(bounding_coords) == 4){
 
-  }else{
-    # do polygon routine
+    # unpacking the list pack
     index_xmin = bounding_coords$index_xmin
     index_xmax = bounding_coords$index_xmax
     index_ymin = bounding_coords$index_ymin
@@ -29,6 +48,7 @@ build_query <- function(bounding_coords, mn_variables, fromdate, todate,
     # station.
     bbox_width = index_xmax - index_xmin
     bbox_height = index_ymax - index_ymin
+    if(verbose){cat(green(italic("you have a grid of ", black(bold(bbox_width)), "x", black(bold(bbox_height)),"..",bbox_width*bbox_height, "cells\n")))}
     if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
     if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
 
@@ -42,8 +62,8 @@ build_query <- function(bounding_coords, mn_variables, fromdate, todate,
     ystep = grid_resolution
 
     # print grid resolution
-    if(verbose){cat(green(italic("fetching with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
-  }
+    if(verbose){cat(green(italic("generating urls with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+  }else{stop("bounding coords must be either 2 coordiates (point) or 4 (rectangle), you passed:", length(bounding_coords))}
 
   # paste together the vars
   x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
@@ -53,9 +73,6 @@ build_query <- function(bounding_coords, mn_variables, fromdate, todate,
   latitude <- paste0("latitude", y_q, x_q)
   longitude <-  paste0("longitude", y_q, x_q)
   altitude <- paste0("altitude", y_q, x_q)
-
-  # not always available:
-  # notfull <- c("integral_of_surface_downwelling_longwave_flux_in_air_wrt_time")
 
   # paste together the variable query
   var_q <- paste0(mn_variables, time_q, y_q, x_q, collapse = ",")
@@ -94,11 +111,5 @@ build_query <- function(bounding_coords, mn_variables, fromdate, todate,
   # full query URL pasted together
   full_urls <- paste0(header, filepath, filenames, "?", var_query)
 
-  return(list(
-    full_urls = full_urls,
-    filenames = filenames,
-    years = years,
-    daterange = daterange
-  ))
-
+  return(full_urls)
 }
