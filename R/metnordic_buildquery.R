@@ -111,5 +111,5 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
   # full query URL pasted together
   full_urls <- paste0(header, filepath, filenames, "?", var_query)
 
-  return(full_urls)
+  return(list(full_urls = full_urls, filenames = filenames))
 }
