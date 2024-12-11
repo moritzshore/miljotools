@@ -16,8 +16,8 @@
 #' @importFrom dplyr  %>%
 #' @importFrom ncdf4 nc_open ncatt_get
 metnordic_reproject <- function(filepath, outfile, projstring = NULL){
-  # how to reproject the metnorodic to UTM 33 N
-  # filepath <- "../staging_ground/test_miljotools/mndl_day2%/met_analysis_1_0km_nordic_20210101-air_temperature_2m.nc"
+
+  ## Projecting the NC file using terra.
   ncfile <- nc_open(filepath)
   varid <- (ncfile$var %>% names())[1]
   varname <- ncdf4::ncatt_get(ncfile, varid)
@@ -25,6 +25,7 @@ metnordic_reproject <- function(filepath, outfile, projstring = NULL){
   metnordic_crs <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6.371e+06"
   if(is.null(projstring)){
     projstring <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"
+    #projstring <-  "proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0, type=crs" from cwatm
   }
   terra::crs(ncfile_spatrast) <- metnordic_crs
   nc_reprojected <- terra::project(ncfile_spatrast, projstring)
@@ -39,8 +40,7 @@ metnordic_reproject <- function(filepath, outfile, projstring = NULL){
     varname = varid,
     unit = varname$units,
     atts = c(instituion, history),
-    overwrite = TRUE
+    overwrite = TRUE,
   )
-
-  return(test)
+  return(outfile)
 }
