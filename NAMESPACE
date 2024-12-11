@@ -2,6 +2,7 @@
 
 export(classify_soil)
 export(convert_to_cwatm)
+export(cwatm_convert_nc)
 export(cwatm_hourly_to_daily_ncdf4)
 export(get_metno_reanalysis3)
 export(metnordic_aggregate)
