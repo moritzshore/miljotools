@@ -40,7 +40,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
   }
 
   # Open file and grab latitude, longitude, x and  y
-  ncin <- nc_open(url)
+  ncin <- nc_open_stable(url)
+  # TODO: add a check here if the download worked.
   lon <- ncvar_get(ncin,"longitude")
   lat <- ncvar_get(ncin,"latitude")
   nlat <- dim(lat)
