@@ -23,12 +23,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 
 The MET Nordic Reanalysis Dataset is a reanalysis product from the
-[Meteorologisk institutt](https://www.met.no/). You can read more about
+[Meteorologisk institutt](https://www.met.no/). You can [read more about
 the dataset
-[here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset). The
-MET Nordic rerun archive version 3 can be accessed using a dedicated
-function in `miljotools`. Please inform yourself on the limitations of
-reanalysis data before applying this dataset to your needs.
+here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset). The MET
+Nordic rerun archive version 3 can be accessed using dedicated functions
+in `miljotools`. Please inform yourself on the limitations of reanalysis
+data before applying this dataset to your needs.
 
 ```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: The spatial domain of the reanalysis dataset.", out.width="50%", out.height="50%"}
 knitr::include_graphics("../man/figures/domain.png")
@@ -43,9 +43,12 @@ knitr::include_graphics("../man/figures/domain.png")
 -   Following variables: temperature, precipitation, relative humidity,
     wind speed, wind direction, air pressure, cloud area fraction,
     short+longwave radiation (downwelling), land area fraction, and
-    altitude
+    altitude.
 
 ## Usage
+
+There are two main ways of downloading the data, either as seperate .csv
+files for each grid point, or NetCDF "maps" that cover a certain extent.
 
 ### Input
 
@@ -65,9 +68,9 @@ provide the following as input:
 
 Optionally, you can pass additional parameters to buffer your shapefile,
 choose your variables, resolution, to preview the data you are
-downloading, or to download the files in NetCDF format. See the
-[man-page](https://moritzshore.github.io/miljotools/reference/get_metno_reanalysis3.html)
-for more information
+downloading, or to download the files in NetCDF format.
+
+If y
 
 ```{r, fig2, fig.align='center', fig.cap= "Figure 2. Processing the shapefile and downloading relevant grid points.", echo=FALSE, out.height="50%", out.width="50%"}
 knitr::include_graphics("../man/figures/output.png")
