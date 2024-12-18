@@ -16,7 +16,7 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
   # get a base file to find the right x y
   mt_print(preview, function_name = "metnordic_coordwindow","getting base file..")
   filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
-  ncin <- nc_open_stable(filename)
+  ncin <- nc_open_retry(filename)
   if(ncin$filename == filename){
     mt_print(preview, function_name = "metnordic_coordwindow","basefile downloaded.")
   }else{stop("error downloading basefile:\n", filename)}
