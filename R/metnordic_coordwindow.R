@@ -101,41 +101,6 @@ metnordic_coordwindow <- function(area_path, area_buffer, preview){
         mapview::mapview(area_buff, col.region = "red")+
         mapview::mapview(area, col.region = "orange")
       print(plot)
-      # mt_print(preview, function_name = "metnordic_coordwindow","getting basemap...")
-      # europe <- suppressMessages(eurostat::get_eurostat_geospatial(resolution = "01",
-      #                                             nuts_level = "3",
-      #                                             year = 2024, crs = "3857"))
-      # europe_lcc <- sf::st_transform(europe, crs = proj_crs)
-      # mt_print(preview, function_name = "metnordic_coordwindow","finished downloading basemap.")
-      #
-      #
-      #
-      # outer <- (abs(abs(wsbox[['xmin']]) - abs(wsbox[['ymax']]))) * .1 #
-      # mymapextent <- sf::st_bbox(sf::st_buffer(area_buff,outer ))
-      #
-      # xmin_out <- mymapextent[['xmin']]
-      # xmax_out <- mymapextent[['xmax']]
-      # ymin_out <- mymapextent[['ymin']]
-      # ymax_out <- mymapextent[['ymax']]
-      #
-      #
-      # centroid <- suppressWarnings(sf::st_centroid(area))
-      # centroid <-  sf::st_transform(centroid, crs = "EPSG:4326")
-      # center <- st_coordinates(centroid)
-      #
-      # plot_title <- paste("Shapefile middlepoint: \nLON =", center[1], "\nLAT = ", center[2])
-      # mt_print(preview, function_name = "metnordic_coordwindow","plotting...")
-      #
-      # mymap <- ggplot() +
-      #   geom_sf(data = europe_lcc) +
-      #   geom_sf(data = area_buff, mapping = aes(fill = "Buffer")) +
-      #   geom_sf(data = area, mapping = aes(fill = "Area")) +
-      #   coord_sf(xlim = c(xmin_out, xmax_out), ylim = c(ymin_out, ymax_out))+
-      #   theme(legend.title = element_blank(), legend.position = "bottom")+
-      #   ggtitle(plot_title, paste0("Buffer size = ", area_buffer, " m"))
-      #
-      # print(mymap)
-      # mt_print(preview, function_name = "metnordic_coordwindow","finished plotting.")
     }
     mt_print(preview, function_name = "metnordic_coordwindow","calculating coordinate window...")
 
