@@ -40,7 +40,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
   }
 
   # Open file and grab latitude, longitude, x and  y
-  ncin <- nc_open_stable(url)
+  ncin <- nc_open_retry(url)
 
   # if the file download failed, ncin should be null and we can exit the
   # function early.
