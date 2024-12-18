@@ -186,10 +186,6 @@ metnordic_aggregate <- function(directory, variable, method, day, outpath, overw
   ncatt_put(ncout,0,"Conventions","CF=1.6")
   ncatt_put(ncout,0,"source files",directory)
 
-
-  # Get a summary of the created file:
-  # if(preview){print(ncout)}
-
   # close the file, writing data to disk
   nc_close(ncout)
 
