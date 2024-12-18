@@ -21,6 +21,7 @@
 #' @importFrom stringr str_remove str_replace str_replace
 #' @importFrom lattice levelplot
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom grDevices rgb
 metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
   # url <- "https://thredds.met.no/thredds/dodsC/metpparchivev3/2012/09/01/met_analysis_1_0km_nordic_20120901T10Z.nc?x[448:1:652],y[868:1:1071],latitude[868:1:1071][448:1:652],longitude[868:1:1071][448:1:652],altitude[868:1:1071][448:1:652],air_temperature_2m[0:1:0][868:1:1071][448:1:652],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][868:1:1071][448:1:652],relative_humidity_2m[0:1:0][868:1:1071][448:1:652],precipitation_amount[0:1:0][868:1:1071][448:1:652],wind_speed_10m[0:1:0][868:1:1071][448:1:652],wind_direction_10m[0:1:0][868:1:1071][448:1:652]"
   # TODO: add nc_open_retry
@@ -100,7 +101,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
       cutpts <- seq(min(var_array),max(var_array), length = 10)
       if(all(cutpts == 0)){ cutpts <- c(1:10)}
       print(lattice::levelplot(main = paste(date, variable), var_array ~ x * y, data=grid, at=cutpts, cuts=11, pretty=T,
-                               col.regions=c(rgb(1,1,1),RColorBrewer::brewer.pal(9,"Blues"))))
+                               col.regions=c(grDevices::rgb(1,1,1),RColorBrewer::brewer.pal(9,"Blues"))))
     }
 
     # put variables

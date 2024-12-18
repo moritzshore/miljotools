@@ -20,6 +20,8 @@ Imports:
     ggplot2,
     ggrepel,
     ggtern,
+    graphics,
+    grDevices,
     lattice,
     lubridate,
     mapview,

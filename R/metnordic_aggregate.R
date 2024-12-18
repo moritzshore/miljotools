@@ -1,13 +1,15 @@
 #' Convert hourly MetNordic files to daily
 #'
-#' This function takes 24 hourly files from the same day and converts them to
-#' an daily format
+#' This function takes 24 hourly files from the same day and variable and
+#' converts them to a daily format
 #'
 #' @param directory String: Path to the source files
+#' @param variable String: variable to aggregate
 #' @param day String: day to convert (ie. "20150901")
 #' @param method method of aggregation (mean, min, max, sum)
 #' @param outpath String: path to directory of to be created files
 #' @param preview Logical: plot map?
+#' @param overwrite Logical: overwrite existing file?
 #'
 #' @return String: path to written file
 #' @export
@@ -20,6 +22,7 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
+#' @importFrom graphics image
 metnordic_aggregate <- function(directory, variable, method, day, outpath, overwrite = TRUE, preview = TRUE) {
   # testing par set
   # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
@@ -89,7 +92,7 @@ metnordic_aggregate <- function(directory, variable, method, day, outpath, overw
 
   # plot
   if (preview) {
-    image(flat_cube, main = paste0(var_name, " ", day))
+    graphics::image(flat_cube, main = paste0(var_name, " ", day))
   }
 
   ### Elaborate NC file definition scheme: (mostly copied from `download_metnordic()`)

@@ -17,11 +17,15 @@ metnordic_aggregate(
 \arguments{
 \item{directory}{String: Path to the source files}
 
+\item{variable}{String: variable to aggregate}
+
 \item{method}{method of aggregation (mean, min, max, sum)}
 
 \item{day}{String: day to convert (ie. "20150901")}
 
 \item{outpath}{String: path to directory of to be created files}
+
+\item{overwrite}{Logical: overwrite existing file?}
 
 \item{preview}{Logical: plot map?}
 }
@@ -29,8 +33,8 @@ metnordic_aggregate(
 String: path to written file
 }
 \description{
-This function takes 24 hourly files from the same day and converts them to
-an daily format
+This function takes 24 hourly files from the same day and variable and
+converts them to a daily format
 }
 \examples{
 # TODO
