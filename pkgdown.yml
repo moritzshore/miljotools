@@ -5,4 +5,7 @@ articles:
   metno_reanal: metno_reanal.html
   Norwegian_Soil_Classification: Norwegian_Soil_Classification.html
   thermopluviograms: thermopluviograms.html
-last_built: 2024-10-30T12:00Z
+last_built: 2024-12-19T22:33Z
+urls:
+  reference: https://moritzshore.github.io/miljotools/reference
+  article: https://moritzshore.github.io/miljotools/articles
