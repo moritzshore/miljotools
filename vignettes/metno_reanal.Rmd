@@ -12,7 +12,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-runmetnovig = F
+runmetnovig = TRUE # runs the vignette code or not. only enable for when you want to release a new package version, since it takes a long time to run. 
 ```
 
 [Author]{.underline}: Moritz Shore
@@ -206,7 +206,7 @@ Here, an example for air temperature on May 15-16th, with 1x1
 resolution. This function returns the URLs and the file names of the
 to-be-downloaded files.
 
-```{r, eval = runmetnovig}
+```{r buildquery, eval = runmetnovig}
 urls <- metnordic_buildquery(
   bounding_coords = box,
   mn_variables = c("air_temperature_2m", "precipitation_amount"),
@@ -376,7 +376,7 @@ a function later on:
 require(doParallel)
 ```
 
-```{r, eval = runmetnovig}
+```{r, agg_metno, eval = runmetnovig}
 ### Aggregating to daily resolution: ----
 aggr_path = paste0(mydir, "/aggregated")
 
@@ -392,7 +392,7 @@ if(length(already_agged) > 0){
   some_days <- all_days
 }
 
-cores <- detectCores() - 2
+cores <- 2
 mt_print(TRUE, "MetNordic Aggregation", "Aggregating on:", paste(cores, "threads"))
 cl <- makeCluster(cores,  outfile="")
 registerDoParallel(cl)
@@ -559,7 +559,7 @@ swat_weather_input_chain(
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-require(magrittr)
+require(dplyr)
 unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "cs10point", "miljotools_swat_backup", "download", "merged", "aggregated", "cwatm_ready", "projected"), recursive = T)
 
 list.files(pattern = "met_no_dl*") %>% unlink(recursive = T)
