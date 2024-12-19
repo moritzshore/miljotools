@@ -1,12 +1,21 @@
-#' Convert hourly MetNordic files to daily
+#' Convert hourly MET Nordic files to daily
 #'
 #' This function takes 24 hourly files from the same day and variable and
-#' converts them to a daily format
+#' converts them to a daily format. You have the choice of four different
+#' aggregation methods: min, max, mean, and sum.
 #'
+#' This function is designed to take input from `metnordic_download()` and
+#' provides input for `metnordic_merge()`
+#'
+#' Code largely adapted from this handy guide:
+#' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
+#' from Pat Bartlein, bartlein@uoregon.edu
+#'
+#' @seealso [metnordic_merge()] [metnordic_download()]
 #' @param directory String: Path to the source files
-#' @param variable String: variable to aggregate
-#' @param day String: day to convert (ie. "20150901")
-#' @param method method of aggregation (mean, min, max, sum)
+#' @param variable String: MET Nordic variable to aggregate (ie. "precipitation_amount", [(see more)](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
+#' @param day String: day to convert ("YYYYMMDD" format, ie. "20150901")
+#' @param method String: method of aggregation ("mean", "min", "max", "sum")
 #' @param outpath String: path to directory of to be created files
 #' @param preview Logical: plot map?
 #' @param overwrite Logical: overwrite existing file?
@@ -14,6 +23,7 @@
 #' @return String: path to written file
 #' @export
 #'
+#' @author Moritz Shore
 #'
 #' @examples
 #' # TODO

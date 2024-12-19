@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnordic_reproject.R
 \name{metnordic_reproject}
 \alias{metnordic_reproject}
-\title{Reproject MetNordic Data}
+\title{Re-project MET Nordic Data}
 \usage{
 metnordic_reproject(filepath, outfile, projstring = NULL)
 }
@@ -14,12 +14,23 @@ metnordic_reproject(filepath, outfile, projstring = NULL)
 \item{projstring}{desired projection in \href{https://epsg.io/docs}{proj4 format}. By default, \href{https://epsg.io/32633}{UTM33N} will be used.}
 }
 \value{
-filepath to reprojected file
+Filepath to re-projected file
 }
 \description{
-Takes in MetNordic .nc files as created by \code{metnordic_download()} and
-reprojects them to desired projection.
+Takes in MET Nordic .nc files as created by \code{metnordic_merge()} and
+re-projects them to desired projection.
+}
+\details{
+\strong{NOTE:} currently only the following projstring has been tested:
+
+\code{projstring <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"}
 }
 \examples{
 # TODO
+}
+\seealso{
+\code{\link[=metnordic_merge]{metnordic_merge()}} \code{\link[=cwatm_convert_nc]{cwatm_convert_nc()}}
+}
+\author{
+Moritz Shore
 }

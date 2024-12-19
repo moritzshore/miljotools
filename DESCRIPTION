@@ -28,6 +28,7 @@ Imports:
     vroom
 Suggests:
     devtools,
+    doParallel,
     euptf2,
     fs,
     ggplot2,

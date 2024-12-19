@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnordic_aggregate.R
 \name{metnordic_aggregate}
 \alias{metnordic_aggregate}
-\title{Convert hourly MetNordic files to daily}
+\title{Convert hourly MET Nordic files to daily}
 \usage{
 metnordic_aggregate(
   directory,
@@ -17,11 +17,11 @@ metnordic_aggregate(
 \arguments{
 \item{directory}{String: Path to the source files}
 
-\item{variable}{String: variable to aggregate}
+\item{variable}{String: MET Nordic variable to aggregate (ie. "precipitation_amount", \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{(see more)})}
 
-\item{method}{method of aggregation (mean, min, max, sum)}
+\item{method}{String: method of aggregation ("mean", "min", "max", "sum")}
 
-\item{day}{String: day to convert (ie. "20150901")}
+\item{day}{String: day to convert ("YYYYMMDD" format, ie. "20150901")}
 
 \item{outpath}{String: path to directory of to be created files}
 
@@ -34,9 +34,24 @@ String: path to written file
 }
 \description{
 This function takes 24 hourly files from the same day and variable and
-converts them to a daily format
+converts them to a daily format. You have the choice of four different
+aggregation methods: min, max, mean, and sum.
+}
+\details{
+This function is designed to take input from \code{metnordic_download()} and
+provides input for \code{metnordic_merge()}
+
+Code largely adapted from this handy guide:
+(\href{https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file}{link})
+from Pat Bartlein, bartlein@uoregon.edu
 }
 \examples{
 # TODO
 
+}
+\seealso{
+\code{\link[=metnordic_merge]{metnordic_merge()}} \code{\link[=metnordic_download]{metnordic_download()}}
+}
+\author{
+Moritz Shore
 }

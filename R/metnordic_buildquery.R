@@ -1,19 +1,23 @@
-#' Build MetNordic Download Query
+#' Build MET Nordic Download Query
 #'
-#' This function builds the URL queries for downloading MetNordic Data through
+#' This function builds the URL queries for downloading MET Nordic data through
 #' the OPENDAP protocol. The requirements for this function to work are the
 #' bounding coordinates as divined by function `metnordic_coordwindow()`, the
 #' variables of interest, the starting and ending dates and the desired grid
-#' resolution
+#' resolution. The results of this function can be downloaded when passed to
+#' `metnordic_download()`.
+#'
+#' @seealso [metnordic_coordwindow()] [metnordic_download()]
+#' @author Moritz Shore
 #'
 #' @param bounding_coords as determined by `metnordic_coordwindow()`
-#' @param mn_variables MetNordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
+#' @param mn_variables MET Nordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param fromdate ie. "2019-01-01 00:00:00"
 #' @param todate ie. "2020-12-31 23:00:00"
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
 #'
-#' @returns charater vector of all the OPENDAP URLs to download.
+#' @returns character vector of all the OPENDAP URLs to download.
 #' @export
 #'
 #' @examples

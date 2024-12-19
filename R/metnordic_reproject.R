@@ -1,13 +1,20 @@
-#' Reproject MetNordic Data
+#' Re-project MET Nordic Data
 #'
-#' Takes in MetNordic .nc files as created by `metnordic_download()` and
-#' reprojects them to desired projection.
+#' Takes in MET Nordic .nc files as created by `metnordic_merge()` and
+#' re-projects them to desired projection.
+#'
+#' **NOTE:** currently only the following projstring has been tested:
+#'
+#' `projstring <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"`
+#'
+#' @seealso [metnordic_merge()] [cwatm_convert_nc()]
+#' @author Moritz Shore
 #'
 #' @param filepath path to .nc file to be reprojected
 #' @param outfile filepath of .nc file to be created. (if the same file path is used, .nc file will be overwritten)
 #' @param projstring desired projection in [proj4 format](https://epsg.io/docs). By default, [UTM33N](https://epsg.io/32633) will be used.
 #'
-#' @returns filepath to reprojected file
+#' @returns Filepath to re-projected file
 #' @export
 #'
 #' @examples

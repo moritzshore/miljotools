@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnordic_buildquery.R
 \name{metnordic_buildquery}
 \alias{metnordic_buildquery}
-\title{Build MetNordic Download Query}
+\title{Build MET Nordic Download Query}
 \usage{
 metnordic_buildquery(
   bounding_coords,
@@ -16,7 +16,7 @@ metnordic_buildquery(
 \arguments{
 \item{bounding_coords}{as determined by \code{metnordic_coordwindow()}}
 
-\item{mn_variables}{MetNordic variables (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{documentation})}
+\item{mn_variables}{MET Nordic variables (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{documentation})}
 
 \item{fromdate}{ie. "2019-01-01 00:00:00"}
 
@@ -27,15 +27,22 @@ metnordic_buildquery(
 \item{verbose}{print to console?}
 }
 \value{
-charater vector of all the OPENDAP URLs to download.
+character vector of all the OPENDAP URLs to download.
 }
 \description{
-This function builds the URL queries for downloading MetNordic Data through
+This function builds the URL queries for downloading MET Nordic data through
 the OPENDAP protocol. The requirements for this function to work are the
 bounding coordinates as divined by function \code{metnordic_coordwindow()}, the
 variables of interest, the starting and ending dates and the desired grid
-resolution
+resolution. The results of this function can be downloaded when passed to
+\code{metnordic_download()}.
 }
 \examples{
 # TODO
+}
+\seealso{
+\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}}
+}
+\author{
+Moritz Shore
 }

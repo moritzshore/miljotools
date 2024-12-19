@@ -1,14 +1,23 @@
-#' Convert MetNordic Files to CWatM Meteo Input
+#' Convert MET Nordic Files to CWatM Meteo Input
 #'
-#' This function converts a projected metnodric file to be compatible with
-#' CWatm. This function mainly just changes the dimension names from easting and
-#' northing to x and y but has a crap load of boiler plate because... well..
+#' This function converts a projected MET Nordic file (from
+#' `metnordic_reproject()`) to be compatible with CWatm. This function mainly
+#' just changes the dimension names from easting and northing to x and y and
+#' swapes variable order but has a crap load of boiler plate because... well..
 #' ncdf4.
 #'
-#' @param infile path to projected MetNordic .nc file as created by `metnordic_reproject()`
-#' @param outfile path and file name to desired output file
+#' Code largely adapted from this handy guide:
+#' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
+#' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @returns path to outfile
+#' @seealso [metnordic_reproject()]
+#'
+#' @author Moritz Shore
+#'
+#' @param infile String: path to projected MET Nordic .nc file as created by `metnordic_reproject()`
+#' @param outfile String: path and file name to desired output file
+#'
+#' @returns Path to outfile
 #' @export
 #'
 #' @examples

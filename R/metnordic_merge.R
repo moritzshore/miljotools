@@ -1,12 +1,21 @@
-#' Merge MetNordic Files
+#' Merge MET Nordic Files
 #'
-#' This function merges daily MetNordic files into a single file for a single
-#' variable. The input data should be the output data of `metnordic_aggregate()`
+#' This function merges daily MET Nordic files into a single .nc file for a
+#' single variable. The input data should be the output data of
+#' `metnordic_aggregate()`. This function provides input for
+#' `metnordic_reproject()`
 #'
-#' @param folderpath outpath of files from `metnordic_aggregate()`
-#' @param variable MetNordic variable to be used (don't forget suffix such as 'mean', 'sum', 'min', or 'max')
-#' @param outpath Folderpath where to write files
-#' @param overwrite overwrite existing file?
+#' Code largely adapted from this handy guide:
+#' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
+#' from Pat Bartlein, bartlein@uoregon.edu
+#'
+#' @seealso [metnordic_aggregate()] [metnordic_reproject()]
+#' @author Moritz Shore
+#'
+#' @param folderpath String: Outpath of files from `metnordic_aggregate()`.
+#' @param variable String: [MET Nordic variable](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters) to be used (**NOTE:** don't forget suffix such as 'mean', 'sum', 'min', or 'max').
+#' @param outpath String: Folder path where to write files.
+#' @param overwrite Logical: Overwrite existing file?
 #'
 #' @returns file path of generated files
 #' @export

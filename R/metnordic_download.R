@@ -1,17 +1,24 @@
-#' Downloads MetNordic Data
+#' Download a MET Nordic Data URL
 #'
-#' Downloads Metnordic reanlysis data when passed a URL and desired variables.
+#' Downloads MET Nordic re-analysis data using an OPENDAP url. This function
+#' ideally takes input from `metnordic_buildquery()` and provides input for
+#' `metnordic_aggregate()`.
 #'
-#' Following this handy guide: [link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file)
-#  From Pat Bartlein, bartlein@uoregon.edu
+#' Code largely adapted from this handy guide:
+#' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
+#' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @param url String: OPDAP url which the function should download
+#' @seealso [metnordic_buildquery()] [metnordic_aggregate()]
+#'
+#' @author Moritz Shore
+#'
+#' @param url String: OPENDAP url to be downloaded (from `metnordic_buildquery()).
 #' @param outdir String: Location where the .nc file should be written.
-#' @param vars Vector: Variables to extract. All Must be present in the URL
+#' @param vars Vector: MET Nordic Variables to extract. See: [MET Nordic variables](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters)
 #' @param overwrite Logical: Overwrite files if they already exist?
 #' @param preview Logical: Print preview?
 #'
-#' @return String: filepaths to generated files
+#' @return String: file paths to generated files
 #' @export
 #'
 #' @examples

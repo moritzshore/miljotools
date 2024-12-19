@@ -1,17 +1,23 @@
-#' Get MetNordic Coordinate Window
+#' Get a MET Nordic Coordinate Window
 #'
-#' This function retrieves the coordinate window for downloading MetNordic files
+#' This function retrieves the coordinate window from a shapefile for
+#' downloading MET Nordic files. This window can then be passed to
+#' `metnordic_buildquery()` to parse OPENDAP urls to download.
 #'
-#' @param area_path path to shapefile of extent / point (this must have point or polygon geometry!)
-#' @param area_buffer buffer in m to place around extent / point
-#' @param preview Logical: preview the coord window?
+#' @seealso [metnordic_buildquery()]
+#'
+#' @author Moritz Shore
+#'
+#' @param area_path String: path to shapefile of region / point (this must have point or polygon geometry!)
+#' @param area_buffer Integer: buffer in m to place around shapefile / point
+#' @param preview Logical: plot preview the coordinate window?
 #'
 #' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
 #'
 #' @examples
 #' # TODO
-metnordic_coordwindow <- function(area_path, area_buffer, preview){
+metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
 
   # get a base file to find the right x y
   mt_print(preview, function_name = "metnordic_coordwindow","getting base file..")

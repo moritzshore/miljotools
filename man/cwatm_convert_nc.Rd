@@ -2,24 +2,36 @@
 % Please edit documentation in R/cwatm_convert_nc.R
 \name{cwatm_convert_nc}
 \alias{cwatm_convert_nc}
-\title{Convert MetNordic Files to CWatM Meteo Input}
+\title{Convert MET Nordic Files to CWatM Meteo Input}
 \usage{
 cwatm_convert_nc(infile, outfile)
 }
 \arguments{
-\item{infile}{path to projected MetNordic .nc file as created by \code{metnordic_reproject()}}
+\item{infile}{String: path to projected MET Nordic .nc file as created by \code{metnordic_reproject()}}
 
-\item{outfile}{path and file name to desired output file}
+\item{outfile}{String: path and file name to desired output file}
 }
 \value{
-path to outfile
+Path to outfile
 }
 \description{
-This function converts a projected metnodric file to be compatible with
-CWatm. This function mainly just changes the dimension names from easting and
-northing to x and y but has a crap load of boiler plate because... well..
+This function converts a projected MET Nordic file (from
+\code{metnordic_reproject()}) to be compatible with CWatm. This function mainly
+just changes the dimension names from easting and northing to x and y and
+swapes variable order but has a crap load of boiler plate because... well..
 ncdf4.
+}
+\details{
+Code largely adapted from this handy guide:
+(\href{https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file}{link})
+from Pat Bartlein, bartlein@uoregon.edu
 }
 \examples{
 #TODO
+}
+\seealso{
+\code{\link[=metnordic_reproject]{metnordic_reproject()}}
+}
+\author{
+Moritz Shore
 }

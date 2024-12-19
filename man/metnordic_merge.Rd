@@ -2,26 +2,39 @@
 % Please edit documentation in R/metnordic_merge.R
 \name{metnordic_merge}
 \alias{metnordic_merge}
-\title{Merge MetNordic Files}
+\title{Merge MET Nordic Files}
 \usage{
 metnordic_merge(folderpath, variable, outpath, overwrite = FALSE)
 }
 \arguments{
-\item{folderpath}{outpath of files from \code{metnordic_aggregate()}}
+\item{folderpath}{String: Outpath of files from \code{metnordic_aggregate()}.}
 
-\item{variable}{MetNordic variable to be used (don't forget suffix such as 'mean', 'sum', 'min', or 'max')}
+\item{variable}{String: \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{MET Nordic variable} to be used (\strong{NOTE:} don't forget suffix such as 'mean', 'sum', 'min', or 'max').}
 
-\item{outpath}{Folderpath where to write files}
+\item{outpath}{String: Folder path where to write files.}
 
-\item{overwrite}{overwrite existing file?}
+\item{overwrite}{Logical: Overwrite existing file?}
 }
 \value{
 file path of generated files
 }
 \description{
-This function merges daily MetNordic files into a single file for a single
-variable. The input data should be the output data of \code{metnordic_aggregate()}
+This function merges daily MET Nordic files into a single .nc file for a
+single variable. The input data should be the output data of
+\code{metnordic_aggregate()}. This function provides input for
+\code{metnordic_reproject()}
+}
+\details{
+Code largely adapted from this handy guide:
+(\href{https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file}{link})
+from Pat Bartlein, bartlein@uoregon.edu
 }
 \examples{
 # TODO
+}
+\seealso{
+\code{\link[=metnordic_aggregate]{metnordic_aggregate()}} \code{\link[=metnordic_reproject]{metnordic_reproject()}}
+}
+\author{
+Moritz Shore
 }

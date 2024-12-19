@@ -2,30 +2,40 @@
 % Please edit documentation in R/metnordic_download.R
 \name{metnordic_download}
 \alias{metnordic_download}
-\title{Downloads MetNordic Data}
+\title{Download a MET Nordic Data URL}
 \usage{
 metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
 }
 \arguments{
-\item{url}{String: OPDAP url which the function should download}
+\item{url}{String: OPENDAP url to be downloaded (from `metnordic_buildquery()).}
 
 \item{outdir}{String: Location where the .nc file should be written.}
 
-\item{vars}{Vector: Variables to extract. All Must be present in the URL}
+\item{vars}{Vector: MET Nordic Variables to extract. See: \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{MET Nordic variables}}
 
 \item{overwrite}{Logical: Overwrite files if they already exist?}
 
 \item{preview}{Logical: Print preview?}
 }
 \value{
-String: filepaths to generated files
+String: file paths to generated files
 }
 \description{
-Downloads Metnordic reanlysis data when passed a URL and desired variables.
+Downloads MET Nordic re-analysis data using an OPENDAP url. This function
+ideally takes input from \code{metnordic_buildquery()} and provides input for
+\code{metnordic_aggregate()}.
 }
 \details{
-Following this handy guide: \href{https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file}{link}
+Code largely adapted from this handy guide:
+(\href{https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file}{link})
+from Pat Bartlein, bartlein@uoregon.edu
 }
 \examples{
 #TODO
+}
+\seealso{
+\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}}
+}
+\author{
+Moritz Shore
 }
