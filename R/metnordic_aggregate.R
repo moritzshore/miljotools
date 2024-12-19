@@ -22,7 +22,6 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
-#' @importFrom graphics image
 metnordic_aggregate <- function(directory, variable, method, day, outpath, overwrite = TRUE, preview = TRUE) {
   # testing par set
   # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
@@ -180,7 +179,7 @@ metnordic_aggregate <- function(directory, variable, method, day, outpath, overw
 
   # add global attributes
   ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",var_name_andmethod, "(daily)"))
-  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
+  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
   ncatt_put(ncout,0,"institution",ins_text)
   history <- paste("Creaed ", date())
   ncatt_put(ncout,0,"history",history)

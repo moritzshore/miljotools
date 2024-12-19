@@ -16,36 +16,33 @@ Imports:
     abind,
     crayon,
     dplyr,
-    fs,
-    ggplot2,
-    ggrepel,
-    ggtern,
-    graphics,
-    grDevices,
-    lattice,
     lubridate,
     mapview,
     ncdf4,
-    plotly,
     purrr,
-    RColorBrewer,
     readr,
-    readxl,
     sf,
     stringr,
     terra,
     tibble,
-    utils,
-    vroom,
-    writexl
+    vroom
 Suggests:
     devtools,
     euptf2,
+    fs,
+    ggplot2,
+    ggrepel,
+    ggtern,
     knitr,
+    lattice,
+    plotly,
+    RColorBrewer,
     Rdpack,
+    readxl,
     rmarkdown,
     roxygen2,
-    SWATprepR
+    SWATprepR,
+    writexl
 VignetteBuilder: 
     knitr
 Remotes: 

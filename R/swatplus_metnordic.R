@@ -29,7 +29,6 @@
 #' @importFrom purrr map
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
-#' @importFrom writexl write_xlsx
 #' @importFrom crayon green italic
 reanalysis3_swatinput <-
   function(path,
@@ -216,8 +215,8 @@ reanalysis3_swatinput <-
       # writing the weather gen
       if(verbose){cat(green(italic("writing weather generator to file in '", swat_setup, "'\n")))}
 
-      write.csv(wgn$wgn_st, paste0(swat_setup,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
-      write.csv(wgn$wgn_data, paste0(swat_setup,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
+      utils::write.csv(wgn$wgn_st, paste0(swat_setup,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
+      utils::write.csv(wgn$wgn_data, paste0(swat_setup,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
     }
 
     # writing

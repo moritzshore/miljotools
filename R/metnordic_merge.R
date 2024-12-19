@@ -155,7 +155,7 @@ metnordic_merge <- function(folderpath, variable, outpath, overwrite = FALSE) {
 
   # add global attributes (TODO: cleanup)
   ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",variable, "(daily)"))
-  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
+  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
   ncatt_put(ncout,0,"institution",ins_text)
   history <- paste("Creaed ", date())
   ncatt_put(ncout,0,"history",history)

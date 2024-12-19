@@ -35,12 +35,6 @@
 #'
 #' @return path to generated files
 #' @importFrom dplyr %>% select filter group_by summarise if_else
-#' @importFrom vroom vroom
-#' @importFrom lubridate year
-#' @importFrom ggrepel geom_label_repel
-#' @importFrom fs dir_ls
-#' @importFrom tibble tibble
-#' @importFrom stats reorder
 #' @export
 #'
 #'
@@ -62,6 +56,10 @@ thermopluviogram <- function(modelled_climate,
                              yaxisrange = c(800, 1100),
                              xaxisrange = c(4.5, 8.5),
                              xlab = "Mean Annual Temperature (\u00B0C)") {
+
+  # fs is a silly dependency and should be removed.. TODO
+  required_packages <- c("tibble", "fs", "ggrepel", "lubridate", "vroom")
+  install_missing_packs(required_packages)
 
   ## Setup
 #

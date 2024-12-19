@@ -92,7 +92,6 @@
 #' @importFrom stringr str_pad str_replace_all str_split
 #' @importFrom mapview mapview
 #' @importFrom crayon black bold green italic yellow blue
-#' @importFrom utils packageVersion
 #'
 #' @author Moritz Shore
 #' @export
@@ -241,7 +240,7 @@ get_metno_reanalysis3 <-
 
       source = paste0(
         "Data sourced from MetNordic Reanalysis v3 Dataset Meteorologisk institutt, downloaded by miljotools version ",
-        packageVersion("miljotools"),
+        utils::packageVersion("miljotools"),
         " on ",
         Sys.time()
       )
