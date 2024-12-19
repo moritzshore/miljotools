@@ -98,20 +98,21 @@ unzip("cs10_basin.zip")
 cs10_basin = "cs10_basin/cs10_basin.shp"
 ```
 
+```{r message=FALSE, warning=FALSE}
+require(miljotools)
+```
+
 Downloading MET Nordic data for this shapefile:
 
 ```{r getmetno,  eval = runmetnovig}
-require(miljotools)
 download_folder <- get_metno_reanalysis3(
   area = cs10_basin,
   fromdate = "2015-01-01 00:00:00",
   todate = "2015-01-01 23:00:00",
   mn_variables = c("air_temperature_2m", "precipitation_amount"),
-  area_buffer = 1500,
-  # 1.5km buffer around shapefile
-  grid_resolution = 1,
-  # 1x1 km resolution
-  preview = T
+  area_buffer = 1500, # 1.5km buffer around shapefile
+  grid_resolution = 1, # 1x1 km resolution
+  preview = FALSE
 )
 ```
 
@@ -165,7 +166,7 @@ download_folder_point <- get_metno_reanalysis3(
   fromdate = "2015-01-01 00:00:00",
   todate = "2015-01-01 23:00:00",
   mn_variables = c("air_temperature_2m", "precipitation_amount"),
-  preview = T
+  preview = FALSE
 )
 
 ```
@@ -252,13 +253,16 @@ implemented into a function yet. My solution to downloading a whole
 daterange currently looks like the code chunk below. You are welcome to
 adapt and use it, or suggest a different implementation for the package.
 
+```{r message=FALSE, warning=FALSE}
+require(stringr)
+require(crayon)
+```
+
 ```{r, eval = runmetnovig}
 ### Downloading the files ----
 # This **cannot** be parallelized as we are only allowed to make one request to
 # met.no at a time. therefore we use a forloop for downloading, and a while loop
 # to restart after connection failures..
-require(stringr)
-require(crayon)
 vars_to_dl = c("air_temperature_2m", "precipitation_amount")
 full_urls <- urls$full_urls
 mn_filenames <- urls$filenames
@@ -324,10 +328,11 @@ while((dl_stop == FALSE) & (dl_attempt < 50)){
   if(dl_stop == FALSE){
     for (url in to_download) {
       i = i+1
-      rounded = sprintf("%.2f", round((i/length(full_urls)*100),2))
-      status = paste0("[", i, "/", length(full_urls), "]", " (", (rounded), ")%")
-      mt_print(TRUE, function_name = "MetNordic Download", "Downloading Query:",
-               text2 = paste0(url, blue(bold(underline(status)))), rflag = T)
+      # Printing status is useful, but disabled for Vignette:
+      # rounded = sprintf("%.2f", round((i/length(full_urls)*100),2))
+      # status = paste0("[", i, "/", length(full_urls), "]", " (", (rounded), ")%")
+      # mt_print(TRUE, function_name = "MetNordic Download", "Downloading Query:",
+      #          text2 = paste0(url, blue(bold(underline(status)))), rflag = T)
       metnordic_download(
         url = url,
         outdir = mn_download_dir,
@@ -367,6 +372,10 @@ use cases would like all variables and all days aggregated. The
 following code shows my workflow for this, which will be implemented in
 a function later on:
 
+```{r message=FALSE, warning=FALSE}
+require(doParallel)
+```
+
 ```{r, eval = runmetnovig}
 ### Aggregating to daily resolution: ----
 aggr_path = paste0(mydir, "/aggregated")
@@ -383,8 +392,6 @@ if(length(already_agged) > 0){
   some_days <- all_days
 }
 
-# Aggregating in parallel fashion:
-require(doParallel)
 cores <- detectCores() - 2
 mt_print(TRUE, "MetNordic Aggregation", "Aggregating on:", paste(cores, "threads"))
 cl <- makeCluster(cores,  outfile="")
@@ -477,10 +484,6 @@ cwatm_convert_nc(infile = proj_fp, outfile = convert_to_fp)
 
 You can now feed these files to CWatM!
 
-As one can read, it is a long process to get to this point. Therefore,
-all these steps will be included in a final function which links them
-all together (at some point, similar to `swat_weather_input_chain()`)
-
 ### Link to SWAT+
 
 If you would like to generate
@@ -555,11 +558,7 @@ swat_weather_input_chain(
 )
 ```
 
-### Cleanup
-
-Cleaning up the mess we made..
-
-```{r, eval = runmetnovig}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 require(magrittr)
 unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "cs10point", "miljotools_swat_backup", "download", "merged", "aggregated", "cwatm_ready", "projected"), recursive = T)
 
