@@ -354,9 +354,18 @@ function)
 To convert the data from hourly to daily format, you can use the
 following function:
 
-```{r, eval = runmetnovig}
-aggr_path = paste0(mydir, "/aggregated")
-fp = metnordic_aggregate(
+```{r, eval = runmetnovig, fig.show="hold"}
+fp_tm_agg = metnordic_aggregate(
+  directory = mn_download_dir,
+  variable = "air_temperature_2m", # variable to aggregate
+  method = "mean", # Method of aggregation (mean, min, max, sum..)
+  day = "20200515", # the day in YYYYMMDD format
+  outpath = "../vignettes",
+  overwrite = T,
+  preview = T
+)
+
+fp_pr_agg = metnordic_aggregate(
   directory = mn_download_dir,
   variable = "precipitation_amount", # variable to aggregate
   method = "sum", # Method of aggregation (mean, min, max, sum..)
@@ -372,12 +381,9 @@ use cases would like all variables and all days aggregated. The
 following code shows my workflow for this, which will be implemented in
 a function later on:
 
-```{r message=FALSE, warning=FALSE}
-require(doParallel)
-```
-
-```{r, agg_metno, eval = runmetnovig}
+```{r, agg_metno, eval = FALSE}
 ### Aggregating to daily resolution: ----
+require(doParallel)
 aggr_path = paste0(mydir, "/aggregated")
 
 # Parsing the date range of days downloaded
@@ -423,7 +429,7 @@ Having individual files for each day is not so handy, therefore the
 following function can merge them all together into a single file *(per
 variable!)*
 
-```{r, eval = runmetnovig}
+```{r, eval = FALSE}
 merge_path <- paste0(mydir, "/merged")
 dir.create(merge_path)
 
@@ -433,8 +439,6 @@ merged_fp <- metnordic_merge(
     outpath = merge_path,
     overwrite = T
   )
-
-print(merged_fp)
 ```
 
 **Note:** This only works for daily resolution (for now). Hourly may be
@@ -442,17 +446,18 @@ supported someday (or pull request me..).
 
 ### Re-projecting
 
-If you would like to re-project your now merged NetCDF files, you can
-use this function:
+If you would like to re-project your (merged or aggregated) NetCDF
+files, you can use this function:
 
 ```{r, eval = runmetnovig}
-to_fp <- str_replace(merged_fp, "merged", "projected")
-dir.create(paste0(mydir, "/projected"), showWarnings = F)
 
-proj_fp <- metnordic_reproject(filepath = merged_fp,
-                               outfile = to_fp,
-                               projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"
-                      )
+proj_fp_tm <- metnordic_reproject(filepath = fp_tm_agg,
+                               outfile = "../vignettes/reprojected_tm.nc",
+                               projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
+
+proj_fp_pr <- metnordic_reproject(filepath = fp_pr_agg,
+                               outfile = "../vignettes/reprojected_pr.nc",
+                               projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
 ```
 
 Having a look at the result:
@@ -461,9 +466,11 @@ Having a look at the result:
 require(mapview)
 require(terra)
 require(sf)
-map <- terra::rast(proj_fp)
+map_tm <- terra::rast(proj_fp_tm)
+map_pr <- terra::rast(proj_fp_pr)
 provided_extent <- sf::read_sf(cs10_basin)
-mapview::mapview(map, legend = FALSE)+mapview::mapview(provided_extent, alpha.regions = .5, legend = FALSE)
+
+mapview::mapview(map_tm, legend = FALSE)+mapview::mapview(provided_extent, alpha.regions = .5, legend = FALSE)
 ```
 
 ## Linking to other models
@@ -476,7 +483,9 @@ section need to be slightly altered (easting and northing need to be
 changed to X and Y, and the variable of interest must be listed last).
 These changes can be made automatically using the following function:
 
-```{r gmnrv3ncdf4,  eval = runmetnovig}
+```{r gmnrv3ncdf4,  eval = FALSE}
+# note, you need a multi-day projected file for this, which was not created
+# during this tutorial, so this code is not executed.
 dir.create(paste0(mydir, "/cwatm_ready")) 
 convert_to_fp <- proj_fp %>% str_replace("projected", "cwatm_ready")
 cwatm_convert_nc(infile = proj_fp, outfile = convert_to_fp)
@@ -563,7 +572,8 @@ require(dplyr)
 unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "cs10point", "miljotools_swat_backup", "download", "merged", "aggregated", "cwatm_ready", "projected"), recursive = T)
 
 list.files(pattern = "met_no_dl*") %>% unlink(recursive = T)
-list.files(pattern = "met_analysis*") %>% file.remove()
+list.files(pattern = "met_analysis*", full.names = T) %>% file.remove()
+list.files(pattern = "reprojected*", full.names = T) %>% file.remove()
 
 file.remove(c("krak_daily.zip", "cs10_txt.zip", "cs10_basin.zip", "cs10point.zip"))
 ```
