@@ -12,9 +12,7 @@ get_metno_reanalysis3(
   mn_variables = NULL,
   area_buffer = 1500,
   grid_resolution = NULL,
-  preview = TRUE,
-  ncdf = FALSE,
-  continue = NULL
+  preview = TRUE
 )
 }
 \arguments{
@@ -33,10 +31,6 @@ get_metno_reanalysis3(
 \item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers. (see help page for more details)}
 
 \item{preview}{generate graphs showing previews of data download? (boolean)}
-
-\item{ncdf}{Set this parameter to be \code{TRUE} if you would like the downloaded files to remain in NCDF format (*.nc).}
-
-\item{continue}{if \code{ncdf} is \code{TRUE}, then you can pass a folder name (in passed directory) here to continue an aborted download session.}
 }
 \value{
 Function returns a path to where .csv files of the download were

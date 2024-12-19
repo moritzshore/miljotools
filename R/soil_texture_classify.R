@@ -58,15 +58,6 @@
 #' @export
 #'
 #' @importFrom dplyr %>%
-#' @importFrom grDevices colorRampPalette
-#' @importFrom plotly plot_ly layout
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggtern ggtern
-#' @importFrom ggplot2 aes
-#' @importFrom stringr str_split
-#' @importFrom readxl read_excel
-#' @importFrom writexl write_xlsx
-#' @importFrom utils write.csv read.table
 #'
 classify_soil <-
   function(input,
@@ -80,6 +71,10 @@ classify_soil <-
            append = TRUE,
            new_sums = FALSE,
            write = FALSE){
+
+    # install required packages
+    required_packages <- c("readxl", "writexl", "utils", "stringr", "ggplot2", "ggtern", "RColorBrewer", "plotly", "grDevices")
+    install_missing_packs(required_packages)
 
     # REQUIRED to fill these out!
     PATH = input
@@ -515,7 +510,7 @@ classify_soil <-
         # if a CSV file:
       } else if (file_ext == "csv") {
         # try first with separator ","
-        input.df = try(read.table(
+        input.df = try(utils::read.table(
           PATH,
           sep = ",",
           dec = DECIMAL_SEPERATOR,
@@ -526,7 +521,7 @@ classify_soil <-
 
         # if that failed, try doing it with the other separator
         if (is.data.frame(input.df) == FALSE) {
-          input.df = try(read.table(
+          input.df = try(utils::read.table(
             PATH,
             sep = ";",
             dec = DECIMAL_SEPERATOR,

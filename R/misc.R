@@ -8,8 +8,9 @@
 #'
 #' @return nothing
 #' @keywords internal
+#' @export
 #'
-#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan
+#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan white
 #'
 #'
 #'
@@ -22,7 +23,7 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
   }else if(function_name == "thermopluviogram"){
     f_theme = bgWhite$cyan$bold
   } else{
-    f_theme <- bgCyan$black$bold
+    f_theme <- bgCyan$white$bold
 
   }
   text_theme <- italic$yellow
@@ -47,5 +48,19 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
       suffix,
       sep = ""
     )
+  }
+}
+
+
+install_missing_packs <- function(required_packages) {
+  missing_packs <- which((required_packages %in% utils::installed.packages()) == FALSE)
+  if(length(missing_packs) > 0){
+    mt_print(TRUE, "", "Missing CRAN packages are required to run this function, installing now:",
+            paste0(required_packages[missing_packs], sep = " "))
+    utils::install.packages(required_packages[missing_packs])
+  }
+  if(length(which((required_packages %in% utils::installed.packages()) == FALSE)) > 0){
+    stop("following packages failed to install:\n",
+         required_packages[which((required_packages %in% utils::installed.packages()) == FALSE)])
   }
 }
