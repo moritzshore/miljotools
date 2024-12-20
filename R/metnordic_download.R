@@ -26,7 +26,7 @@
 #' @importFrom dplyr  %>%
 #' @import ncdf4
 #' @importFrom stringr str_remove str_replace str_replace
-metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
+metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = FALSE){
   # url <- "https://thredds.met.no/thredds/dodsC/metpparchivev3/2012/09/01/met_analysis_1_0km_nordic_20120901T10Z.nc?x[448:1:652],y[868:1:1071],latitude[868:1:1071][448:1:652],longitude[868:1:1071][448:1:652],altitude[868:1:1071][448:1:652],air_temperature_2m[0:1:0][868:1:1071][448:1:652],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][868:1:1071][448:1:652],relative_humidity_2m[0:1:0][868:1:1071][448:1:652],precipitation_amount[0:1:0][868:1:1071][448:1:652],wind_speed_10m[0:1:0][868:1:1071][448:1:652],wind_direction_10m[0:1:0][868:1:1071][448:1:652]"
   # TODO: add nc_open_retry
 
@@ -45,7 +45,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
   }
 
   # Open file and grab latitude, longitude, x and  y
-  ncin <- nc_open_retry_v2(url, vars)
+  ncin <- nc_open_retry(url)
 
   # if the file download failed, ncin should be null and we can exit the
   # function early.
@@ -63,6 +63,13 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
   ylname <- ncatt_get(ncin,"y","standard_name")
   yunits <- ncatt_get(ncin,"y","units")
   ny <- dim(y)
+
+  altitude <- ncvar_get(ncin, "altitude")
+  altitude_att <- ncatt_get(ncin, "altitude")
+
+
+
+
 
   # get time [broken] this does not work because of the strange things metnordic
   # does with the time dimension:
@@ -87,15 +94,26 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
   proj_def <- ncvar_def("lambert_conformal_conic","1",NULL,NULL,longname=dlname,prec="char")
   fillvalue <- 1e32
 
+  # Altitude definition
+  altitude_def <- ncvar_def(
+    name = "altitude",
+    units = altitude_att$units,
+    dim = list(xdim, ydim),
+    missval = -999,
+    longname = altitude_att$standard_name,
+    prec = "integer"
+  )
+
   # creates nc file for given var
   vectorized_create_nc <- function(variable){
-    varncfname <- ncfname %>% stringr::str_replace(".nc", paste0("_",variable, ".nc"))
+    # This is unstable. if the ncfname contains a second "z.nc" it will break!!
+    varncfname <- ncfname %>% stringr::str_replace("z.nc", paste0("_",variable, "z.nc"))
     dlname <- ncatt_get(ncin,variable,"standard_name")
     dunits <- ncatt_get(ncin,variable,"units")
     current_var_def <- ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
 
     date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
-    ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,proj_def),force_v4=TRUE)
+    ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,altitude_def,proj_def),force_v4=TRUE)
 
     # Getting variable
     var_array <- ncvar_get(ncin,variable)
@@ -112,6 +130,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     ncvar_put(ncout,current_var_def,var_array)
     ncvar_put(ncout,lon_def,lon)
     ncvar_put(ncout,lat_def,lat)
+    ncvar_put(ncout, altitude_def, altitude)
 
     # put additional attributes into dimension and data variables
     ncatt_put(ncout,"x","axis","X")
@@ -122,6 +141,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     ncatt_put(ncout,"y","_CoordinateAxisType","GeoY")
     ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
     ncatt_put(ncout, variable,"coordinates", "lat lon")
+    ncatt_put(ncout, "altitude","grid_mapping", "lambert_conformal_conic")
+    ncatt_put(ncout, "altitude","coordinates", "lat lon")
 
     # put the CRS attributes
     projname <- "lambert_conformal_conic"

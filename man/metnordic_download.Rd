@@ -4,7 +4,7 @@
 \alias{metnordic_download}
 \title{Download a MET Nordic Data URL}
 \usage{
-metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
+metnordic_download(url, outdir, vars, overwrite = FALSE, preview = FALSE)
 }
 \arguments{
 \item{url}{String: OPENDAP url to be downloaded (from `metnordic_buildquery()).}
