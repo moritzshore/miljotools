@@ -78,3 +78,40 @@ nc_open_retry <- function(link) {
     }
   }
 }
+
+# a second attempt that might be more stable
+link = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2018/05/22/met_analysis_1_0km_nordic_20180522T03Z.nc?x[440:1:660],y[859:1:1080],latitude[859:1:1080][440:1:660],longitude[859:1:1080][440:1:660],altitude[859:1:1080][440:1:660],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][859:1:1080][440:1:660],relative_humidity_2m[0:1:0][859:1:1080][440:1:660],wind_speed_10m[0:1:0][859:1:1080][440:1:660],air_pressure_at_sea_level[0:1:0][859:1:1080][440:1:660]"
+nc_open_retry_v2 <- function(link, vars) {
+
+  # This attempts to connect to the server. if it works, the file is returned, if it does not, NA is returned.
+  nc_file <- tryCatch(expr = {ncdf4::nc_open(link)},
+                      error = function(cond){
+                        return(NA)
+                      })
+
+  # if the nc_file opened successfully, then test if we can access a variable
+  if(nc_file$error == FALSE){
+    nc_var <- tryCatch(expr = {ncdf4::ncvar_get(nc_file, varid = vars[1])},
+                        error = function(cond){
+                          warning("failed..")
+                          return(NA)
+                        })
+    # if the nc_var was accessed succesfully, it should be a matrix, ie.
+    # numeric. if this is the case, it should be safe to return. if it did not
+    # work, we return a after sleeping for a bit (to give the client time to
+    # reconnect?)
+    if (nc_var %>% is.numeric()) {
+      return(nc_file)
+    }
+    else{
+      # if the access to the variable failed.. wait a bit and then return NULL.
+      Sys.sleep(10)
+      return(NULL)
+    }
+  }else{
+    # if the connection to the file itself failed.. wait a bit and then return
+    # NULL.
+    Sys.sleep(10)
+    return(NULL)
+  }
+}
