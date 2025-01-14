@@ -8,7 +8,6 @@
 #'
 #' @return nothing
 #' @keywords internal
-#' @export
 #'
 #' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan white
 #'

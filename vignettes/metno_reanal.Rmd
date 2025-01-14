@@ -327,19 +327,21 @@ while((dl_stop == FALSE) & (dl_attempt < 50)){
   # Starting download if there is anything to download..
   if(dl_stop == FALSE){
     for (url in to_download) {
-      i = i+1
-      # Printing status is useful, but disabled for Vignette:
-      # rounded = sprintf("%.2f", round((i/length(full_urls)*100),2))
-      # status = paste0("[", i, "/", length(full_urls), "]", " (", (rounded), ")%")
-      # mt_print(TRUE, function_name = "MetNordic Download", "Downloading Query:",
-      #          text2 = paste0(url, blue(bold(underline(status)))), rflag = T)
-      metnordic_download(
-        url = url,
-        outdir = mn_download_dir,
-        vars = vars_to_dl,
-        overwrite = T,
-        preview = F
-      )
+      rounded = sprintf("%.2f", round((i/length(full_urls)*100),2))
+      status = paste0("[", i, "/", length(full_urls), "]", " (", (rounded), ")%")
+      print(status)
+      # if the download fails, just skip it in the loop, and get it the next
+      # time around
+      tryCatch({
+        metnordic_download(url = url ,outdir = mn_download_dir,
+                           vars = cwatm_raw_vars, overwrite = T,
+                           preview = F)
+        i = i+1
+      },
+      error = function(cond) {
+        message(paste("failed!", i))
+        NA
+      })
     }
   }
 }
