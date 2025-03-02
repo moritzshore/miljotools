@@ -572,7 +572,7 @@ build_query <- function(bounding_coords, mn_variables, fromdate, todate,
            var_q)
 
   # create the daterange
-  daterange <- seq(lubridate::as_datetime(fromdate), lubridate::as_datetime(todate), by="hour")
+  daterange <- seq(lubridate::as_datetime(fromdate), lubridate::as_datetime(todate), by="hour") %>% strftime()
   years <- lubridate::year(daterange)
   months <- lubridate::month(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
   days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
