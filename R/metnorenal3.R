@@ -165,6 +165,9 @@ get_metno_reanalysis3 <-
     mt_print(preview, "get_metno_reanalysis3", "getting coordinates...")
     bounding_coords <- get_coord_window(area_path = area, area_buffer, preview)
 
+    metadist <- bounding_coords$metadist
+    bounding_coords<- bounding_coords[-length(bounding_coords)]
+
     mt_print(preview, "get_metno_reanalysis3", "building query...")
     queries <- build_query(bounding_coords, mn_variables, fromdate, todate, grid_resolution, verbose)
 
@@ -235,7 +238,8 @@ get_metno_reanalysis3 <-
         lon = paste("lon = ", ncdownload$lon_crop),
         x = paste("X =", ncdownload$x_crop),
         y = paste("Y =", ncdownload$y_crop),
-        elevation = paste("ELEVATION = ", ncdownload$alt_crop)
+        elevation = paste("ELEVATION = ", ncdownload$alt_crop),
+        distance_to_gridcell = paste0("DISTANCE TO NEAREST GRIDCELL (in meters) = ", metadist)
       )
 
       source = paste0(
@@ -282,6 +286,7 @@ get_metno_reanalysis3 <-
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
 #' @importFrom stringr str_split
+#' @importFrom methods is
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
   # remove trailing "/"
@@ -400,9 +405,9 @@ get_coord_window <- function(area_path, area_buffer, preview){
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
   # load in the shape file
   # if it already is a shape file, then no need to read it
-  if(is(area_path, "sf")){
+  if(methods::is(area_path, "sf")){
     area <- area_path
-  }else if(is(area_path, "character")){
+  }else if(methods::is(area_path, "character")){
     # if it is a string, then read it
     area <- sf::read_sf(area_path)
   }else{
@@ -433,22 +438,24 @@ get_coord_window <- function(area_path, area_buffer, preview){
     index_x <- which(min_diff_x == x_diff)
     index_y <- which(min_diff_y == y_diff)
 
+    df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
+                       coords = c("x", "y"),
+                       crs = sf::st_crs(proj_crs))
+    metadist <- (sf::st_distance(df, area) %>% round(0))[1,1]
+
     if(preview){
-      df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
-                         coords = c("x", "y"),
-                         crs = sf::st_crs(proj_crs))
+
       area$name = "provided file"
       plot = mapview::mapview(df, layer.name = "Nearest Re-analysis Gridpoint", col.regions = "orange")+
         mapview::mapview(area, layer.name = "User location", col.regions = "blue")
-
       print(plot)
       mt_print(preview, "get_metno_reanalysis3 ",
-               "Note: Selected grid cell distance (in meters) to desired location:",
-               (sf::st_distance(df, area) %>% round(0)))
+               "Note: Selected grid cell distance (in meters) to desired location:",metadist)
     }
 
 
-    return(list(index_x = index_x, index_y = index_y))
+
+    return(list(index_x = index_x, index_y = index_y, metadist = metadist))
 
   } else{
     # do the polygon stuff
@@ -497,7 +504,8 @@ get_coord_window <- function(area_path, area_buffer, preview){
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,
                 index_ymax = index_ymax,
-                area_buff = area_buff, area_shp = area
+                area_buff = area_buff, area_shp = area,
+                metadist = "not relevant for polygon shapefile"
     ))
   }
 }
