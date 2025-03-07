@@ -73,7 +73,7 @@
 #' as well as plotting interactive maps to the viewer which gives you an idea of
 #' which grid cells were selected relative to the shapefile you provided.
 #'
-#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area
+#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area. (optionally, you can pass a `sf` object directly.)
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
@@ -399,7 +399,16 @@ get_coord_window <- function(area_path, area_buffer, preview){
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
   # load in the shape file
-  area <- sf::read_sf(area_path)
+  # if it already is a shape file, then no need to read it
+  if(is(area_path, "sf")){
+    area <- area_path
+  }else if(is(area_path, "character")){
+    # if it is a string, then read it
+    area <- sf::read_sf(area_path)
+  }else{
+    stop("`area` parameter not recognized! please pass either a filepath to a .shp file, or an `sf` object!\n")
+  }
+
   # Transform the shapefile to the metno projection
   area <- sf::st_transform(area, crs = proj_crs)
 
