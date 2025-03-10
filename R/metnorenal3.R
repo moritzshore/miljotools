@@ -125,6 +125,12 @@ get_metno_reanalysis3 <-
            preview = TRUE
   ){
     # validate input
+    if(as_datetime(todate) > as_datetime("2023-01-31 23:00:00")){
+      stop("Reanalysis 3 is only until '2023-01-31 23:00:00', contact maintainer if this changes..")
+    }
+    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+      stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
+    }
     if(is.null(grid_resolution)){
       mt_print(preview, "get_metno_reanalysis3", text = "`grid_resolution` not chosen, defaulting to 1 x 1 km grid..")
       grid_resolution = 1
