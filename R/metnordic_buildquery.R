@@ -104,25 +104,25 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
   todate_lubed <- lubridate::as_datetime(todate)
 
   if(dataset == "reanalysis"){
-    if(as_datetime(todate) > as_datetime("2023-01-31 23:00:00")){
+    if(lubridate::as_datetime(todate) > lubridate::as_datetime("2023-01-31 23:00:00")){
       stop("Reanalysis 3 is only until '2023-01-31 23:00:00', contact maintainer if this changes..")
     }
-    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+    if(lubridate::as_datetime(fromdate) < lubridate::as_datetime("2012-09-01 03:00:00")){
       stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
     }
   }else if (dataset == "operational"){
-    if(as_datetime(todate) > as_datetime( Sys.time())){
+    if(lubridate::as_datetime(todate) > lubridate::as_datetime( Sys.time())){
       warning("`todate` lies in the future... the operational forecast might not exist for this time yet???")
     }
     #      met_analysis_1_0km_nordic_20180219T08Z.nc
-    if(as_datetime(fromdate) < as_datetime("2018-02-19 08:00:00")){
+    if(lubridate::as_datetime(fromdate) < lubridate::as_datetime("2018-02-19 08:00:00")){
       stop("Reanalysis 3 only starts '2018-02-19 08:00:00', contact maintainer if this changes.. (or use the re-analysis time for this")
     }
   }else if(dataset == 'continuous'){
-    if(as_datetime(todate) > as_datetime( Sys.time())){
+    if(lubridate::as_datetime(todate) > lubridate::as_datetime( Sys.time())){
       warning("`todate` lies in the future... the operational forecast might not exist for this time yet???")
     }
-    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+    if(lubridate::as_datetime(fromdate) < lubridate::as_datetime("2012-09-01 03:00:00")){
       stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
     }
   }else{
