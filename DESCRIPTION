@@ -2,10 +2,10 @@ Type: Package
 Package: miljotools
 Title: An R package hosting a variety of useful functions for
     environmental data handling and anaylsis
-Version: 0.6.0
+Version: 0.7.0
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
-Description: A few useful functions for environemental data processing and
+Description: A few useful functions for environemental data gather, processing, and
     analysis.
 License: GPL (>= 3)
 URL: https://moritzshore.github.io/miljotools/
@@ -38,7 +38,6 @@ Suggests:
     lattice,
     plotly,
     RColorBrewer,
-    Rdpack,
     readxl,
     rmarkdown,
     roxygen2,
