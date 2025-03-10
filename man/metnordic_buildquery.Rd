@@ -10,11 +10,12 @@ metnordic_buildquery(
   fromdate,
   todate,
   grid_resolution,
+  dataset = "continuous",
   verbose
 )
 }
 \arguments{
-\item{bounding_coords}{as determined by \code{metnordic_coordwindow()}}
+\item{bounding_coords}{as passed by \code{metnordic_coordwindow()}}
 
 \item{mn_variables}{MET Nordic variables (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{documentation})}
 
@@ -23,6 +24,10 @@ metnordic_buildquery(
 \item{todate}{ie. "2020-12-31 23:00:00"}
 
 \item{grid_resolution}{an integer, ie. 3 for 3x3 km grid.}
+
+\item{dataset}{either 'reanalysis' for the re-run archive, \code{operational} for
+the operational archive, or \code{continuous} to source from both, depending on
+timerange.}
 
 \item{verbose}{print to console?}
 }

@@ -10,10 +10,13 @@
 #' @seealso [metnordic_coordwindow()] [metnordic_download()]
 #' @author Moritz Shore
 #'
-#' @param bounding_coords as determined by `metnordic_coordwindow()`
+#' @param bounding_coords as passed by `metnordic_coordwindow()`
 #' @param mn_variables MET Nordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param fromdate ie. "2019-01-01 00:00:00"
 #' @param todate ie. "2020-12-31 23:00:00"
+#' @param dataset either 'reanalysis' for the re-run archive, `operational` for
+#'   the operational archive, or `continuous` to source from both, depending on
+#'   timerange.
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
 #'
@@ -23,8 +26,7 @@
 #' @examples
 #' # TODO
 metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
-                        grid_resolution, verbose){
-
+                        grid_resolution, dataset = 'continuous', verbose){
   # time step not really needed since the files are individual
   time1 = 0
   time2 = 0
@@ -133,16 +135,30 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
   days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
   hours <- lubridate::hour(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
 
-  # create the file names using the date range
+  # header for thredds server
   filenames <- paste0("met_analysis_1_0km_nordic_", years, months, days, "T", hours, "Z", ".nc")
-  # create the thredds filepath using the date range
   filepath <- paste0(years, "/", months,"/",days,"/")
 
-  # header for thredds server
-  header = "https://thredds.met.no/thredds/dodsC/metpparchivev3/"
+  if(dataset == "reanalysis"){
+    header = "https://thredds.met.no/thredds/dodsC/metpparchivev3/"
+    full_urls <- paste0(header, filepath, filenames, "?", var_query)
+  }else if(dataset == "operational"){
+    header = "https://thredds.met.no/thredds/dodsC/metpparchive/"
+    full_urls <- paste0(header, filepath, filenames, "?", var_query)
+  }else{
+    # seperated based off cut-off.
+    re_header = "https://thredds.met.no/thredds/dodsC/metpparchivev3/"  # rerun = v3
+    op_header =  "https://thredds.met.no/thredds/dodsC/metpparchive/"
 
-  # full query URL pasted together
-  full_urls <- paste0(header, filepath, filenames, "?", var_query)
+    ## WARNING this will need to change if metnordic ever updates the re-run.
+    ## could replace with an optional parameter to have users define the cutoff..
+    reanal_split <- (as_datetime(daterange) < as_datetime("2023-01-31 23:00:00")) %>% which()
+    op_split <- (as_datetime(daterange) >= as_datetime("2023-01-31 23:00:00")) %>% which()
+
+    re_full_urls <- paste0(re_header, filepath[reanal_split], filenames[reanal_split], "?", var_query)
+    op_full_urls <- paste0(op_header, filepath[op_split], filenames[op_split], "?", var_query)
+    full_urls <- c(re_full_urls,op_full_urls)
+  }
 
   return(list(full_urls = full_urls, filenames = filenames))
 }
