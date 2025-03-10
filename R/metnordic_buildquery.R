@@ -145,7 +145,7 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
   }else if(dataset == "operational"){
     header = "https://thredds.met.no/thredds/dodsC/metpparchive/"
     full_urls <- paste0(header, filepath, filenames, "?", var_query)
-  }else{
+  }else if(dataset == "continuous"){
     # seperated based off cut-off.
     re_header = "https://thredds.met.no/thredds/dodsC/metpparchivev3/"  # rerun = v3
     op_header =  "https://thredds.met.no/thredds/dodsC/metpparchive/"
@@ -168,6 +168,8 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     }
 
     full_urls <- c(re_full_urls,op_full_urls)
+  }else{
+    stop("parameter `dataset` not recognized!")
   }
 
   return(list(full_urls = full_urls, filenames = filenames))
