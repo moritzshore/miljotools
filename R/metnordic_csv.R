@@ -80,7 +80,7 @@ metnordic_csv <-
   ){
 
     ### Getting the bouding box
-    mt_print(verbose, "metnordic_csv", "getting coordinates..", paste0("with buffer of", area_buffer))
+    mt_print(verbose, "metnordic_csv", "getting coordinates..", paste0("with buffer of ", area_buffer, "m"))
     bounding_coords <- metnordic_coordwindow(area_path = area, area_buffer =  area_buffer, verbose = verbose)
 
     ### Extracting the distance to point (if applicable), and saving for later
@@ -93,7 +93,7 @@ metnordic_csv <-
     if (geometry_type == "polygon") stop("this is not supported yet in this function, please still use `get_metno_reanalysis3()`")
 
     ### Building download queries
-    mt_print(verbose, "metnordic_csv", "building query", paste0("from ", dataset, "dataset and a resolution of ", grid_resolution, "km"))
+    mt_print(verbose, "metnordic_csv", "building query", paste0("from '", dataset, "' dataset"))
     queries <- metnordic_buildquery(
       bounding_coords = bounding_coords,
       mn_variables =  mn_variables,
