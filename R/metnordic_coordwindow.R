@@ -17,7 +17,22 @@
 #'
 #' @examples
 #' # TODO
-metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
+metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
+
+  if(area_buffer < 0){
+    area_buffer = 0
+  }
+
+  # if it already is a shape file, then no need to read it
+  if(methods::is(area_path, "sf")){
+    area <- area_path
+  }else if(methods::is(area_path, "character")){
+    # if it is a string, then read it
+    area <- sf::read_sf(area_path)
+  }else{
+    stop("`area` parameter not recognized! please pass either a filepath to a .shp file, or an `sf` object!\n")
+  }
+
 
   # get a base file to find the right x y
   mt_print(verbose, function_name = "metnordic_coordwindow","getting base file..")

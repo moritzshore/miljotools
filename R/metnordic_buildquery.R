@@ -98,7 +98,36 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
            var_q)
 
   # create the daterange
-  daterange <- seq(lubridate::as_datetime(fromdate), lubridate::as_datetime(todate), by="hour")
+  fromdate_lubed <- lubridate::as_datetime(fromdate)
+  todate_lubed <- lubridate::as_datetime(todate)
+
+  if(dataset == "reanalysis"){
+    if(as_datetime(todate) > as_datetime("2023-01-31 23:00:00")){
+      stop("Reanalysis 3 is only until '2023-01-31 23:00:00', contact maintainer if this changes..")
+    }
+    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+      stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
+    }
+  }else if (dataset == "operational"){
+    if(as_datetime(todate) > as_datetime( Sys.time())){
+      warning("`todate` lies in the future... the operational forecast might not exist for this time yet???")
+    }
+    #      met_analysis_1_0km_nordic_20180219T08Z.nc
+    if(as_datetime(fromdate) < as_datetime("2018-02-19 08:00:00")){
+      stop("Reanalysis 3 only starts '2018-02-19 08:00:00', contact maintainer if this changes.. (or use the re-analysis time for this")
+    }
+  }else if(dataset == 'continuous'){
+    if(as_datetime(todate) > as_datetime( Sys.time())){
+      warning("`todate` lies in the future... the operational forecast might not exist for this time yet???")
+    }
+    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+      stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
+    }
+  }else{
+    stop(paste0("dataset = '", dataset, "' not supported or not recognized. Please pass either dataset = 'continuous', reanaysis' or 'operational'"))
+  }
+
+  daterange <- seq(fromdate_lubed,todate_lubed , by="hour")
   years <- lubridate::year(daterange)
   months <- lubridate::month(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
   days <- lubridate::day(daterange) %>% stringr::str_pad(width = 2, side = "left", pad = "0")
