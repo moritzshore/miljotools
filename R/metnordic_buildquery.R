@@ -152,11 +152,21 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
 
     ## WARNING this will need to change if metnordic ever updates the re-run.
     ## could replace with an optional parameter to have users define the cutoff..
-    reanal_split <- (as_datetime(daterange) < as_datetime("2023-01-31 23:00:00")) %>% which()
-    op_split <- (as_datetime(daterange) >= as_datetime("2023-01-31 23:00:00")) %>% which()
+    reanal_split <- (lubridate::as_datetime(daterange) <= lubridate::as_datetime("2023-01-31 23:00:00")) %>% which()
+    op_split <- (lubridate::as_datetime(daterange) > lubridate::as_datetime("2023-01-31 23:00:00")) %>% which()
 
-    re_full_urls <- paste0(re_header, filepath[reanal_split], filenames[reanal_split], "?", var_query)
-    op_full_urls <- paste0(op_header, filepath[op_split], filenames[op_split], "?", var_query)
+    if(length(reanal_split)>0){
+      re_full_urls <- paste0(re_header, filepath[reanal_split], filenames[reanal_split], "?", var_query)
+    }else{
+      re_full_urls <- c()
+    }
+
+    if(length(op_split)>0){
+      op_full_urls <- paste0(op_header, filepath[op_split], filenames[op_split], "?", var_query)
+    }else{
+      op_full_urls <- c()
+    }
+
     full_urls <- c(re_full_urls,op_full_urls)
   }
 
