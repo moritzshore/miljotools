@@ -102,7 +102,7 @@ metnordic_csv <-
 
     ### Downloading files:
     ## TODO: regular save intervals and restarting after failure.
-    mt_print(verbose, "metnordic_csv", "starting download...")
+    mt_print(verbose, "metnordic_csv", "starting download from dataset:", dataset)
     ncdownload <-
       csv_download_ncfiles(
         directory = directory,
