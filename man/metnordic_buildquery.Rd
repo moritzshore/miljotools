@@ -10,7 +10,7 @@ metnordic_buildquery(
   fromdate,
   todate,
   grid_resolution,
-  dataset = "continuous",
+  dataset = "reanalysis",
   verbose
 )
 }
@@ -25,8 +25,8 @@ metnordic_buildquery(
 
 \item{grid_resolution}{an integer, ie. 3 for 3x3 km grid.}
 
-\item{dataset}{either 'reanalysis' for the re-run archive, \code{operational} for
-the operational archive, or \code{continuous} to source from both, depending on
+\item{dataset}{either 'reanalysis' for the re-run archive, 'operational' for
+the operational archive, or 'continuous' to source from both, depending on
 timerange.}
 
 \item{verbose}{print to console?}
