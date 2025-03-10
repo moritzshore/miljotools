@@ -437,6 +437,4 @@ csv_write_stations <- function(vardl, cover_stations, mn_variables, x_crop, y_cr
     print(plot)
   }
 
-  # remove RDS files
-  stat <- file.remove(rdsfiles)
 }
