@@ -12,7 +12,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-runmetnovig = TRUE # runs the vignette code or not. only enable for when you want to release a new package version, since it takes a long time to run. 
+runmetnovig = FALSE # runs the vignette code or not. only enable for when you want to release a new package version, since it takes a long time to run. 
 ```
 
 [Author]{.underline}: Moritz Shore

@@ -18,6 +18,7 @@ Imports:
     dplyr,
     lubridate,
     mapview,
+    methods,
     ncdf4,
     purrr,
     readr,
@@ -29,7 +30,6 @@ Imports:
 Suggests:
     devtools,
     doParallel,
-    euptf2,
     fs,
     ggplot2,
     ggrepel,

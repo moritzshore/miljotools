@@ -16,7 +16,7 @@ get_metno_reanalysis3(
 )
 }
 \arguments{
-\item{area}{(string) path to geo-referenced shapefile (polygon or point) of the desired area}
+\item{area}{(string) path to geo-referenced shapefile (polygon or point) of the desired area. (optionally, you can pass a \code{sf} object directly.)}
 
 \item{directory}{(string) path to desired working directory (default: working directory)}
 

@@ -73,7 +73,7 @@
 #' as well as plotting interactive maps to the viewer which gives you an idea of
 #' which grid cells were selected relative to the shapefile you provided.
 #'
-#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area
+#' @param area (string) path to geo-referenced shapefile (polygon or point) of the desired area. (optionally, you can pass a `sf` object directly.)
 #' @param directory (string) path to desired working directory (default: working directory)
 #' @param fromdate (string) date and time for start of time series (ie. "2012-09-01 10:00:00")
 #' @param todate (string) date and time for end of time series (ie. "2013-09-01 10:00:00")
@@ -125,6 +125,12 @@ get_metno_reanalysis3 <-
            preview = TRUE
   ){
     # validate input
+    if(as_datetime(todate) > as_datetime("2023-01-31 23:00:00")){
+      stop("Reanalysis 3 is only until '2023-01-31 23:00:00', contact maintainer if this changes..")
+    }
+    if(as_datetime(fromdate) < as_datetime("2012-09-01 03:00:00")){
+      stop("Reanalysis 3 only starts '2012-09-01 03:00:00', contact maintainer if this changes..")
+    }
     if(is.null(grid_resolution)){
       mt_print(preview, "get_metno_reanalysis3", text = "`grid_resolution` not chosen, defaulting to 1 x 1 km grid..")
       grid_resolution = 1
@@ -164,6 +170,9 @@ get_metno_reanalysis3 <-
 
     mt_print(preview, "get_metno_reanalysis3", "getting coordinates...")
     bounding_coords <- get_coord_window(area_path = area, area_buffer, preview)
+
+    metadist <- bounding_coords$metadist
+    bounding_coords<- bounding_coords[-length(bounding_coords)]
 
     mt_print(preview, "get_metno_reanalysis3", "building query...")
     queries <- build_query(bounding_coords, mn_variables, fromdate, todate, grid_resolution, verbose)
@@ -235,7 +244,8 @@ get_metno_reanalysis3 <-
         lon = paste("lon = ", ncdownload$lon_crop),
         x = paste("X =", ncdownload$x_crop),
         y = paste("Y =", ncdownload$y_crop),
-        elevation = paste("ELEVATION = ", ncdownload$alt_crop)
+        elevation = paste("ELEVATION = ", ncdownload$alt_crop),
+        distance_to_gridcell = paste0("DISTANCE TO NEAREST GRIDCELL (in meters) = ", metadist)
       )
 
       source = paste0(
@@ -282,6 +292,7 @@ get_metno_reanalysis3 <-
 #' @importFrom readr read_csv write_csv
 #' @importFrom lubridate date
 #' @importFrom stringr str_split
+#' @importFrom methods is
 reanalysis3_daily <- function(path, outpath = NULL, verbose = FALSE, precision = 2){
 
   # remove trailing "/"
@@ -399,7 +410,16 @@ get_coord_window <- function(area_path, area_buffer, preview){
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
   # load in the shape file
-  area <- sf::read_sf(area_path)
+  # if it already is a shape file, then no need to read it
+  if(methods::is(area_path, "sf")){
+    area <- area_path
+  }else if(methods::is(area_path, "character")){
+    # if it is a string, then read it
+    area <- sf::read_sf(area_path)
+  }else{
+    stop("`area` parameter not recognized! please pass either a filepath to a .shp file, or an `sf` object!\n")
+  }
+
   # Transform the shapefile to the metno projection
   area <- sf::st_transform(area, crs = proj_crs)
 
@@ -424,22 +444,24 @@ get_coord_window <- function(area_path, area_buffer, preview){
     index_x <- which(min_diff_x == x_diff)
     index_y <- which(min_diff_y == y_diff)
 
+    df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
+                       coords = c("x", "y"),
+                       crs = sf::st_crs(proj_crs))
+    metadist <- (sf::st_distance(df, area) %>% round(0))[1,1]
+
     if(preview){
-      df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
-                         coords = c("x", "y"),
-                         crs = sf::st_crs(proj_crs))
+
       area$name = "provided file"
       plot = mapview::mapview(df, layer.name = "Nearest Re-analysis Gridpoint", col.regions = "orange")+
         mapview::mapview(area, layer.name = "User location", col.regions = "blue")
-
       print(plot)
       mt_print(preview, "get_metno_reanalysis3 ",
-               "Note: Selected grid cell distance (in meters) to desired location:",
-               (sf::st_distance(df, area) %>% round(0)))
+               "Note: Selected grid cell distance (in meters) to desired location:",metadist)
     }
 
 
-    return(list(index_x = index_x, index_y = index_y))
+
+    return(list(index_x = index_x, index_y = index_y, metadist = metadist))
 
   } else{
     # do the polygon stuff
@@ -488,7 +510,8 @@ get_coord_window <- function(area_path, area_buffer, preview){
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,
                 index_ymax = index_ymax,
-                area_buff = area_buff, area_shp = area
+                area_buff = area_buff, area_shp = area,
+                metadist = "not relevant for polygon shapefile"
     ))
   }
 }
