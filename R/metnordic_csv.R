@@ -1,3 +1,9 @@
+## TODO:
+# Directly write data to disk, and auto-catch up when download restarts
+# Add a custom foldername path
+# Return geometry type in the list.
+# Move crop/write station data to dedicated functions.
+
 ### Notes:
 # EPGS code: 4368
 
@@ -74,10 +80,11 @@ metnordic_csv <-
   ){
 
     ### Getting the bouding box
-    mt_print(verbose, "metnordic_csv", "getting coordinates...")
+    mt_print(verbose, "metnordic_csv", "getting coordinates..", paste0("with buffer of", area_buffer))
     bounding_coords <- metnordic_coordwindow(area_path = area, area_buffer =  area_buffer, verbose = verbose)
 
     ### Extracting the distance to point (if applicable), and saving for later
+    # TODO: swich to return list instead of this method.
     metadist <- bounding_coords$metadist
     bounding_coords<- bounding_coords[-length(bounding_coords)]
 
@@ -86,7 +93,7 @@ metnordic_csv <-
     if (geometry_type == "polygon") stop("this is not supported yet in this function, please still use `get_metno_reanalysis3()`")
 
     ### Building download queries
-    mt_print(verbose, "metnordic_csv", "building query...")
+    mt_print(verbose, "metnordic_csv", "building query", paste0("from ", dataset, "dataset and a resolution of ", grid_resolution, "km"))
     queries <- metnordic_buildquery(
       bounding_coords = bounding_coords,
       mn_variables =  mn_variables,
@@ -97,8 +104,9 @@ metnordic_csv <-
       verbose = verbose)
 
     ### Creating download folder.
-    mt_print(verbose, "metnordic_csv", "creating download folder...")
     foldername <- csv_create_download_folder(directory)
+    mt_print(verbose, "metnordic_csv", "creating download folder", foldername)
+
 
     ### Downloading files:
     ## TODO: regular save intervals and restarting after failure.
