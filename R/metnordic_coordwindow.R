@@ -10,7 +10,7 @@
 #'
 #' @param area_path String: path to shapefile of region / point (this must have point or polygon geometry!)
 #' @param area_buffer Integer: buffer in m to place around shapefile / point
-#' @param preview Logical: plot preview the coordinate window?
+#' @param verbose Logical: plot the coordinate window?
 #'
 #' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
@@ -20,11 +20,11 @@
 metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
 
   # get a base file to find the right x y
-  mt_print(preview, function_name = "metnordic_coordwindow","getting base file..")
+  mt_print(verbose, function_name = "metnordic_coordwindow","getting base file..")
   filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
   ncin <- nc_open_retry(filename)
   if(ncin$filename == filename){
-    mt_print(preview, function_name = "metnordic_coordwindow","basefile downloaded.")
+    mt_print(verbose, function_name = "metnordic_coordwindow","basefile downloaded.")
   }else{stop("error downloading basefile:\n", filename)}
   x <- ncdf4::ncvar_get(ncin, "x")
   y <- ncdf4::ncvar_get(ncin, "y")
@@ -40,7 +40,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
 
   # get the geometry type (either point or polygon)
   area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
-  mt_print(preview, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
+  mt_print(verbose, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
 
   # routine for if a point was passed
   if (area_attr == "sfc_POINT") {
@@ -85,7 +85,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     # drop the Z coordinate (extra stability)
     area <- sf::st_zm(area)
     # Buffer the shapefile to the user defined amount
-    mt_print(preview, function_name = "metnordic_coordwindow","buffering shapefile: ", paste(area_buffer, "m"))
+    mt_print(verbose, function_name = "metnordic_coordwindow","buffering shapefile: ", paste(area_buffer, "m"))
 
     if(area_buffer > 0){
       area_buff <- sf::st_buffer(x = area, dist = area_buffer)
@@ -101,14 +101,14 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     xmax <- wsbox[["xmax"]]
 
     # previewing coverage
-    if(preview){
+    if(verbose){
       # old mapview solution
       plot <- mapview::mapview(wsbox, col.region = "blue")+
         mapview::mapview(area_buff, col.region = "red")+
         mapview::mapview(area, col.region = "orange")
       print(plot)
     }
-    mt_print(preview, function_name = "metnordic_coordwindow","calculating coordinate window...")
+    mt_print(verbose, function_name = "metnordic_coordwindow","calculating coordinate window...")
 
     ## Finding the nearest neighbor to each corner
     # calculate the difference in value
@@ -129,7 +129,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     index_ymin <- which(min_diff_ymin == y_mn_diff)
     index_ymax <- which(min_diff_ymax == y_mx_diff)
 
-    if(preview){mt_print(preview, function_name = "metnordic_coordwindow",
+    if(verbose){mt_print(verbose, function_name = "metnordic_coordwindow",
                          "coordinate window is:", paste0("xmin=", index_xmin,
                                                          " xmax=", index_xmax,
                                                          " xmin=",index_ymin,

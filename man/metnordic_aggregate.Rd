@@ -11,7 +11,7 @@ metnordic_aggregate(
   day,
   outpath,
   overwrite = TRUE,
-  preview = TRUE
+  verbose = TRUE
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ metnordic_aggregate(
 
 \item{overwrite}{Logical: overwrite existing file?}
 
-\item{preview}{Logical: plot map?}
+\item{verbose}{Logical: plot map?}
 }
 \value{
 String: path to written file

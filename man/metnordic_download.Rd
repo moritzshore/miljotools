@@ -4,7 +4,7 @@
 \alias{metnordic_download}
 \title{Download a MET Nordic Data URL}
 \usage{
-metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
+metnordic_download(url, outdir, vars, overwrite = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{url}{String: OPENDAP url to be downloaded (from `metnordic_buildquery()).}
@@ -15,7 +15,7 @@ metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
 
 \item{overwrite}{Logical: Overwrite files if they already exist?}
 
-\item{preview}{Logical: Print preview?}
+\item{verbose}{Logical: Print preview?}
 }
 \value{
 String: file paths to generated files
