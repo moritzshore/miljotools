@@ -83,6 +83,7 @@ metnordic_csv <-
 
     ### Determining Geometry type (BAD METHOD!, use return list of bounding_coords)
     if(bounding_coords %>% length() == 2){geometry_type = "point"}else{geometry_type = "polygon"}
+    if (geometry_type == "polygon") stop("this is not supported yet in this function, please still use `get_metno_reanalysis3()`")
 
     ### Building download queries
     mt_print(verbose, "metnordic_csv", "building query...")
@@ -142,11 +143,10 @@ metnordic_csv <-
         lon_crop = ncdownload$lon_crop,
         lat_crop = ncdownload$lat_crop,
         alt_crop = ncdownload$alt_crop,
-        mastermatrix = merged_data$mastermatrix,
+        mastermatrix = ncdownload$mastermatrix,
         daterange = queries$daterange,
         foldername = foldername,
         directory = directory,
-        rdsfiles = merged_data$rdsfiles,
         verbose = verbose,
         area = bounding_coords$area_shp
       )
@@ -339,7 +339,7 @@ csv_crop_dataset <- function(lat_crop, lon_crop, area, area_buff, verbose){
 }
 csv_write_stations <- function(vardl, cover_stations, mn_variables, x_crop, y_crop,
                            lon_crop, lat_crop, alt_crop, mastermatrix,
-                           daterange, foldername, rdsfiles, directory,
+                           daterange, foldername,directory,
                            verbose, area) {
   # getting dimensions of the x and y grid
   x_mat <- dim(vardl[[1]])[1]
