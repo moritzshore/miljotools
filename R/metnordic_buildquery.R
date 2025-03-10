@@ -14,8 +14,8 @@
 #' @param mn_variables MET Nordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param fromdate ie. "2019-01-01 00:00:00"
 #' @param todate ie. "2020-12-31 23:00:00"
-#' @param dataset either 'reanalysis' for the re-run archive, `operational` for
-#'   the operational archive, or `continuous` to source from both, depending on
+#' @param dataset either 'reanalysis' for the re-run archive, 'operational' for
+#'   the operational archive, or 'continuous' to source from both, depending on
 #'   timerange.
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
@@ -26,7 +26,7 @@
 #' @examples
 #' # TODO
 metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
-                        grid_resolution, dataset = 'continuous', verbose){
+                        grid_resolution, dataset = 'reanalysis', verbose){
   # time step not really needed since the files are individual
   time1 = 0
   time2 = 0
