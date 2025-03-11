@@ -193,7 +193,7 @@ function:
 ```{r, eval = runmetnovig}
 box <- metnordic_coordwindow(area_path = cs10_basin,
                              area_buffer = 1500,
-                             preview = T)
+                             verbose = T)
 ```
 
 ### Building the queries
@@ -202,8 +202,19 @@ With the bounding box determined, the URL queries to download from the
 server can be parsed. This requires the additional inputs: starting
 time, ending time, and desired variables.
 
+Additionally, you choose from which archive you would like to download your data
+from, your three options (decided with the parameter `dataset`) are:
+
+1. "reanalysis" -- the classic product, ranges from 2012 to 2022
+
+2. "operational" -- the archive up to present, this contains data from
+2018-**TODAY**
+
+3. "continuous" -- this option provides queries from the reanalysis archive
+until it ends and continues with the operational data from there.
+
 Here, an example for air temperature on May 15-16th, with 1x1
-resolution. This function returns the URLs and the file names of the
+resolution, with the "continuous" option. This function returns the URLs and the file names of the
 to-be-downloaded files.
 
 ```{r buildquery, eval = runmetnovig}
@@ -213,6 +224,7 @@ urls <- metnordic_buildquery(
   fromdate = "2020-05-15 00:00:00",
   todate = "2020-05-16 23:00:00",
   grid_resolution = 1,
+  dataset = "continuous",
   verbose = T
 )
 ```
@@ -228,7 +240,7 @@ dl_path = metnordic_download(
   outdir = "../vignettes",
   vars = c("air_temperature_2m","precipitation_amount"),
   overwrite = T,
-  preview = T
+  verbose = T
 )
 ```
 
@@ -250,7 +262,7 @@ to use a for-loop instead of a parallel solution.
 
 I do not yet have a fully robust way of doing this, therefore I have not
 implemented into a function yet. My solution to downloading a whole
-daterange currently looks like the code chunk below. You are welcome to
+date range currently looks like the code chunk below. You are welcome to
 adapt and use it, or suggest a different implementation for the package.
 
 ```{r message=FALSE, warning=FALSE}
@@ -338,7 +350,7 @@ while((dl_stop == FALSE) & (dl_attempt < 50)){
         outdir = mn_download_dir,
         vars = vars_to_dl,
         overwrite = T,
-        preview = F
+        verbose = F
       )
     }
   }
@@ -362,7 +374,7 @@ fp_tm_agg = metnordic_aggregate(
   day = "20200515", # the day in YYYYMMDD format
   outpath = "../vignettes",
   overwrite = T,
-  preview = T
+  verbose = T
 )
 
 fp_pr_agg = metnordic_aggregate(
@@ -372,7 +384,7 @@ fp_pr_agg = metnordic_aggregate(
   day = "20200515", # the day in YYYYMMDD format
   outpath = "../vignettes",
   overwrite = T,
-  preview = T
+  verbose = T
 )
 ```
 
@@ -405,19 +417,19 @@ registerDoParallel(cl)
 result <- foreach(day = some_days, .packages = "miljotools") %dopar% {
 
   metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "mean", day = day, preview = F, overwrite = T,
+                      method = "mean", day = day, verbose = F, overwrite = T,
                       outpath = aggr_path)
 
   metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "max", day = day, preview = F, overwrite = T,
+                      method = "max", day = day, verbose = F, overwrite = T,
                       outpath = aggr_path)
 
   metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "min", day = day, preview = F, overwrite = T,
+                      method = "min", day = day, verbose = F, overwrite = T,
                       outpath =aggr_path)
 
   metnordic_aggregate(directory = mn_download_dir, variable = "precipitation_amount",
-                      method = "sum", day = day, preview = F, overwrite = T,
+                      method = "sum", day = day, verbose = F, overwrite = T,
                       outpath = aggr_path)
 }
 stopCluster(cl)
@@ -558,22 +570,14 @@ swat_weather_input_chain(
 )
 ```
 
-```{r swatinputchain, include=FALSE, eval = runmetnovig}
-swat_weather_input_chain(
-  area = "cs10_basin/cs10_basin.shp",
-  swat_setup = "cs10_txt",
-  from = "2013-01-01 00:00:00",
-  to = "2013-01-02 23:00:00"
-)
-```
-
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 require(dplyr)
 unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "cs10point", "miljotools_swat_backup", "download", "merged", "aggregated", "cwatm_ready", "projected"), recursive = T)
-
+gc()
 list.files(pattern = "met_no_dl*") %>% unlink(recursive = T)
 list.files(pattern = "met_analysis*", full.names = T) %>% file.remove()
 list.files(pattern = "reprojected*", full.names = T) %>% file.remove()
+list.files(pattern = "met_analysis_1_0km_nordic*", full.names = T) %>% file.remove()
 
 file.remove(c("krak_daily.zip", "cs10_txt.zip", "cs10_basin.zip", "cs10point.zip"))
 ```
