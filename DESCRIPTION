@@ -41,13 +41,14 @@ Suggests:
     readxl,
     rmarkdown,
     roxygen2,
+    rswap,
     SWATprepR,
     writexl
 VignetteBuilder: 
     knitr
 Remotes: 
     github::biopsichas/SWATprepR,
-    github::tkdweber/euptf2
+    github::moritzshore/rswap,
 Encoding: UTF-8
 Language: English
 LazyData: true
