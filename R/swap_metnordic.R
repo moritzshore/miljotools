@@ -22,7 +22,7 @@ swap_metnordic <- function(dldir, outpath, timescale = "daily", verbose = FALSE)
   .data <- NULL # R CMD CHECK appeasement
   # parsing paths
   dl_path <- paste0(dldir, "/METNORDIC_point.csv")
-  meta_path <- paste0(dldir, "/metadata.txt")
+  meta_path <- paste0(dldir, "/METNORDIC_metadata.csv")
 
   # checking if files exist
   if(file.exists(dl_path) == FALSE){
@@ -137,7 +137,7 @@ swap_metnordic <- function(dldir, outpath, timescale = "daily", verbose = FALSE)
   # precipitation values, which count as rain, but are near 0. So this ignores
   # them.
   indf<-indf %>% mutate(qrain = ifelse(.data$precipitation_amount >= 0.01, yes = 1, no = 0))
-  WET <- indf %>% group_by(.data$DATE) %>% mutate(WET = ((sum(.data$qrain)/24) %>% round(2))) %>% select(.data$DATE, .data$WET) %>% distinct()
+  WET <- indf %>% group_by(.data$DATE) %>% mutate(WET = ((sum(.data$qrain, na.rm = T)/24) %>% round(2))) %>% select(.data$DATE, .data$WET) %>% distinct()
   SWAP_INPUT_DF <- left_join(SWAP_INPUT_DF, WET, by = "DATE")
 
   ### DATE and STATION
