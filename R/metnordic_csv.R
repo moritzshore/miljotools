@@ -155,6 +155,10 @@ csv_download_ncfiles <- function(directory,
     append_flag = FALSE
   }
 
+  if(full_urls %>% length()==0){
+    stop("All files are already present in this directory! No need to download anything else!")
+  }
+
   url <- full_urls
   ncin_crop <- nc_open_retry(url[1])
 
