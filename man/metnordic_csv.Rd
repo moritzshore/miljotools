@@ -6,34 +6,28 @@
 \usage{
 metnordic_csv(
   area,
-  directory = NULL,
+  path = NULL,
   fromdate = "2012-09-01 10:00:00",
   todate = "2012-09-01 20:00:00",
   mn_variables = NULL,
   dataset = "continuous",
-  area_buffer = 0,
-  grid_resolution = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{area}{(string) path to geo-referenced shapefile (polygon or point) of the desired area. (optionally, you can pass a \code{sf} object directly.)}
+\item{area}{(string) path to geo-referenced shapefile (point) of the desired area. (optionally, you can pass a \code{sf} object directly.)}
 
-\item{directory}{(string) path to desired working directory (default: working directory)}
+\item{path}{(string) path to download directory}
 
 \item{fromdate}{(string) date and time for start of time series (ie. "2012-09-01 10:00:00")}
 
 \item{todate}{(string) date and time for end of time series (ie. "2013-09-01 10:00:00")}
 
-\item{mn_variables}{(vector) Leave blank for default (tested) variables. See details for more}
+\item{mn_variables}{(vector) Leave blank for default variables}
 
 \item{dataset}{(string) from which dataset to source the files from? ("reanalysis", "operational", or "continuous" for both).}
 
-\item{area_buffer}{desired buffer around the provided shapefile (in meters)}
-
-\item{grid_resolution}{(integer) desired resolution of downloaded grid in kilometers.}
-
-\item{verbose}{generate graphs showing previews of data download? (Boolean)}
+\item{verbose}{(boolean) generate graphs showing previews of data download?}
 }
 \value{
 Function returns a path to where .csv files of the download were
@@ -41,12 +35,15 @@ written. One .csv file for each grid point within the (buffered) shape
 file area. Additionally one metadata file (.csv) is written with the
 }
 \description{
+note: this function only works for point geometry.
+}
+\details{
 This is a modified version of the normal \code{get_metno_reanalysis3} designed
-specifically for harmonizing downloading in csv format and  netCDF. Since it is quite
-hard to harmonize the netcdf stuff and the csv stuff with things like point
-vs. polygon (and my bad coding practices), this function exists as an
-intermediary where i try to step-wise harmonize the two methods as best as i
-can. It hasnt fully worked out yet, but its like half way there.
+specifically for harmonizing downloading in csv format and  netCDF. Since it
+is quite hard to harmonize the netcdf stuff and the csv stuff with things
+like point vs. polygon (and my bad coding practices), this function exists as
+an intermediary where i try to step-wise harmonize the two methods as best as
+i can. It hasnt fully worked out yet, but its like half way there.
 }
 \examples{
 
@@ -55,7 +52,6 @@ can. It hasnt fully worked out yet, but its like half way there.
  area = example_file_path,
  fromdate = "2015-01-01",
  todate = "2015-01-02",
- area_buffer = 100,
  verbose = TRUE
  )
  }
