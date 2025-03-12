@@ -9,7 +9,7 @@ metnordic_buildquery(
   mn_variables,
   fromdate,
   todate,
-  grid_resolution,
+  grid_resolution = 1,
   dataset = "reanalysis",
   verbose
 )

@@ -26,7 +26,7 @@
 #' @examples
 #' # TODO
 metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
-                        grid_resolution, dataset = 'reanalysis', verbose){
+                        grid_resolution = 1, dataset = 'reanalysis', verbose){
   # time step not really needed since the files are individual
   time1 = 0
   time2 = 0
