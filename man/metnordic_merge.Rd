@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnordic_merge.R
 \name{metnordic_merge}
 \alias{metnordic_merge}
-\title{Merge MET Nordic Files}
+\title{Merge MET Nordic Files (daily)}
 \usage{
 metnordic_merge(folderpath, variable, outpath, overwrite = FALSE)
 }
@@ -19,10 +19,10 @@ metnordic_merge(folderpath, variable, outpath, overwrite = FALSE)
 file path of generated files
 }
 \description{
-This function merges daily MET Nordic files into a single .nc file for a
+This function merges \strong{daily} MET Nordic files into a single .nc file for a
 single variable. The input data should be the output data of
 \code{metnordic_aggregate()}. This function provides input for
-\code{metnordic_reproject()}
+\code{metnordic_reproject()}. For \strong{hourly} merging, please use \code{metnordic_merge_hourly()}
 }
 \details{
 Code largely adapted from this handy guide:
@@ -33,7 +33,7 @@ from Pat Bartlein, bartlein@uoregon.edu
 # TODO
 }
 \seealso{
-\code{\link[=metnordic_aggregate]{metnordic_aggregate()}} \code{\link[=metnordic_reproject]{metnordic_reproject()}}
+\code{\link[=metnordic_aggregate]{metnordic_aggregate()}} \code{\link[=metnordic_reproject]{metnordic_reproject()}} \code{\link[=metnordic_merge_hourly]{metnordic_merge_hourly()}}
 }
 \author{
 Moritz Shore

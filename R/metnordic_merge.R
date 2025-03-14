@@ -1,15 +1,15 @@
-#' Merge MET Nordic Files
+#' Merge MET Nordic Files (daily)
 #'
-#' This function merges daily MET Nordic files into a single .nc file for a
+#' This function merges **daily** MET Nordic files into a single .nc file for a
 #' single variable. The input data should be the output data of
 #' `metnordic_aggregate()`. This function provides input for
-#' `metnordic_reproject()`
+#' `metnordic_reproject()`. For **hourly** merging, please use `metnordic_merge_hourly()`
 #'
 #' Code largely adapted from this handy guide:
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
 #' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @seealso [metnordic_aggregate()] [metnordic_reproject()]
+#' @seealso [metnordic_aggregate()] [metnordic_reproject()] [metnordic_merge_hourly()]
 #' @author Moritz Shore
 #'
 #' @param folderpath String: Outpath of files from `metnordic_aggregate()`.
