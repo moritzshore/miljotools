@@ -88,6 +88,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   source_date = as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
   first_date = dateformat[1]
   basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
+  basehour <- basehour - 1
   post_hours <- c(1:length(dateformat))
   hours_since_1901_01 <-basehour+post_hours
   timedim <- ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
