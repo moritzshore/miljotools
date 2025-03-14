@@ -27,8 +27,8 @@ metnordic_extract <-  function(directory, mn_variables, lat, lon, outdir, name, 
       var = variable,
       infile = infp,
       outfile = outfp,
-      lon1 = ex$lon,
-      lat1 = ex$lat,
+      lon1 = lon,
+      lat1 = lat,
       format = "csv",
       verbose = verbose,
       overwrite = TRUE)
@@ -43,8 +43,8 @@ metnordic_extract <-  function(directory, mn_variables, lat, lon, outdir, name, 
     extract_var(
       directory = directory,
       outdir = outdir,
-      lat = ex$lat,
-      lon = ex$lon,
+      lat = lat,
+      lon = lon,
       variable =  the_var
     )
   }
