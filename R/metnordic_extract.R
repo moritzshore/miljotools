@@ -5,6 +5,7 @@
 #' `metnordic_extract()`. The function relies upon the `cmsafops` to extract values.
 #'
 #' @importFrom cmsafops selpoint
+#' @importFrom readr read_delim
 #'
 #' @param directory (String) directory containing merged files as created by `metnordic_merge_hourly()`
 #' @param mn_variables (vector, strings) variables to extract
@@ -33,7 +34,7 @@ metnordic_extract <-  function(directory, mn_variables, lat, lon, outdir, name, 
       verbose = verbose,
       overwrite = TRUE)
     # need to move things up by one day
-    res = read_delim(outfp, delim = ";", col_names = T, show_col_types = F)
+    res = readr::read_delim(outfp, delim = ";", col_names = T, show_col_types = F)
     file.remove(outfp)
     colnames(res) <- c("date", variable)
     return(res)
@@ -50,7 +51,7 @@ metnordic_extract <-  function(directory, mn_variables, lat, lon, outdir, name, 
   }
 
   reslist <- lapply(X = mn_variables, FUN = extract_all_vars)
-  full_df <- do.call("cbind", reslist) %>% dplyr::select(all_of(c("date", project_vars)))
+  full_df <- do.call("cbind", reslist) %>% dplyr::select(all_of(c("date", mn_variables)))
 
   writefp <- paste0(outdir, name, "_metno-extract-LAT",lat %>%str_replace("\\.", "-"), "_LON",  lon %>%str_replace("\\.", "-"), ".csv")
   write_csv(full_df, file = writefp)
