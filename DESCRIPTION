@@ -1,7 +1,6 @@
 Type: Package
 Package: miljotools
-Title: An R package hosting a variety of useful functions for
-    environmental data handling and anaylsis
+Title: Download MET Nordic data / Soil Texture Classification / Thermopluviograms
 Version: 0.7.0
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
