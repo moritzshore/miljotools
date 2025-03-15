@@ -4,7 +4,7 @@ Title: Download MET Nordic data / Soil Texture Classification / Thermopluviogram
 Version: 0.7.0
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
-Description: A few useful functions for environemental data gather, processing, and
+Description: A few useful functions for environemental data gathering, processing, and
     analysis.
 License: GPL (>= 3)
 URL: https://moritzshore.github.io/miljotools/
