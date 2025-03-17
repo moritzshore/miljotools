@@ -23,7 +23,8 @@ String: file paths to generated files
 \description{
 Downloads MET Nordic re-analysis data using an OPENDAP url. This function
 ideally takes input from \code{metnordic_buildquery()} and provides input for
-\code{metnordic_aggregate()}.
+\code{metnordic_aggregate()}. If you are having issues with downloads, make sure
+to check https://status.met.no/ for server (THREDDS) status.
 }
 \details{
 Code largely adapted from this handy guide:

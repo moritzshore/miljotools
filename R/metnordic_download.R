@@ -2,7 +2,8 @@
 #'
 #' Downloads MET Nordic re-analysis data using an OPENDAP url. This function
 #' ideally takes input from `metnordic_buildquery()` and provides input for
-#' `metnordic_aggregate()`.
+#' `metnordic_aggregate()`. If you are having issues with downloads, make sure
+#' to check https://status.met.no/ for server (THREDDS) status.
 #'
 #' Code largely adapted from this handy guide:
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
