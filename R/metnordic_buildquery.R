@@ -26,13 +26,28 @@
 #' @examples
 #' # TODO
 metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
-                        grid_resolution = 1, dataset = 'reanalysis', verbose){
+                        grid_resolution = 1, dataset = 'reanalysis', verbose = FALSE){
+
+  # detecting geometry by list structure
+  if(length(bounding_coords) == 5){
+    q_poly_geom <- (bounding_coords %>% names() == c("index_xmin", "index_xmax", "index_ymin", "index_ymax", "metadist")) %>% all()
+    q_point_geom <- FALSE
+  }else if(length(bounding_coords) == 3){
+    q_point_geom <- (bounding_coords %>% names() == c("index_x", "index_y", "metadist")) %>% all()
+    q_poly_geom <- FALSE
+  }else{stop("bounding coords not recognized. please generate with 'metnordic_coordwindow()'")}
+
+  # if the passed bounding coords match the polygon geomtry, remove the metadist
+  if(q_poly_geom){
+    bounding_coords <- bounding_coords[-5]
+  }
+
   # time step not really needed since the files are individual
   time1 = 0
   time2 = 0
   timestep = 1
   # do point routine if true:
-  if(length(bounding_coords) == 2){
+  if(q_point_geom){
     x = bounding_coords$index_x
     y = bounding_coords$index_y
     x1 = x
@@ -41,8 +56,8 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     y2 = y
     xstep = 1
     ystep = 1
-    # if 4, do polygon routine
-  }else if(length(bounding_coords) == 4){
+    # or do polygon routine
+  }else if(q_poly_geom){
 
     # unpacking the list pack
     index_xmin = bounding_coords$index_xmin
@@ -69,7 +84,7 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
 
     # print grid resolution
     if(verbose){cat(green(italic("generating urls with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
-  }else{stop("bounding coords must be either 2 coordiates (point) or 4 (rectangle), you passed:", length(bounding_coords))}
+  }else{stop("bounding coords not recognized. please generate with 'metnordic_coordwindow()'")}
 
   # paste together the vars
   x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
