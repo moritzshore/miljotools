@@ -165,7 +165,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   metafp <- paste0(outdir, "/METNORDIC_meta_", name, ".csv")
 
   readr::write_csv(x = full_df, file = writefp)
-  paste(names(meta_tib), "=", meta_tib, collapse = "\n") %>% writeLines(con = metafp)
+  paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
 
   return(writefp)
 }
