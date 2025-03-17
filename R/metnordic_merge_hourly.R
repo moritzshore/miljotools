@@ -52,7 +52,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
       if(removed == FALSE){stop("error with removing file",full_write_fp )}
     }else{
       warning(write_fp, "already exists, skipping..")
-      return(FALSE)
+      return(full_write_fp)
     }
   }
 
