@@ -39,7 +39,8 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
 
 
-  get_meta <- function(infp, name, mn_variables, point, proj_crs, verbose){
+  get_meta <- function(directory, name, mn_variables, point, proj_crs, verbose){
+    infp = list.files(directory, mn_variables[1], full.names = T)
     point_proj <- sf::st_transform(point, crs = projection)
     coordinate <- sf::st_coordinates(point_proj)
     point_x <- coordinate[1]
@@ -102,8 +103,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     return(meta_tib)
   }
 
-  metadf = get_meta(
-    infp = infp,
+  metadf = get_meta(directory = directory,
     mn_variables = mn_variables,
     point = point,
     proj_crs = proj_crs,
