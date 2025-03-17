@@ -11,7 +11,7 @@ metnordic_buildquery(
   todate,
   grid_resolution = 1,
   dataset = "reanalysis",
-  verbose
+  verbose = FALSE
 )
 }
 \arguments{
