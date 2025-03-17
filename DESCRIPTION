@@ -13,7 +13,6 @@ Depends:
     R (>= 4.0)
 Imports:
     abind,
-    cmsafops,
     crayon,
     dplyr,
     lubridate,

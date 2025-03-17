@@ -7,8 +7,7 @@
 metnordic_extract(
   directory,
   mn_variables,
-  lat,
-  lon,
+  point,
   outdir,
   name,
   verbose = FALSE
@@ -19,9 +18,7 @@ metnordic_extract(
 
 \item{mn_variables}{(vector, strings) variables to extract}
 
-\item{lat}{(numeric) latitude of point to extract}
-
-\item{lon}{(numeric) longitude of point to extract}
+\item{point}{an object of class "sf" with point geometry.}
 
 \item{outdir}{(string) directory in which to write the file (.csv)}
 
