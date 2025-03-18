@@ -12,28 +12,27 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-runmetnovig = FALSE # runs the vignette code or not. only enable for when you want to release a new package version, since it takes a long time to run. 
+require(gifski)
 ```
 
 [Author]{.underline}: Moritz Shore
 
 [Date]{.underline}: October, 2023
 
-[Last Update]{.underline}: Dec. 18, 2024
-
-```{r echo=FALSE, eval = runmetnovig}
-cat(paste(" >> Vignette last run for miljotools version", packageVersion("miljotools")))
-```
+[Last Update]{.underline}: March 15th, 2025
 
 ## Introduction
 
-The MET Nordic Reanalysis Dataset is a reanalysis product from the
+> Check server status if issues with downloading exist:
+> <https://status.met.no/>
+
+The MET Nordic Reanalysis Data set is a reanalysis product from the
 [Meteorologisk institutt](https://www.met.no/). You can [read more about
-the dataset
+the data set
 here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset). The MET
 Nordic rerun archive version 3 can be accessed using dedicated functions
 in `miljotools`. Please inform yourself on the limitations of reanalysis
-data before applying this dataset to your needs.
+data before applying this data set to your needs.
 
 ```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: The spatial domain of the reanalysis dataset. (SOURCE: MET Nordic)", out.width="50%", out.height="50%"}
 knitr::include_graphics("../man/figures/domain.png")
@@ -44,7 +43,7 @@ knitr::include_graphics("../man/figures/domain.png")
 -   **1x1 km** grid covering the Nordics (see Figure 1.)
 
 -   **Hourly** resolution from [2012-09-01]{.underline} to
-    [2023-01-31]{.underline}
+    [TODAY]{.underline}
 
 -   Following variables: [temperature]{.underline},
     [precipitation]{.underline}, [relative humidity]{.underline}, [wind
@@ -73,511 +72,236 @@ Optionally, you can pass additional parameters to **buffer** your
 shapefile, choose your **variables**, choose your **resolution**, or to
 preview the data you are downloading.
 
-There are two ways of downloading this data, either in text format, with
-each grid point as a seperate .csv file, or as a map, in [NetCDF
-format](https://www.unidata.ucar.edu/software/netcdf/).
+## Overview
 
-## Downloading as text files (.csv)
+The following figure shows a flowchart of how the different functions
+fit together, along with some explanation of the parameters.
 
-To download the MET Nordic data as text files, one can use the
-`get_metno_reanalysis3()` function, which takes a shapefile (polygon or
-point), downloads a grid of overlapping data, and removes grid points
-which do not overlay the provided shapefile. This process can be
-visualized in Figure 2:
-
-```{r, fig2, fig.align='center', fig.cap= "Figure 2. Processing the shapefile and downloading relevant grid points.", echo=FALSE, out.height="50%", out.width="50%"}
-knitr::include_graphics("../man/figures/output.png")
+```{r, fig2, echo= FALSE, fig.align='center', fig.cap="Figure 2: Overview of all the `metnordic` functions. You can download a full version of the image [here](https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/metnordic_functions.png?inline=false)", out.width="100%", out.height="100%"}
+knitr::include_graphics("../man/figures/metnordic_flowchart.png")
 ```
 
-For an example workflow, downloading an example shape file from a
-[public repository](https://gitlab.nibio.no/moritzshore/example-files):
-
-```{r downloadcs}
-download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
-unzip("cs10_basin.zip")
-cs10_basin = "cs10_basin/cs10_basin.shp"
-```
+The following will show you how to use these functions, but first the
+required libraries need to be loaded:
 
 ```{r message=FALSE, warning=FALSE}
 require(miljotools)
+require(dplyr)
+require(sf)
+require(mapview)
+require(readr)
+require(raster)
+library(terra)
+library(tidyterra)
 ```
 
-Downloading MET Nordic data for this shapefile:
+## Coordinate Window
 
-```{r getmetno,  eval = runmetnovig}
-download_folder <- get_metno_reanalysis3(
-  area = cs10_basin,
-  fromdate = "2015-01-01 00:00:00",
-  todate = "2015-01-01 23:00:00",
-  mn_variables = c("air_temperature_2m", "precipitation_amount"),
-  area_buffer = 1500, # 1.5km buffer around shapefile
-  grid_resolution = 1, # 1x1 km resolution
-  preview = FALSE
-)
-```
+To start, one needs to determine which grid cells of the dataset need to
+be downloaded. this can be done with
+[`metnordic_coordwindow()`](https://moritzshore.github.io/miljotools/reference/metnordic_coordwindow.html "link to documentation").
+This function requires which requires us to pass a geo-referenced
+shapefile of our area of interest.
 
-As output you will receive a separate .csv file for each grid point.
-This .csv file contains the meteorological data as a time series, with a
-column for each variable. Additionally one metadata file is created
-listing the properties of each grid point (such as coordinates)
+The geometry of the shapefile can be either `polygon` or `point` , and
+can either be the `path` to the file (including [sidecar
+files](https://desktop.arcgis.com/en/arcmap/latest/manage-data/shapefiles/shapefile-file-extensions.htm))
+or an `sf` object in the R environment. Here is an example:
 
-**Note:** Currently, this function must request the data from met.no
-server on an hour-basis. This means that for each year to download, 8760
-requests must be made to the server. This is rather slow, and as such
-the download can take quite a few hours.
-
-#### Converting to Daily
-
-If you would prefer to have your data in a daily format, you can use the
-`reanalysis3_daily()` function. This function merely requires the path
-of the download folder as created by `get_metno_reanalysis3()`. You can
-pass a precision parameter which determines to which decimal point the
-hourly data will be averaged / summed to.
-
-We can convert the data set to daily resolution as follows:
-
-```{r convertodaily,  eval = runmetnovig}
-daily_path = reanalysis3_daily(
-  path = download_folder,
-  outpath = "../vignettes",
-  verbose = T,
-  precision = 2
-)
-```
-
-#### Downloading a single point
-
-If you would like to download just a single grid point, you should pass
-a **shapefile** with the **point** geometry to the function like so:
-
-Downloading an example shapefile with point geometry..
-
-```{r,eval = runmetnovig}
-download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10point.zip", destfile = "cs10point.zip")
-unzip("cs10point.zip")
-cs10_point = "cs10point/cs10point.shp"
-```
-
-Downloading MET Nordic data from closest grid point:
-
-```{r, eval = runmetnovig}
-download_folder_point <- get_metno_reanalysis3(
-  area = cs10_point,
-  fromdate = "2015-01-01 00:00:00",
-  todate = "2015-01-01 23:00:00",
-  mn_variables = c("air_temperature_2m", "precipitation_amount"),
-  preview = FALSE
-)
-
-```
-
-And converting it to daily resolution..
-
-```{r, eval = runmetnovig}
-daily_path_point = reanalysis3_daily(download_folder_point, verbose = T)
-```
-
-## Downloading as NetCDF
-
-If you would either like to download the files as NetCDF format, or have
-more fine grained control over the download process, you can use the
-following functions:
-
-### Coordinate Window
-
-In order to build the download queries using MET Nordic's
-[OPeNDAP](https://www.opendap.org/) protocol, a desired coordinate
-window needs to be calculated, this can be done with the following
-function:
-
-```{r, eval = runmetnovig}
-box <- metnordic_coordwindow(area_path = cs10_basin,
-                             area_buffer = 1500,
-                             verbose = T)
-```
-
-### Building the queries
-
-With the bounding box determined, the URL queries to download from the
-server can be parsed. This requires the additional inputs: starting
-time, ending time, and desired variables.
-
-Additionally, you choose from which archive you would like to download your data
-from, your three options (decided with the parameter `dataset`) are:
-
-1. "reanalysis" -- the classic product, ranges from 2012 to 2022
-
-2. "operational" -- the archive up to present, this contains data from
-2018-**TODAY**
-
-3. "continuous" -- this option provides queries from the reanalysis archive
-until it ends and continues with the operational data from there.
-
-Here, an example for air temperature on May 15-16th, with 1x1
-resolution, with the "continuous" option. This function returns the URLs and the file names of the
-to-be-downloaded files.
-
-```{r buildquery, eval = runmetnovig}
-urls <- metnordic_buildquery(
-  bounding_coords = box,
-  mn_variables = c("air_temperature_2m", "precipitation_amount"),
-  fromdate = "2020-05-15 00:00:00",
-  todate = "2020-05-16 23:00:00",
-  grid_resolution = 1,
-  dataset = "continuous",
-  verbose = T
-)
-```
-
-### Downloading the files
-
-With the URLs set, the files can be downloaded with the following
-function.
-
-```{r, eval = runmetnovig}
-dl_path = metnordic_download(
-  url = urls$full_urls[1],
-  outdir = "../vignettes",
-  vars = c("air_temperature_2m","precipitation_amount"),
-  overwrite = T,
-  verbose = T
-)
-```
-
-Note, this function only downloads a single URL! (i.e. one hour). See
-next section..
-
-### Downloading a date range
-
-Now, clearly you would normally want to download all files in the date
-range. This should most likely be done with a `for` loop, looping
-through every url in variable `urls$full_urls`. This is easier said than
-done, as during the thousands of server requests, some eventually fail.
-There is a certain amount of re-connection code implemented in the
-`metnordic_download()` function, but it is not perfect.
-
-**Note:** Terms of Service (ToS) of the MET Nordic server are that you
-cannot download multiple files at the same time, therefore I recommend
-to use a for-loop instead of a parallel solution.
-
-I do not yet have a fully robust way of doing this, therefore I have not
-implemented into a function yet. My solution to downloading a whole
-date range currently looks like the code chunk below. You are welcome to
-adapt and use it, or suggest a different implementation for the package.
+> (By the way, these files are publicly available, so you can try this
+> code yourself)
 
 ```{r message=FALSE, warning=FALSE}
-require(stringr)
-require(crayon)
+# downloading example files:
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10point.zip", destfile = "cs10point.zip")
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
+unzip("cs10point.zip")
+unzip("cs10_basin.zip")
+cs10_basin = "cs10_basin/cs10_basin.shp"
+cs10_point = "cs10point/cs10point.shp"
+example_polygon_geometry <- read_sf(cs10_basin)
+example_point_geometry <-  read_sf(cs10_point)
+map1 <- mapview(example_polygon_geometry, alpha.regions = .3, legend = F)
+map2 <- mapview(example_point_geometry, col.regions = "orange", legend = F)
+
+map1+map2
 ```
 
-```{r, eval = runmetnovig}
-### Downloading the files ----
-# This **cannot** be parallelized as we are only allowed to make one request to
-# met.no at a time. therefore we use a forloop for downloading, and a while loop
-# to restart after connection failures..
-vars_to_dl = c("air_temperature_2m", "precipitation_amount")
-full_urls <- urls$full_urls
-mn_filenames <- urls$filenames
-mydir = "../vignettes"
-mn_download_dir =  paste0(mydir,"/download")
-dir.create(mn_download_dir, showWarnings = F)
-dl_stop = FALSE # set this initially to false. when TRUE, ends the DL
-dl_attempt = 0 # do not try this more than 50 times.
-dl_t1 <- Sys.time() # tracking time
-while((dl_stop == FALSE) & (dl_attempt < 50)){
-  # How many files have already been downloaded?
-  already_downloaded <- list.files(mn_download_dir, pattern = "*.nc")
+Now, with our geometries loaded, we can create coordinate windows for
+them. We will also buffer our polygon shapefile to ensure full coverage.
 
-  # if there have been files downloaded already, remove the variable name to
-  # restore the original download file name.
-  if(length(already_downloaded>0)){
-    for (keyword in vars_to_dl) {
-      already_downloaded <- str_remove_all(already_downloaded,paste0("_",keyword))
-    }
-    already_downloaded <- already_downloaded %>% unique()
-  }
-
-  # if there are the same amount of files in the download directory as the
-  # download urls, then check if all the file names are the same, if both hold
-  # true, then all files have been downloaded, and we can move onto the next step.
-  # If not, the while loop should continue.
-  have_all_files_been_downloaded <- function(already_downloaded, mn_filenames){
-    if((length(already_downloaded) == length(mn_filenames))){
-      (already_downloaded == mn_filenames) %>% all() %>% return()
-    }
-    else(return(FALSE))
-  }
-  dl_stop = have_all_files_been_downloaded(already_downloaded, mn_filenames)
-
-  # This code block removes the already downloaded files from the list of files
-  # that need to be donwloaded.
-  if((length(already_downloaded)>0) && (dl_stop == FALSE)){
-    to_remove <- -which(mn_filenames %in% already_downloaded)
-    mt_print(TRUE, "MetNordic Download", 
-             "Not downloading files already present:",length(to_remove))
-    to_download <- full_urls[to_remove]
-    i = length(to_remove)-1
-  }else{
-    to_download = full_urls
-    i=0
-  }
-
-  if(dl_stop == FALSE){
-    dl_attempt <- dl_attempt + 1
-    if(dl_attempt>1){
-      mt_print(TRUE, "MetNordic Download", 
-               crayon::red(paste("Download incomplete! trying again.. (Attempt #"),
-                           dl_attempt, "/ 50)"))}
-  }else{
-    dl_t2 <- Sys.time()
-    tdiff <- dl_t2-dl_t1
-    cat("\n")
-    mt_print(TRUE, "MetNordic Download", "Download complete!")
-    print(tdiff)
-  }
-
-  # Starting download if there is anything to download..
-  if(dl_stop == FALSE){
-    for (url in to_download) {
-      i = i+1
-      # Printing status is useful, but disabled for Vignette:
-      # rounded = sprintf("%.2f", round((i/length(full_urls)*100),2))
-      # status = paste0("[", i, "/", length(full_urls), "]", " (", (rounded), ")%")
-      # mt_print(TRUE, function_name = "MetNordic Download", "Downloading Query:",
-      #          text2 = paste0(url, blue(bold(underline(status)))), rflag = T)
-      metnordic_download(
-        url = url,
-        outdir = mn_download_dir,
-        vars = vars_to_dl,
-        overwrite = T,
-        verbose = F
-      )
-    }
-  }
-}
-
+```{r}
+coord_window_poly <- metnordic_coordwindow(example_polygon_geometry, area_buffer = 1500)
+coord_window_point <- metnordic_coordwindow(example_point_geometry)
 ```
 
-(Once I am satisfied with the above code it will be implemented into a
-function)
+This gives us a list containing the minimum and maximum x and y cells to
+download the data from.
 
-### Aggregating the data
+```{r, results='hold'}
+paste0(names(coord_window_poly), collapse = ", ")
+paste0(coord_window_poly, collapse = ", ")
+```
 
-To convert the data from hourly to daily format, you can use the
-following function:
+The `metadist` entry is only needed for point geometry and indicates the
+distance to the nearest data set grid cell. Of course, for this geometry
+there are only two coordinates:
 
-```{r, eval = runmetnovig, fig.show="hold"}
-fp_tm_agg = metnordic_aggregate(
-  directory = mn_download_dir,
-  variable = "air_temperature_2m", # variable to aggregate
-  method = "mean", # Method of aggregation (mean, min, max, sum..)
-  day = "20200515", # the day in YYYYMMDD format
-  outpath = "../vignettes",
-  overwrite = T,
-  verbose = T
+```{r, results='hold'}
+paste0(names(coord_window_point), collapse = ", ")
+paste0(coord_window_point, collapse = ", ")
+```
+
+## Build Query
+
+With our grid-cells set, we can build the queries that we would like to
+download from the server. For that we also need to decide the following:
+
+1.  `mn_variables` are the meteorological variables to be downloaded,
+    these are [defined
+    here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters "MET No Variables").
+2.  `fromdate` and `todate` are time stamps for the period you would
+    like to download. Make sure to follow the format below:
+3.  `grid_resolution` is the resolution at which the area will be
+    downloaded. For very large regions where a dense network of grid
+    cells is not needed, this parameter can be used. A setting of `3`
+    for example, will download data from every 3rd cell in the grid, in
+    both x and y directions.
+4.  `dataset` determines the data source. Classic would be setting this
+    to "reanalysis", which is only the re-run archive, and covers
+    approximately 2012-2022. The "operational" data set is also a
+    reanalysis product, and covers the time period approximately between
+    2018-TODAY. Probably the most useful setting is "continuous" which
+    uses the re-run archive where ever possible, and then switches to
+    the operational data set once the re-run ends. You can read more
+    about this
+    [here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#available-data-streams "archive versions").
+
+Determining our settings:
+
+```{r}
+my_variables = c("air_temperature_2m", "precipitation_amount")
+start = "2019-06-01 00:00:00"
+end = "2019-06-01 23:00:00"
+```
+
+```{r}
+queries_poly <- metnordic_buildquery(bounding_coords = coord_window_poly,
+                                mn_variables = my_variables,
+                                fromdate = start, todate = end, 
+                                grid_resolution = 1, dataset = "continuous")
+```
+
+And for point geometry:
+
+```{r}
+queries_point <- metnordic_buildquery(bounding_coords = coord_window_point,
+                                mn_variables = my_variables,
+                                fromdate = start, todate = end, 
+                                grid_resolution = 1, dataset = "continuous")
+```
+
+We now have the files we want to download:
+
+```{r}
+queries_point$filenames %>% head()
+```
+
+And the `OPenDaP` download urls: (just one as an example, as they are
+very long).
+
+```{r}
+queries_poly$full_urls[1]
+```
+
+> "metpparchivev3" indicates this comes from the re-run archive. if it
+> were to say "metpparchive" only, that would indicate that it comes
+> from the operational archive!
+
+## Download
+
+Now we are ready to download the files. Lets download 14:00 as it rained
+at that time, a bit:
+
+```{r}
+poly_path <- "indiv_poly/"
+dir.create(poly_path, showWarnings = F)
+fps <- metnordic_download(url = queries_poly$full_urls[15],
+                          outdir = poly_path,
+                          vars = my_variables)
+```
+
+Please note, the downloaded files are separated per variable. Why?
+Because the project this code was designed for needed the files like
+that. Also, these files get very big very quickly, so having
+per-variable separation can sometimes be useful.
+
+### Download a Date range
+
+Now of course, you would like to download not just one file, but the
+whole daterange, the following function allows you to do this.
+
+```{r,  eval = FALSE}
+dl_path = metnordic_download_daterange(
+  queries = queries_poly,
+  directory = poly_path,
+  mn_variables = my_variables,
 )
 
-fp_pr_agg = metnordic_aggregate(
-  directory = mn_download_dir,
-  variable = "precipitation_amount", # variable to aggregate
-  method = "sum", # Method of aggregation (mean, min, max, sum..)
-  day = "20200515", # the day in YYYYMMDD format
-  outpath = "../vignettes",
-  overwrite = T,
-  verbose = T
-)
+list.files(dl_path) %>% head()
 ```
 
-Now of course this was only for a single day and single variable. Most
-use cases would like all variables and all days aggregated. The
-following code shows my workflow for this, which will be implemented in
-a function later on:
+### Downloading from Point Geometry
 
-```{r, agg_metno, eval = FALSE}
-### Aggregating to daily resolution: ----
-require(doParallel)
-aggr_path = paste0(mydir, "/aggregated")
-
-# Parsing the date range of days downloaded
-all_days <- ((list.files(mn_download_dir) %>% str_split("_", simplify = T))[,6] %>% str_split("T", simplify = T))[,1] %>% unique()
-
-# Parsing the date range already aggregated
-already_agged <- list.files(aggr_path)
-if(length(already_agged) > 0){
-  agged_days <- ((already_agged %>% str_split("_", simplify = T))[,6]) %>% unique()
-  some_days <- all_days[-which(agged_days %in% all_days)]
-}else{
-  some_days <- all_days
-}
-
-cores <- 2
-mt_print(TRUE, "MetNordic Aggregation", "Aggregating on:", paste(cores, "threads"))
-cl <- makeCluster(cores,  outfile="")
-registerDoParallel(cl)
-result <- foreach(day = some_days, .packages = "miljotools") %dopar% {
-
-  metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "mean", day = day, verbose = F, overwrite = T,
-                      outpath = aggr_path)
-
-  metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "max", day = day, verbose = F, overwrite = T,
-                      outpath = aggr_path)
-
-  metnordic_aggregate(directory = mn_download_dir, variable = "air_temperature_2m",
-                      method = "min", day = day, verbose = F, overwrite = T,
-                      outpath =aggr_path)
-
-  metnordic_aggregate(directory = mn_download_dir, variable = "precipitation_amount",
-                      method = "sum", day = day, verbose = F, overwrite = T,
-                      outpath = aggr_path)
-}
-stopCluster(cl)
-```
-
-### Merging Files
-
-Having individual files for each day is not so handy, therefore the
-following function can merge them all together into a single file *(per
-variable!)*
+Please note! `metnordic_download()` and `metnordic_download_daterange()`
+do not yet work for point geometries. As an alternative, you can use the
+`metnordic_csv()` function
 
 ```{r, eval = FALSE}
-merge_path <- paste0(mydir, "/merged")
-dir.create(merge_path)
-
-merged_fp <- metnordic_merge(
-    folderpath = aggr_path,
-    variable = "air_temperature_2m_mean",
-    outpath = merge_path,
-    overwrite = T
-  )
-```
-
-**Note:** This only works for daily resolution (for now). Hourly may be
-supported someday (or pull request me..).
-
-### Re-projecting
-
-If you would like to re-project your (merged or aggregated) NetCDF
-files, you can use this function:
-
-```{r, eval = runmetnovig}
-
-proj_fp_tm <- metnordic_reproject(filepath = fp_tm_agg,
-                               outfile = "../vignettes/reprojected_tm.nc",
-                               projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
-
-proj_fp_pr <- metnordic_reproject(filepath = fp_pr_agg,
-                               outfile = "../vignettes/reprojected_pr.nc",
-                               projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
-```
-
-Having a look at the result:
-
-```{r message=FALSE, warning=FALSE, eval = runmetnovig}
-require(mapview)
-require(terra)
-require(sf)
-map_tm <- terra::rast(proj_fp_tm)
-map_pr <- terra::rast(proj_fp_pr)
-provided_extent <- sf::read_sf(cs10_basin)
-
-mapview::mapview(map_tm, legend = FALSE)+mapview::mapview(provided_extent, alpha.regions = .5, legend = FALSE)
-```
-
-## Linking to other models
-
-### Link to CWATM
-
-To provide input files for the [CWATM
-model](https://cwatm.iiasa.ac.at/), the NetCDF files from the previous
-section need to be slightly altered (easting and northing need to be
-changed to X and Y, and the variable of interest must be listed last).
-These changes can be made automatically using the following function:
-
-```{r gmnrv3ncdf4,  eval = FALSE}
-# note, you need a multi-day projected file for this, which was not created
-# during this tutorial, so this code is not executed.
-dir.create(paste0(mydir, "/cwatm_ready")) 
-convert_to_fp <- proj_fp %>% str_replace("projected", "cwatm_ready")
-cwatm_convert_nc(infile = proj_fp, outfile = convert_to_fp)
-```
-
-You can now feed these files to CWatM!
-
-### Link to SWAT+
-
-If you would like to generate
-[SWAT+](https://swat.tamu.edu/software/plus/) met input from the daily
-data as downloaded by `get_metno_reanalysis3()` and converted from
-`reanalysis3_daily()`, you can use the `reanalysis3_swatinput()`
-function. This function, depending on the parameters given to it, will
-generate your station files and weather generator. It also can update
-your SWAT+ input files to match the new weather stations, or update your
-`.sqlite` database. To do this, the function heavily utilizes
-`SWATprepR` which needs to be installed before use. This can be done
-[here](https://biopsichas.github.io/SWATprepR/).
-
-We can create input files for the SWAT+ model using the daily files. For
-this we will need to get a SWAT+ setup to modify, which we will download
-from the same GitLab Repository. Additionally, we will download some
-pre-downloaded reanalysis files generated by `miljotools`.
-
-```{r downloadtxt, eval = runmetnovig}
-download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip", destfile = "cs10_txt.zip")
-unzip("cs10_txt.zip")
-download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/krak_daily.zip", destfile = "krak_daily.zip")
-unzip("krak_daily.zip")
-example_daily_files = "krak_daily"
-cs10_txt_path = "cs10_txt"
-```
-
-Now we are ready to run the function: (this function print a lot of
-text, which is why it has been muted for the sake of scrollability...)
-
-```{r swtinput2, eval = FALSE}
-reanalysis3_swatinput(
-  path = example_daily_files,
-  swat_setup = cs10_txt_path,
-  write_wgn = T,
-  verbose = T
+point_path <- "indiv_point/"
+dir.create(point_path, showWarnings = F)
+point_dl_path <- metnordic_csv(
+  area = example_point_geometry,
+  path = point_path,
+  fromdate = start,
+  todate = end,
+  mn_variables = my_variables,
+  verbose = F
 )
+
+# Viewing the data:
+data <- read_csv("indiv_point/METNORDIC_point.csv", show_col_types = F)
+plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_csv() download")
 ```
 
-```{r swtinput, message=FALSE, warning=FALSE, include=FALSE, eval = runmetnovig}
-reanalysis3_swatinput(
-  path = example_daily_files,
-  swat_setup = cs10_txt_path,
-  write_wgn = T,
-  verbose = T
-)
+## Working with hourly data
+
+If you are working with hourly data, the next logical step would be to
+merge the per-hour per-variable files into simply per-variable files.
+You can do this like so:
+
+```{r}
+outpath = "merged_poly/"
+dir.create(outpath, showWarnings = F)
+merge_path = metnordic_merge_hourly(folderpath = poly_path,
+                                    variable = "air_temperature_2m",
+                                    outpath = outpath)
 ```
 
-#### Reanalysis to SWAT+ input pipeline
-
-The aforementioned three function can be linked together with the
-`swat_weather_input_chain()`. It simply runs the three functions in
-parallel, allowing you to generate and apply weather data to your SWAT+
-project with one line of code. For scrolling's sake, the following code
-is not printed here.
-
-```{r swatinputchain2, eval = FALSE}
-swat_weather_input_chain(
-  area = "cs10_basin/cs10_basin.shp",
-  swat_setup = "cs10_txt",
-  from = "2013-01-01 00:00:00",
-  to = "2013-01-02 23:00:00"
-)
+```{r gif, fig.align='center', fig.cap="Hourly Air Temperature in K", message=FALSE, warning=FALSE, animation.hook='gifski', interval=0.2, echo=TRUE}
+data <- brick(merge_path)
+spatast <- data  %>% rast()
+hours = dim(data)[3]
+for (i in c(1:hours)) {
+  plot(spatast[[i]], legend = FALSE, main = spatast[[i]] %>% names())
+}
 ```
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
-require(dplyr)
-unlink(c("krak_daily", "cwatm", "cs10_txt", "cs10_basin", "cs10point", "miljotools_swat_backup", "download", "merged", "aggregated", "cwatm_ready", "projected"), recursive = T)
-gc()
-list.files(pattern = "met_no_dl*") %>% unlink(recursive = T)
-list.files(pattern = "met_analysis*", full.names = T) %>% file.remove()
-list.files(pattern = "reprojected*", full.names = T) %>% file.remove()
-list.files(pattern = "met_analysis_1_0km_nordic*", full.names = T) %>% file.remove()
+### Extracting time series
 
-file.remove(c("krak_daily.zip", "cs10_txt.zip", "cs10_basin.zip", "cs10point.zip"))
+In most cases, one would want a time series from a point on this map,
+the following function can do just that:
+
+```{r}
+# TODO
 ```
