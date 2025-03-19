@@ -1,13 +1,9 @@
-#' Download MET Nordic data in CSV format
+#' Download MET Nordic data for one point
 #'
-#' note: this function only works for point geometry.
+#' note: this function only works for point geometry in csv format.
 #'
-#' This is a modified version of the normal `get_metno_reanalysis3` designed
-#' specifically for harmonizing downloading in csv format and  netCDF. Since it
-#' is quite hard to harmonize the netcdf stuff and the csv stuff with things
-#' like point vs. polygon (and my bad coding practices), this function exists as
-#' an intermediary where i try to step-wise harmonize the two methods as best as
-#' i can. It hasnt fully worked out yet, but its like half way there.
+#' This is a modified version of the legacy `get_metno_reanalysis3` designed
+#' specifically for downloading single points in csv format.
 #'
 #' @param area (string) path to geo-referenced shapefile (point) of the desired area. (optionally, you can pass a `sf` object directly.)
 #' @param path (string) path to download directory
@@ -41,7 +37,7 @@
 #'
 #'
 
-metnordic_csv <-
+metnordic_point <-
   function(area,
            path = NULL,
            fromdate =  "2012-09-01 10:00:00",
