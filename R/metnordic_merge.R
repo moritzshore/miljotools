@@ -25,7 +25,7 @@
 #' @importFrom abind abind
 #' @importFrom dplyr %>% first last
 #' @importFrom stringr str_split
-metnordic_merge <- function(folderpath, variable, outpath, overwrite = FALSE) {
+metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FALSE) {
 
   # testing par set:
   #
