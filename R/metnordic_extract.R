@@ -142,7 +142,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',) %>% as_datetime() %>% strftime()
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',) %>% as_datetime() #%>% strftime() this causes issues with summer time, do not use!
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
     res <- tibble(date = datetime, variable = timeseries)
@@ -160,7 +160,20 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   }
 
   reslist <- lapply(X = mn_variables, FUN = extract_all_vars)
-  full_df <- do.call("cbind", reslist) %>% dplyr::select(all_of(c("date", mn_variables))) %>% tibble()
+
+  datestart <-  reslist[[1]][[1]][1] %>% as_datetime()
+  dateend <-  reslist[[1]][[1]][length(reslist[[1]][[1]])] %>% as_datetime()
+  daterange <- seq(from = datestart, to = dateend, by = "hour")
+  full_df <- tibble(date = daterange)
+
+  # left joining in case of NAs
+  for (i in c(1:length(reslist))) {
+    dis <- reslist[[i]]
+    full_df<-left_join(full_df, reslist[[i]], by = "date", relationship = "one-to-one")
+  }
+  #full_df2 <- lapply(FUN = join_vars, X = reslist)
+
+  #full_df <- do.call("cbind", reslist) %>% dplyr::select(all_of(c("date", mn_variables))) %>% tibble()
   writefp <- paste0(outdir, "/METNORDIC_point_", name, ".csv")
   metafp <- paste0(outdir, "/METNORDIC_meta_", name, ".csv")
 
