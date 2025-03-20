@@ -21,48 +21,46 @@ require(gifski)
 
 [Last Update]{.underline}: March 15th, 2025
 
-## Introduction
+# Introduction
 
-> Check server status if issues with downloading exist:
+> Tip: check server status if issues with downloading exist:
 > <https://status.met.no/>
 
 The MET Nordic Reanalysis Data set is a reanalysis product from the
 [Meteorologisk institutt](https://www.met.no/). You can [read more about
 the data set
 here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset). The MET
-Nordic rerun archive version 3 can be accessed using dedicated functions
-in `miljotools`. Please inform yourself on the limitations of reanalysis
-data before applying this data set to your needs.
+Nordic rerun archive and operational dataset can be accessed using
+dedicated functions in `miljotools`. Please inform yourself on the
+benefits and limitations of reanalysis data before applying this data
+set to your needs.
 
 ```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: The spatial domain of the reanalysis dataset. (SOURCE: MET Nordic)", out.width="50%", out.height="50%"}
 knitr::include_graphics("../man/figures/domain.png")
 ```
 
-### Specs
+**Specs**
 
 -   **1x1 km** grid covering the Nordics (see Figure 1.)
 
 -   **Hourly** resolution from [2012-09-01]{.underline} to
     [TODAY]{.underline}
 
--   Following variables: [temperature]{.underline},
-    [precipitation]{.underline}, [relative humidity]{.underline}, [wind
-    speed]{.underline}, [wind direction]{.underline}, [air
-    pressure]{.underline}, [cloud area fraction]{.underline},
-    [short+long-wave radiation (down-welling]{.underline}), [land area
-    fraction]{.underline}, and [altitude]{.underline}.
+-   **Variables**: temperature, precipitation, relative humidity, wind
+    speed, wind direction, air pressure, cloud area fraction,
+    short+long-wave radiation (down-welling), land area fraction, and
+    altitude.
 
-### Input
+**Input**
 
 To access the data for a specific region of the Nordics, you need to
 provide the following as input:
 
 1.  A path to a georeferenced
     [shapefile](https://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm)
-    (single polygon or point) of the desired area
+    of the desired area
 
-2.  A directory where you would like to save the data (default: working
-    directory)
+2.  A directory where you would like to save the data (
 
 3.  A starting date and time
 
@@ -72,7 +70,7 @@ Optionally, you can pass additional parameters to **buffer** your
 shapefile, choose your **variables**, choose your **resolution**, or to
 preview the data you are downloading.
 
-## Overview
+# Overview
 
 The following figure shows a flowchart of how the different functions
 fit together, along with some explanation of the parameters.
@@ -82,7 +80,7 @@ knitr::include_graphics("../man/figures/metnordic_flowchart.png")
 ```
 
 The following will show you how to use these functions, but first the
-required libraries need to be loaded:
+required libraries need to be loaded for this example workflow:
 
 ```{r message=FALSE, warning=FALSE}
 require(miljotools)
@@ -95,7 +93,7 @@ library(terra)
 library(tidyterra)
 ```
 
-## Coordinate Window
+# Coordinate Window
 
 To start, one needs to determine which grid cells of the dataset need to
 be downloaded. this can be done with
@@ -152,7 +150,7 @@ paste0(names(coord_window_point), collapse = ", ")
 paste0(coord_window_point, collapse = ", ")
 ```
 
-## Build Query
+# Build Query
 
 With our grid-cells set, we can build the queries that we would like to
 download from the server. For that we also need to decide the following:
@@ -218,7 +216,7 @@ queries_poly$full_urls[1]
 > were to say "metpparchive" only, that would indicate that it comes
 > from the operational archive!
 
-## Download
+# Download
 
 Now we are ready to download the files. Lets download 14:00 as it rained
 at that time, a bit:
@@ -236,7 +234,7 @@ Because the project this code was designed for needed the files like
 that. Also, these files get very big very quickly, so having
 per-variable separation can sometimes be useful.
 
-### Download a Date range
+## Download a Date Range
 
 Now of course, you would like to download not just one file, but the
 whole daterange, the following function allows you to do this.
@@ -251,16 +249,16 @@ dl_path = metnordic_download_daterange(
 list.files(dl_path) %>% head()
 ```
 
-### Downloading from Point Geometry
+## Downloading from Point Geometry
 
 Please note! `metnordic_download()` and `metnordic_download_daterange()`
 do not yet work for point geometries. As an alternative, you can use the
-`metnordic_csv()` function
+`metnordic_point()` function
 
 ```{r, eval = FALSE}
 point_path <- "indiv_point/"
 dir.create(point_path, showWarnings = F)
-point_dl_path <- metnordic_csv(
+point_dl_path <- metnordic_point(
   area = example_point_geometry,
   path = point_path,
   fromdate = start,
@@ -271,10 +269,10 @@ point_dl_path <- metnordic_csv(
 
 # Viewing the data:
 data <- read_csv("indiv_point/METNORDIC_point.csv", show_col_types = F)
-plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_csv() download")
+plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_point() download")
 ```
 
-## Working with hourly data
+# Merging Hourly Files
 
 If you are working with hourly data, the next logical step would be to
 merge the per-hour per-variable files into simply per-variable files.
@@ -297,11 +295,131 @@ for (i in c(1:hours)) {
 }
 ```
 
-### Extracting time series
+# Extracting Timeseries
 
 In most cases, one would want a time series from a point on this map,
-the following function can do just that:
+`metnordic_extract()` does exactly this.
+
+```{r}
+dir.create("extracted", showWarnings = F)
+metnordic_extract(
+  directory = "merged_poly",
+  mn_variables = "air_temperature_2m",
+  point = example_point_geometry,
+  outdir = "extracted",
+  name = "vignette_example",
+  verbose = T
+)
+```
+
+```{r}
+# Viewing the data:
+data <- read_csv("extracted//METNORDIC_point_vignette_example.csv", show_col_types = F)
+plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_extract() data")
+```
+
+# Further processing the data cube
+
+## Aggregating
+
+In some cases you might not want to extract single points and would like
+to keep working with the NetCDF4 data cube. If you would like to have
+the data in daily form, you can aggregate it (summarize) using
+`metnordic_aggregate()`:
+
+```{r}
+dir.create("aggregated/", showWarnings = F)
+agg_path <- metnordic_aggregate(directory = "indiv_poly/", 
+                                variable = "air_temperature_2m",
+                                method = "mean",
+                                day =  "20190601",
+                                outpath = "aggregated/",
+                                verbose = F, overwrite = T)
+```
+
+```{r message=FALSE, warning=FALSE}
+data <- brick(agg_path)
+spatast <- data  %>% rast()
+plot(spatast, main = "air_temperature_2m_mean (2019-06-01)")
+```
+
+Now that was only a single day, and usually you would like to aggregate
+very many days all at once. A dedicated function for this does not exist
+yet, but you can easily write a for loop (or better yet – parallelize
+it). I have written such code, if you would like to see it as an example
+feel free to contact me. Someday it will be in the package.
+
+```{r}
+# TODO: add `metnordic_aggregate_daterange()` to package. 
+```
+
+## Merging
+
+Now we would usually merge the aggregated days together, with
+miljotools, like so:
+
+> Tip: don't forget to add the method of aggregation as a suffix!
+
+```{r}
+# TODO download two days instead of one so that this makes more sense
+dir.create("merged_daily/")
+merged_fp <- metnordic_merge_daily(folderpath = "aggregated/",
+                                   variable = "air_temperature_2m_mean",
+                                   outpath = "merged_daily/",overwrite = T)
+```
+
+## Re-projecting
+
+If your use-case requires your NetCDF file to be in a specific
+projection, you can re-project it like so:
+
+```{r}
+metnordic_reproject(filepath = merged_fp,
+                    outfile = "reprojected_example.nc",
+                    projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
+```
+
+```{r message=FALSE, warning=FALSE}
+reproj <- rast("reprojected_example.nc")
+mapview(reproj)
+```
+
+# Link to Other Models
+
+So far, conversion of MET Nordic data, as downloaded by `miljotools`,
+has been implemented for three models, in order of implementation:
+[SWAT+](https://swat.tamu.edu/software/plus/),
+[CWatM](https://cwatm.iiasa.ac.at/), and
+[SWAP](https://www.swap.alterra.nl/). Here is how it works:
+
+## SWAT+
 
 ```{r}
 # TODO
+```
+
+## CWatM
+
+CWatM takes in NetCDF files, We take the file as projected by
+`metnordic_reproject()` into the correct projection for the setup. Note,
+this needs to be done per variable.
+
+```{r}
+cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
+```
+
+## SWAP
+
+SWAP, being a field scale model, needs point data. Therefore we convert
+from the `metnordic_extract()` function.
+
+```{r}
+# TODO, download all SWAP variables to get this to work
+swap_metnordic(
+  dldir = "extracted/",
+  name = "vignette_example",
+  outpath = "metnordic.met",
+  timescale = "daily",
+  verbose = T
+)
 ```
