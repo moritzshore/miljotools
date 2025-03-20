@@ -153,7 +153,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
   extract_all_vars <- function(the_var) {
     infp = list.files(directory, the_var, full.names = T)
-    print(paste0("extracting from:", infp))
+    #print(paste0("extracting from:", infp))
     extract_var(infp = infp,
                 point = point,
                 variable =  the_var)

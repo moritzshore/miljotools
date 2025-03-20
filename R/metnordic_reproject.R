@@ -24,6 +24,8 @@
 #' @importFrom ncdf4 nc_open ncatt_get
 metnordic_reproject <- function(filepath, outfile, projstring = NULL){
 
+  ## TODO: you should use a CRS object or something instead of a projstring...
+
   ## Projecting the NC file using terra.
   ncfile <- nc_open(filepath)
   varid <- (ncfile$var %>% names())[1]
