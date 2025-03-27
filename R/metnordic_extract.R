@@ -3,8 +3,11 @@
 #' MET Nordic Extract - Point Timeseries regional downloads
 #'
 #' This function extracts timeseries from (hourly) files from the chain
-#' `metnordic_coordwindow()` -->  `metnordic_buildquery()` -->  `metnordic_coordmetnordic_download()` --> `metnordic_merge_hourly()` -->
-#' `metnordic_extract()`. The function relies upon the `cmsafops` to extract values.
+#' `metnordic_coordwindow()` -->  `metnordic_buildquery()` -->
+#' `metnordic_coordmetnordic_download()` --> `metnordic_merge_hourly()` -->
+#' `metnordic_extract()`. This function extracts from the nearest grid cell, if
+#' you would like a bi-linear interpolation of the nearest 4 cells, please try
+#' `metnordic_extract_grid()`
 #'
 #' @importFrom lubridate as_datetime
 #' @importFrom readr write_csv read_csv
@@ -36,8 +39,6 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   # lambert conform conical (the projection used by met reanalysis)
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
-
-
 
   get_meta <- function(directory, name, mn_variables, point, proj_crs, verbose){
     infp = list.files(directory, mn_variables[1], full.names = T)
@@ -73,6 +74,33 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
                        crs = proj_crs)
     metadist <- (sf::st_distance(df, point_proj) %>% round(0))[1,1]
 
+    # getting elevation:
+    projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
+    proj_crs <- sf::st_crs(projection) # replace with sf::crs()
+    point_proj <- sf::st_transform(point, crs = proj_crs)
+    coordinate <- sf::st_coordinates(point_proj)
+    point_x <- coordinate[1]
+    point_y <- coordinate[2]
+
+
+    reffile = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
+    nc_elevation <- ncdf4::nc_open(reffile)
+    x <- ncdf4::ncvar_get(nc_elevation, "x")
+    y <- ncdf4::ncvar_get(nc_elevation, "y")
+    alt_grid <- ncdf4::ncvar_get(nc = nc_elevation, varid = "altitude")
+    ncdf4::nc_close(nc_elevation)
+    x_diff <- abs(x-point_x)
+    y_diff <- abs(y-point_y)
+
+    # find the minimum
+    min_diff_x <- min(x_diff)
+    min_diff_y <- min(y_diff)
+
+    # find the index of the minimum
+    index_x <- which(min_diff_x == x_diff)
+    index_y <- which(min_diff_y == y_diff)
+
+    elevation = alt_grid[index_x, index_y]
 
     if(verbose){
       xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
@@ -90,7 +118,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
       variables = mn_variables %>% paste(collapse = ","),
       metno_x = x[index_x],
       metno_y = y[index_y],
-      metno_altitude = NA,
+      metno_altitude = elevation,
       # TODO need to add
       point_x = point_x,
       point_y = point_y,
