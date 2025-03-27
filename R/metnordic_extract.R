@@ -170,7 +170,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',) %>% as_datetime() #%>% strftime() this causes issues with summer time, do not use!
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% as_datetime() #%>% strftime() this causes issues with summer time, do not use!
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
     res <- tibble(date = datetime, variable = timeseries)
