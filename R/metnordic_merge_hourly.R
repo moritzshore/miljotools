@@ -34,7 +34,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   # note, UNSTABLE! dependent on file path ([,6] and [,1])
   filenames_date <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
 
-
+  # WARNING I think you should remove strftime!
   dateformat <-  paste0(substring(filenames_date, 1,4), "-", substring(filenames_date, 5,6), "-", substring(filenames_date, 7,8)," ", substring(filenames_date, 10,11), ":00:00") %>% as_datetime() %>% strftime(tz = "UTC")
 
   daterange <- paste0(filenames_date[1],"-", filenames_date[length(filenames_date)])
@@ -85,6 +85,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   # the upper one is from the handy guide im using, the lower one from the source
   # ncdf4 files for senorgeCWATM. not sure which to use..
   tunits <- "hours since 1901-01-01 01:00:00"
+  ## WARNING, i think you should remove strftime!
   source_date = as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
   first_date = dateformat[1]
   basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
