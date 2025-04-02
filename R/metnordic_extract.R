@@ -105,7 +105,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     if(verbose){
       xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
       xy$geom_line <- st_union(xy$geometry, xy$geometry.1) %>% st_transform(crs = st_crs(proj_crs)) %>% st_cast("LINESTRING")
-      st_geometry(xy) <- "geom_line"
+      sf::st_geometry(xy) <- "geom_line"
       map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
       map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
       map3 = mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
