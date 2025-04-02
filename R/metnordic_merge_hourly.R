@@ -19,46 +19,9 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
   long_fps_filt <- long_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
 
-  vect_open_return <- function(filepaths) {
-    ncfile <- nc_open(filepaths)
-    slice <- ncvar_get(ncfile, variable)
-    nc_close(ncfile)
-    return(slice)
-  }
-
-  datacube <- lapply(long_fps_filt, vect_open_return) %>% abind(along = 3)
-
-
-  # here we determine the correct format for the time dimension
-  # "days since 1901-01-01 00:00:00.0"
-  # note, UNSTABLE! dependent on file path ([,6] and [,1])
-  filenames_date <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
-
-  # WARNING I think you should remove strftime!
-  dateformat <-  paste0(substring(filenames_date, 1,4), "-", substring(filenames_date, 5,6), "-", substring(filenames_date, 7,8)," ", substring(filenames_date, 10,11), ":00:00") %>% as_datetime() %>% strftime(tz = "UTC")
-
-  daterange <- paste0(filenames_date[1],"-", filenames_date[length(filenames_date)])
-
-  # create the file path to be written, check if it already exists. if the
-  # overwrite flag is enabled, then the existing file is delted to be created
-  # again. if not, the function skips this file.
-  write_fp <- paste0("metno-", variable, "_", daterange, ".nc")
-  full_write_fp <- paste0(outpath, "/", write_fp)
-  dir.create(outpath, showWarnings = F)
-  if(file.exists(full_write_fp)){
-    if(overwrite){
-      warning("file already exists, overwriting: ", write_fp, "\n")
-      removed = file.remove(full_write_fp)
-      if(removed == FALSE){stop("error with removing file",full_write_fp )}
-    }else{
-      warning(write_fp, "already exists, skipping..")
-      return(full_write_fp)
-    }
-  }
-
+  templatenc <- nc_open(long_fps_filt[1])
   # opening the first nc file to serve as a template. many attributes are
   # extracted
-  templatenc <- nc_open(long_fps_filt[1])
   ### Elaborate NC file definition scheme: (mostly copied from `download_metnordic()`)
   lon <- ncvar_get(templatenc,"lon")
   lat <- ncvar_get(templatenc,"lat")
@@ -74,6 +37,69 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   ny <- dim(y)
   fillvalue <- 1e32
 
+  # here we determine the correct format for the time dimension
+  # "days since 1901-01-01 00:00:00.0"
+  # note, UNSTABLE! dependent on file path ([,6] and [,1])
+  filenames_date <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
+
+  # WARNING I think you should remove strftime! --> I checked the summer time, seems to work. but no october in the range i tested
+  dateformat <-  paste0(
+    substring(filenames_date, 1, 4),
+    "-",
+    substring(filenames_date, 5, 6),
+    "-",
+    substring(filenames_date, 7, 8),
+    " ",
+    substring(filenames_date, 10, 11),
+    ":00:00"
+  ) %>% as_datetime() %>% strftime(tz = "UTC")
+
+
+  full_date_range <- seq(dateformat[1] %>% as_datetime(), dateformat[length(dateformat)] %>% as_datetime(), by = "hour") %>% strftime(tz = "UTC")
+
+  vect_open_return_na <- function(timestamp) {
+    filedate <- paste0(
+      substr(timestamp, 0, 4),
+      substr(timestamp, 6, 7),
+      substr(timestamp, 9, 10),
+      "T",
+      substr(timestamp, 12, 13),
+      "Z_", variable, ".nc"
+    )
+    filepath = list.files(folderpath, pattern = filedate, full.names = T)
+    if(length(filepath) == 0){
+      slice = matrix(data = NA, nrow = nx, ncol = ny)
+    }else{
+      ncfile <- nc_open(filepath)
+      slice <- ncvar_get(ncfile, variable)
+      nc_close(ncfile)
+    }
+    return(slice)
+  }
+
+  datacube <- lapply(full_date_range, vect_open_return_na) %>% abind(along = 3)
+
+
+  # create the file path to be written, check if it already exists. if the
+  # overwrite flag is enabled, then the existing file is deleted to be created
+  # again. if not, the function skips this file.
+  daterange <- paste0(filenames_date[1],"-", filenames_date[length(filenames_date)])
+  write_fp <- paste0("metno-", variable, "_", daterange, ".nc")
+  full_write_fp <- paste0(outpath, "/", write_fp)
+  dir.create(outpath, showWarnings = F)
+  if(file.exists(full_write_fp)){
+    if(overwrite){
+      warning("file already exists, overwriting: ", write_fp, "\n")
+      removed = file.remove(full_write_fp)
+      if(removed == FALSE){stop("error with removing file",full_write_fp )}
+    }else{
+      warning(write_fp, "already exists, skipping..")
+      return(full_write_fp)
+    }
+  }
+
+
+
   # define dimensions
   xdim <- ncdim_def("x",units="m",
                     longname="eastward distance from southwest corner of domain in projection coordinates",as.double(x))
@@ -85,12 +111,11 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   # the upper one is from the handy guide im using, the lower one from the source
   # ncdf4 files for senorgeCWATM. not sure which to use..
   tunits <- "hours since 1901-01-01 01:00:00"
-  ## WARNING, i think you should remove strftime!
   source_date = as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
-  first_date = dateformat[1]
+  first_date = full_date_range[1]
   basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
-  basehour <- basehour - 1
-  post_hours <- c(1:length(dateformat))
+  #basehour <- basehour - 1
+  post_hours <- c(1:length(full_date_range))
   hours_since_1901_01 <-basehour+post_hours
   timedim <- ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
 
