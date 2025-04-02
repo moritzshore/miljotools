@@ -183,7 +183,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
 
   # add global attributes (TODO: cleanup)
   ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",variable, "(hourly)"))
-  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
+  ins_text <- paste0("Sourced from MetNordic ++ Downloaded and processed miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
   ncatt_put(ncout,0,"institution",ins_text)
   history <- paste("Creaed ", date())
   ncatt_put(ncout,0,"history",history)

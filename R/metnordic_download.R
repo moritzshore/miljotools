@@ -147,8 +147,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
 
     # add global attributes
     ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable",variable))
-    ncatt_put(ncout,0,"institution","Sourced from MetNordic, (met.no) Downloaded and processed by NIBIO")
-    history <- paste("Creaed by miljotools version",utils::packageVersion("miljotools"), "on", date())
+    ncatt_put(ncout,0,"institution","Sourced from MetNordic (met.no)")
+    history <- paste("Created by miljotools version",utils::packageVersion("miljotools"), "on", date())
     ncatt_put(ncout,0,"history",history)
     ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
     ncatt_put(ncout,0,"Conventions","CF=1.6")
