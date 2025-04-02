@@ -9,6 +9,10 @@
 #' @param outpath (String) folder where to write the file
 #' @param overwrite (Boolean) overwrite existing file?
 #'
+#' @importFrom parallel  detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
+#'
 #' @returns path of written file
 #' @export
 #'
@@ -58,6 +62,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
   full_date_range <- seq(dateformat[1] %>% as_datetime(), dateformat[length(dateformat)] %>% as_datetime(), by = "hour") %>% strftime(tz = "UTC")
 
   vect_open_return_na <- function(timestamp) {
+
     filedate <- paste0(
       substr(timestamp, 0, 4),
       substr(timestamp, 6, 7),
@@ -66,19 +71,27 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
       substr(timestamp, 12, 13),
       "Z_", variable, ".nc"
     )
+    print(filedate)
+
     filepath = list.files(folderpath, pattern = filedate, full.names = T)
     if(length(filepath) == 0){
       slice = matrix(data = NA, nrow = nx, ncol = ny)
     }else{
-      ncfile <- nc_open(filepath)
-      slice <- ncvar_get(ncfile, variable)
-      nc_close(ncfile)
+      ncfile <- ncdf4::nc_open(filepath)
+      slice <- ncdf4::ncvar_get(ncfile, variable)
+      ncdf4::nc_close(ncfile)
     }
     return(slice)
   }
 
-  datacube <- lapply(full_date_range, vect_open_return_na) %>% abind(along = 3)
-
+  require(doParallel)
+  n_cores = parallel::detectCores() - 2
+  logfilepath = paste0(dirname(folderpath),"/", variable, "_parallel_log.txt")
+  cl <-parallel::makeCluster(n_cores, outfile ="parlog.log")
+  doParallel::registerDoParallel(cl)
+  result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
+  parallel::stopCluster(cl)
+  datacube <- result %>% abind::abind(along = 3)
 
   # create the file path to be written, check if it already exists. if the
   # overwrite flag is enabled, then the existing file is deleted to be created

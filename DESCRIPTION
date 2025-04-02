@@ -14,11 +14,14 @@ Depends:
 Imports:
     abind,
     crayon,
+    doParallel,
     dplyr,
+    foreach,
     lubridate,
     mapview,
     methods,
     ncdf4,
+    parallel,
     purrr,
     readr,
     sf,
@@ -28,7 +31,6 @@ Imports:
     vroom
 Suggests:
     devtools,
-    doParallel,
     fs,
     ggplot2,
     ggrepel,
