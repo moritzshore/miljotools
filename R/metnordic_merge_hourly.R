@@ -7,6 +7,7 @@
 #' @param folderpath (String) folder where individual files are located
 #' @param variable (String) MET Nordic variable to combine
 #' @param outpath (String) folder where to write the file
+#' @param n_cores (Integer) Number of cores to use for parallel processing (Defaults to max - 2)
 #' @param overwrite (Boolean) overwrite existing file?
 #'
 #' @importFrom parallel  detectCores makeCluster stopCluster
@@ -17,7 +18,7 @@
 #' @export
 #'
 #' @seealso [metnordic_download()]
-metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FALSE) {
+metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE) {
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
@@ -84,8 +85,9 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, overwrite = FA
     return(slice)
   }
 
-  require(doParallel)
-  n_cores = parallel::detectCores() - 2
+  if(is.null(n_cores)){
+    n_cores = parallel::detectCores() - 2
+  }
   logfilepath = paste0(dirname(folderpath),"/", variable, "_parallel_log.txt")
   cl <-parallel::makeCluster(n_cores, outfile ="parlog.log")
   doParallel::registerDoParallel(cl)
