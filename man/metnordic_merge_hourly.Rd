@@ -4,7 +4,13 @@
 \alias{metnordic_merge_hourly}
 \title{Merge MET Nordic files (hourly)}
 \usage{
-metnordic_merge_hourly(folderpath, variable, outpath, overwrite = FALSE)
+metnordic_merge_hourly(
+  folderpath,
+  variable,
+  outpath,
+  n_cores = NULL,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{folderpath}{(String) folder where individual files are located}
@@ -12,6 +18,8 @@ metnordic_merge_hourly(folderpath, variable, outpath, overwrite = FALSE)
 \item{variable}{(String) MET Nordic variable to combine}
 
 \item{outpath}{(String) folder where to write the file}
+
+\item{n_cores}{(Integer) Number of cores to use for parallel processing (Defaults to max - 2)}
 
 \item{overwrite}{(Boolean) overwrite existing file?}
 }
