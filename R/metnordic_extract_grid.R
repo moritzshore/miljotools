@@ -18,7 +18,21 @@ if(FALSE){
   mn_variables <- c("air_temperature_2m", "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", "relative_humidity_2m", "precipitation_amount", "wind_speed_10m")
 }
 
-metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verbose){
+# if regular is set to TRUE, a grid will be created. if regular is false, the provided shapefile should be multiple point geometries.
+#' extract grid of metnordic (WIP)
+#'
+#' @param merged_path path to merged ncdf files
+#' @param area shape file, either an area to be gridded, or a premade grid (regular = FALSE!)
+#' @param mn_variables variables to extract
+#' @param outdir where to extract
+#' @param verbose you know it
+#' @param regular create a grid? or one was provided? (to be replaced with geometry detection)
+#'
+#' @returns nothing
+#' @export
+#'
+#'
+metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verbose, regular = TRUE){
 
   # sub functions
   get_overlapping_cells <- function(merged_path, area){
@@ -67,33 +81,69 @@ metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verb
 
   # main
   dir.create(outdir)
-  swatprepr_check(verbose)
-  grid <- get_overlapping_cells(merged_path = merged_path, area = area)
+  #swatprepr_check(verbose)
+  if(regular){
+    grid <- get_overlapping_cells(merged_path = merged_path, area = area)
+  }else{
+    # if the grid is not regular, just use the provided shapefile
+    grid <- area
+  }
   station_nr <- grid$geometry %>% length()
   matrix_list <- lapply(X = mn_variables,FUN =  extract_grid_cells)
 
-  for (i in c(1:station_nr)) {
+  if(regular){
+    for (i in c(1:station_nr)) {
+      get_timeseries <- function(matrix){
 
-    get_timeseries <- function(matrix){
-
-      # suffix should always be 1 for the first cell?
-      variable = colnames(matrix)[1] %>% stringr::str_split("_")
-      splitted <- colnames(matrix)[1] %>% stringr::str_split("_") %>% unlist()
-      # remove the id
-      variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
-      time <- get_timestamps(merged_path, variable)
-      values <- ret_mat <- matrix[i,] %>% as.vector()
-      ret_df <- tibble(time, values)
-      colnames(ret_df) <- c("date", variable)
-      return(ret_df)
+        # suffix should always be 1 for the first cell?
+        variable = colnames(matrix)[1] %>% stringr::str_split("_")
+        splitted <- colnames(matrix)[1] %>% stringr::str_split("_") %>% unlist()
+        # remove the id
+        variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
+        time <- get_timestamps(merged_path, variable)
+        values <- ret_mat <- matrix[i,] %>% as.vector()
+        ret_df <- tibble(time, values)
+        colnames(ret_df) <- c("date", variable)
+        return(ret_df)
+      }
+      cat(paste0("\rworking on station ", i, "..."))
+      varlist <- lapply(X = matrix_list, get_timeseries)
+      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
+      write_csv(x = yes, file = fp)
     }
+  }else{
+    for (i in c(1:station_nr)) {
+      get_timeseries <- function(matrix){
 
-    cat(paste0("\rworking on station ", i, "..."))
-    varlist <- lapply(X = matrix_list, get_timeseries)
-    yes <- varlist %>% purrr::reduce(full_join, by = "date")
-    fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
-    write_csv(x = yes, file = fp)
+        # suffix should always be 1 for the first cell?
+        variable = colnames(matrix)[1] %>% stringr::str_split("_")
+        splitted <- colnames(matrix)[1] %>% stringr::str_split("_") %>% unlist()
+        # remove the id
+        variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
+        time <- get_timestamps(merged_path, variable)
+        values <- ret_mat <- matrix[i,] %>% as.vector()
+        ret_df <- tibble(time, values)
+        colnames(ret_df) <- c("date", variable)
+        return(ret_df)
+      }
+      cat(paste0("\rworking on station ", i, "..."))
+      varlist <- lapply(X = matrix_list, get_timeseries)
+      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
+      write_csv(x = yes, file = fp)
+
+      metadf = get_meta(directory = directory,
+                        mn_variables = mn_variables,
+                        point = area[i,],
+                        name = paste0("plot", i),
+                        verbose = verbose
+      )
+      metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
+      paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
+    }
   }
+
 
   # TODO: write metadata in SWATprepR format. Get lat and long in the for loop and write to metadata file in append mode.
   # problem: this will still need elevation metadata. This could also be bilinearly interpolated.

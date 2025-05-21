@@ -40,97 +40,6 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
 
-  get_meta <- function(directory, name, mn_variables, point, proj_crs, verbose){
-    infp = list.files(directory, mn_variables[1], full.names = T)
-    point_proj <- sf::st_transform(point, crs = projection)
-    coordinate <- sf::st_coordinates(point_proj)
-    point_x <- coordinate[1]
-    point_y <- coordinate[2]
-
-    ## Finding the nearest neighbor to each corner
-    # calculate the difference in value
-    ncin <- ncdf4::nc_open(infp)
-    x <- ncdf4::ncvar_get(ncin, "x")
-    y <- ncdf4::ncvar_get(ncin, "y")
-    # TODO Add altitude to download always!
-    #alt <- ncdf4::ncvar_get(ncin, "altitude")
-    meta_text <- ncdf4::ncatt_get(ncin,varid = 0, attname = "institution")
-    meta_text <- meta_text$value
-
-    ncdf4::nc_close(ncin)
-    x_diff <- abs(x-point_x)
-    y_diff <- abs(y-point_y)
-
-    # find the minimum
-    min_diff_x <- min(x_diff)
-    min_diff_y <- min(y_diff)
-
-    # find the index of the minimum
-    index_x <- which(min_diff_x == x_diff)
-    index_y <- which(min_diff_y == y_diff)
-
-    df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
-                       coords = c("x", "y"),
-                       crs = proj_crs)
-    metadist <- (sf::st_distance(df, point_proj) %>% round(0))[1,1]
-
-    # getting elevation:
-    projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
-    proj_crs <- sf::st_crs(projection) # replace with sf::crs()
-    point_proj <- sf::st_transform(point, crs = proj_crs)
-    coordinate <- sf::st_coordinates(point_proj)
-    point_x <- coordinate[1]
-    point_y <- coordinate[2]
-
-
-    reffile = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
-    nc_elevation <- ncdf4::nc_open(reffile)
-    x <- ncdf4::ncvar_get(nc_elevation, "x")
-    y <- ncdf4::ncvar_get(nc_elevation, "y")
-    alt_grid <- ncdf4::ncvar_get(nc = nc_elevation, varid = "altitude")
-    ncdf4::nc_close(nc_elevation)
-    x_diff <- abs(x-point_x)
-    y_diff <- abs(y-point_y)
-
-    # find the minimum
-    min_diff_x <- min(x_diff)
-    min_diff_y <- min(y_diff)
-
-    # find the index of the minimum
-    index_x <- which(min_diff_x == x_diff)
-    index_y <- which(min_diff_y == y_diff)
-
-    elevation = alt_grid[index_x, index_y]
-
-    if(verbose){
-      xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
-      xy$geom_line <- st_union(xy$geometry, xy$geometry.1) %>% st_transform(crs = st_crs(proj_crs)) %>% st_cast("LINESTRING")
-      sf::st_geometry(xy) <- "geom_line"
-      map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
-      map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
-      map3 = mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
-      plot <- map1+map2+map3
-      print(plot)
-    }
-
-    meta_tib <- tibble(
-      name = name,
-      variables = mn_variables %>% paste(collapse = ","),
-      metno_x = x[index_x],
-      metno_y = y[index_y],
-      metno_altitude = elevation,
-      # TODO need to add
-      point_x = point_x,
-      point_y = point_y,
-      distance_to_gridcell = metadist,
-      source_projection = projection,
-      source = meta_text,
-      date = Sys.time() %>% as.character()
-    )
-
-    return(meta_tib)
-  }
-
   metadf = get_meta(directory = directory,
     mn_variables = mn_variables,
     point = point,
@@ -209,4 +118,96 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
 
   return(writefp)
+}
+
+get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbose){
+  infp = list.files(directory, mn_variables[1], full.names = T)
+
+  projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
+  point_proj <- sf::st_transform(point, crs = projection)
+  coordinate <- sf::st_coordinates(point_proj)
+  point_x <- coordinate[1]
+  point_y <- coordinate[2]
+
+  ## Finding the nearest neighbor to each corner
+  # calculate the difference in value
+  ncin <- ncdf4::nc_open(infp)
+  x <- ncdf4::ncvar_get(ncin, "x")
+  y <- ncdf4::ncvar_get(ncin, "y")
+  # TODO Add altitude to download always!
+  #alt <- ncdf4::ncvar_get(ncin, "altitude")
+  meta_text <- ncdf4::ncatt_get(ncin,varid = 0, attname = "institution")
+  meta_text <- meta_text$value
+  ncdf4::nc_close(ncin)
+  x_diff <- abs(x-point_x)
+  y_diff <- abs(y-point_y)
+
+  # find the minimum
+  min_diff_x <- min(x_diff)
+  min_diff_y <- min(y_diff)
+
+  # find the index of the minimum
+  index_x <- which(min_diff_x == x_diff)
+  index_y <- which(min_diff_y == y_diff)
+
+  df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
+                     coords = c("x", "y"),
+                     crs = projection)
+  metadist <- (sf::st_distance(df, point_proj) %>% round(0))[1,1]
+
+  # getting elevation:
+  projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
+  proj_crs <- sf::st_crs(projection) # replace with sf::crs()
+  point_proj <- sf::st_transform(point, crs = proj_crs)
+  coordinate <- sf::st_coordinates(point_proj)
+  point_x <- coordinate[1]
+  point_y <- coordinate[2]
+
+
+  reffile = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
+  nc_elevation <- ncdf4::nc_open(reffile)
+  x <- ncdf4::ncvar_get(nc_elevation, "x")
+  y <- ncdf4::ncvar_get(nc_elevation, "y")
+  alt_grid <- ncdf4::ncvar_get(nc = nc_elevation, varid = "altitude")
+  ncdf4::nc_close(nc_elevation)
+  x_diff <- abs(x-point_x)
+  y_diff <- abs(y-point_y)
+
+  # find the minimum
+  min_diff_x <- min(x_diff)
+  min_diff_y <- min(y_diff)
+
+  # find the index of the minimum
+  index_x <- which(min_diff_x == x_diff)
+  index_y <- which(min_diff_y == y_diff)
+
+  elevation = alt_grid[index_x, index_y]
+
+  if(verbose){
+    xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
+    xy$geom_line <- st_union(xy$geometry, xy$geometry.1) %>% st_transform(crs = st_crs(proj_crs)) %>% st_cast("LINESTRING")
+    sf::st_geometry(xy) <- "geom_line"
+    map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
+    map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
+    map3 = mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
+    plot <- map1+map2+map3
+    print(plot)
+  }
+
+  meta_tib <- tibble(
+    name = name,
+    variables = mn_variables %>% paste(collapse = ","),
+    metno_x = x[index_x],
+    metno_y = y[index_y],
+    metno_altitude = elevation,
+    # TODO need to add
+    point_x = point_x,
+    point_y = point_y,
+    distance_to_gridcell = metadist,
+    source_projection = projection,
+    source = meta_text,
+    date = Sys.time() %>% as.character()
+  )
+
+  return(meta_tib)
 }
