@@ -133,7 +133,7 @@ metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verb
       fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
       write_csv(x = yes, file = fp)
 
-      metadf = get_meta(directory = directory,
+      metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = area[i,],
                         name = paste0("plot", i),
