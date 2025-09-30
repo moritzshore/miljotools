@@ -24,13 +24,18 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   # this is where the files will be written
   dir.create(directory, showWarnings = F)
   # these are the files that have already been written
-  already_downloaded <- paste0((list.files(directory) %>% str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
-  # these are the files that then should not be re-downloaded
-  dont_redownload <- queries$filenames %in% already_downloaded %>% which()
-  # these are the files that should be downloaded
-  remaining_urls <- urls[-dont_redownload]
-  # this is how many have already been downloaded (only for printing)
-  i = length(dont_redownload)
+  if(list.files(directory) %>% length() > 0){
+    already_downloaded <- paste0((list.files(directory) %>% str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
+    # these are the files that then should not be re-downloaded
+    dont_redownload <- queries$filenames %in% already_downloaded %>% which()
+    # these are the files that should be downloaded
+    remaining_urls <- urls[-dont_redownload]
+    # this is how many have already been downloaded (only for printing)
+    i = length(dont_redownload)
+  }else{
+    remaining_urls <- urls
+    i = 1
+  }
   # this is how many still need downloading
   ix = length(urls)
   # downloading each file in a foreloop
@@ -46,5 +51,6 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
     )
     i = i + 1
   }
+  if(verbose){cat(paste0("\rdownloading ...[", i, "/", ix, "] >> ", queries$filenames[i]))}
   return(directory)
 }
