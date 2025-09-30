@@ -7,7 +7,7 @@
 #'
 #' `projstring <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"`
 #'
-#' @seealso [metnordic_merge()] [cwatm_convert_nc()]
+#' @seealso [metnordic_merge_daily()] [cwatm_convert_nc()]
 #' @author Moritz Shore
 #'
 #' @param filepath path to .nc file to be reprojected
