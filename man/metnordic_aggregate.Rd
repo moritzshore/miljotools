@@ -50,7 +50,7 @@ from Pat Bartlein, bartlein@uoregon.edu
 
 }
 \seealso{
-\code{\link[=metnordic_merge]{metnordic_merge()}} \code{\link[=metnordic_download]{metnordic_download()}}
+\code{\link[=metnordic_merge_daily]{metnordic_merge_daily()}} \code{\link[=metnordic_download]{metnordic_download()}}
 }
 \author{
 Moritz Shore

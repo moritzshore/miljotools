@@ -29,7 +29,7 @@ re-projects them to desired projection.
 # TODO
 }
 \seealso{
-\code{\link[=metnordic_merge]{metnordic_merge()}} \code{\link[=cwatm_convert_nc]{cwatm_convert_nc()}}
+\code{\link[=metnordic_merge_daily]{metnordic_merge_daily()}} \code{\link[=cwatm_convert_nc]{cwatm_convert_nc()}}
 }
 \author{
 Moritz Shore

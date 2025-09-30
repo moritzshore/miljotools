@@ -2,33 +2,40 @@
 % Please edit documentation in R/metnordic_extract_grid.R
 \name{metnordic_extract_grid}
 \alias{metnordic_extract_grid}
-\title{extract grid of metnordic (WIP)}
+\title{Extract data on a (ir)regular grid basis}
 \usage{
 metnordic_extract_grid(
   merged_path,
   area,
+  buffer = 0,
   mn_variables,
   outdir,
-  verbose,
-  regular = TRUE
+  verbose
 )
 }
 \arguments{
-\item{merged_path}{path to merged ncdf files}
+\item{merged_path}{String, Path to merged ncdf files from \code{metnordic_merge_hourly()}}
 
-\item{area}{shape file, either an area to be gridded, or a premade grid (regular = FALSE!)}
+\item{area}{Geo-referenced shapefile either of polygon or point geometry. Passing a polygon geometry will lead to a regular grid being extracted from all overlaying points.}
 
-\item{mn_variables}{variables to extract}
+\item{buffer}{Numeric, buffer in meters. Useful for getting grid cells just outside of catchment. Not used if a point geometry is passed.}
 
-\item{outdir}{where to extract}
+\item{mn_variables}{Character Vector, Met Nordic variables to extract}
 
-\item{verbose}{you know it}
+\item{outdir}{String, Folder where data will be written}
 
-\item{regular}{create a grid? or one was provided? (to be replaced with geometry detection)}
+\item{verbose}{Boolean, print status}
 }
 \value{
 nothing
 }
 \description{
-extract grid of metnordic (WIP)
+This function takes the files from \code{metnordic_merge_hourly()} and extracts
+timeseries at desired locations. If a polygon shapefile is passed to the
+function, data will be extracted at each grid cells within the (buffered)
+area. If a point geometry is supplied, data will be extracted at each point. A
+file is written to disk with .csv file for each grid cell and a metadata file for each grid cell.
+}
+\details{
+TODO: add resolution to polygon grid..
 }
