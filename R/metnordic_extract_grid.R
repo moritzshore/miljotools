@@ -18,43 +18,85 @@ if(FALSE){
   mn_variables <- c("air_temperature_2m", "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", "relative_humidity_2m", "precipitation_amount", "wind_speed_10m")
 }
 
-# if regular is set to TRUE, a grid will be created. if regular is false, the provided shapefile should be multiple point geometries.
-#' extract grid of metnordic (WIP)
+#' Extract data on a (ir)regular grid basis
 #'
-#' @param merged_path path to merged ncdf files
-#' @param area shape file, either an area to be gridded, or a premade grid (regular = FALSE!)
-#' @param mn_variables variables to extract
-#' @param outdir where to extract
-#' @param verbose you know it
-#' @param regular create a grid? or one was provided? (to be replaced with geometry detection)
+#' This function takes the files from `metnordic_merge_hourly()` and extracts
+#' timeseries at desired locations. If a polygon shapefile is passed to the
+#' function, data will be extracted at each grid cells within the (buffered)
+#' area. If a point geometry is supplied, data will be extracted at each point. A
+#' file is written to disk with .csv file for each grid cell and a metadata file for each grid cell.
+#'
+#'
+#' TODO: add resolution to polygon grid..
+#'
+#' @param merged_path String, Path to merged ncdf files from `metnordic_merge_hourly()`
+#' @param area Geo-referenced shapefile either of polygon or point geometry. Passing a polygon geometry will lead to a regular grid being extracted from all overlaying points.
+#' @param buffer Numeric, buffer in meters. Useful for getting grid cells just outside of catchment. Not used if a point geometry is passed.
+#' @param mn_variables Character Vector, Met Nordic variables to extract
+#' @param outdir String, Folder where data will be written
+#' @param verbose Boolean, print status
 #'
 #' @returns nothing
 #' @export
 #'
+#' @importFrom sf st_geometry_type
+#' @importFrom raster xyFromCell
 #'
-metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verbose, regular = TRUE){
+metnordic_extract_grid <- function(merged_path,
+                                   area,
+                                   buffer = 0,
+                                   mn_variables,
+                                   outdir,
+                                   verbose) {
 
   # sub functions
-  get_overlapping_cells <- function(merged_path, area){
+  get_overlapping_cells <- function(merged_path, area_overlap){
+    # Open up the first file to extract the coordinates
     filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
     basemap <- nc_open(filepaths[1])
     basemap_lon <- ncvar_get(basemap, "lon") %>% as.vector()
     basemap_lat <- ncvar_get(basemap, "lat") %>% as.vector()
+
+    basemap_x <- ncvar_get(basemap, "x") %>% as.vector()
+    basemap_y <- ncvar_get(basemap, "y") %>% as.vector()
+    basemapgrid <- expand.grid(basemap_x, basemap_y) %>% tibble()
+    colnames(basemapgrid) <- c("x", "y")
     nc_close(basemap)
+
+    # convert the coordinates into a spatial object
     points <- tibble(lon = basemap_lon, lat = basemap_lat)
+    gridtry2 <- st_as_sf(x = basemapgrid,
+                         coords = c("x", "y"),
+                         crs =  "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000")
+
     projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
     grid.sf <- st_as_sf(x = points,
                         coords = c("lon", "lat"),
                         crs = projcrs)
-    myrast <- terra::rast(filepaths[1])
-    grid.sf.proj <- st_transform(grid.sf, st_crs(myrast))
-    area <- st_transform(area, st_crs(myrast))
-    rm(myrast)
-    # figure out which ones are touching the area buffer
-    pnts_trans <- grid.sf.proj %>% mutate(
-      intersection = as.integer(st_intersects(grid.sf.proj, area)))
-    grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
+    # load the first file as a raster and convert it the lat lon grid to the
+    # projected CRS. Also project the area overlap to the correct crs
+    myrast <- terra::rast(filepaths[1]) %>% terra::project("+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000")
 
+    rasterfile <- raster::raster(filepaths[1])
+    testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
+                                                              crs =  crs(rasterfile))
+    # plot(myrast[[1]])
+    grid.sf.proj <- st_transform(testpoints, st_crs(rasterfile))
+    area_overlap <- st_transform(area_overlap, st_crs(rasterfile))
+    # figure out which ones are touching the area_overlap buffer
+    pnts_trans <- grid.sf.proj %>% mutate(
+      intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
+    grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
+    #mapview(area_buffered) + mapview(grid.sf.proj, col.region = "orange")+ mapview(grid, col.region = "green")
+    diagnostic = FALSE
+    if(diagnostic){
+      ggplot() +  geom_spatraster(data=myrast[[1]])+
+        geom_sf(data = area_buffered, alpha = .3, color = "green")+
+        geom_sf(data = area, alpha = .3, color = "lightgreen")+
+        geom_sf(data = testpoints, color = "darkorange")+
+        geom_sf(data = grid, color = "darkgreen")+
+        theme_bw() +  viridis::scale_fill_viridis(option="E")
+    }
     return(grid)
   }
   get_timestamps <- function(merged_path, variable){
@@ -75,15 +117,35 @@ metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verb
     print(paste0("extracting: ", variable))
     varrast <- terra::rast(filepath)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
+
+    diagnostic = FALSE
+    if(diagnostic){
+      require(ggplot2)
+      require(tidyterra)
+      ggplot() +  geom_spatraster(data=varrast[[1]])+
+        geom_sf(data = area)+
+        geom_sf(data = grid)+
+        theme_bw() +  viridis::scale_fill_viridis(option="D")
+    }
     datamatrix %>% return()
   }
 
 
   # main
   dir.create(outdir)
-  #swatprepr_check(verbose)
+
+  # check if regular grid was provided:
+
+   if(st_geometry_type(area) == "POLYGON"){
+     regular = TRUE
+   }else if((area %>% st_geometry_type() == "POINT") %>% all()){0
+     regular = FALSE}else{
+       stop("Geometry type not understood! Must be either a single POLYGON or multiple POINT geometries. \n >> You supplied: ", st_geometry_type(area))
+     }
+
   if(regular){
-    grid <- get_overlapping_cells(merged_path = merged_path, area = area)
+    area_buffered <- st_buffer(area, buffer)
+    grid <- get_overlapping_cells(merged_path = merged_path, area_overlap = area_buffered)
   }else{
     # if the grid is not regular, just use the provided shapefile
     grid <- area
@@ -106,13 +168,25 @@ metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verb
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
-      cat(paste0("\rworking on station ", i, "..."))
+      cat(paste0(" >> working on station ", i, "...\n"))
       varlist <- lapply(X = matrix_list, get_timeseries)
       yes <- varlist %>% purrr::reduce(full_join, by = "date")
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
       write_csv(x = yes, file = fp)
+      metadf = get_meta(directory = merged_path,
+                        mn_variables = mn_variables,
+                        point = grid[i,],
+                        name = paste0("plot", i),
+                        verbose = F ## TODO: something is wrong here, the distance should always be 0? some issue with projection?
+      )
+
+
+      metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
+      paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
+    cat("Finished.\n")
   }else{
+    warning("functionality for non-regular not proofed yet..")
     for (i in c(1:station_nr)) {
       get_timeseries <- function(matrix){
 
@@ -143,9 +217,4 @@ metnordic_extract_grid <- function(merged_path, area, mn_variables, outdir, verb
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
   }
-
-
-  # TODO: write metadata in SWATprepR format. Get lat and long in the for loop and write to metadata file in append mode.
-  # problem: this will still need elevation metadata. This could also be bilinearly interpolated.
-  # TODO 2: Actually, the bi-linear interpolation does not make any sense, since we are extracting on a grid basis anyway....
 }
