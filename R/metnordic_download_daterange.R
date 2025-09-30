@@ -51,6 +51,7 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
     )
     i = i + 1
   }
-  if(verbose){cat(paste0("\rdownloading ...[", i, "/", ix, "] >> ", queries$filenames[i]))}
+  if(verbose){cat("\rDownload Finished.")}
+
   return(directory)
 }
