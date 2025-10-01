@@ -66,7 +66,10 @@ automatically, then the following format is recommended:
 A simple usage is shown below. for a more in-depth run down of the
 arguments please visit the function help page.
 
-```{r}
+```{r, eval = F}
+
+## CURRENTLY BROKEN BECAUSE OF ggtern DEPENDENCY ISSUE.
+
 
 # for demonstration purposes, use path of package
 example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
