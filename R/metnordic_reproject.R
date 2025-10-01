@@ -7,7 +7,7 @@
 #'
 #' `projstring <- "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"`
 #'
-#' @seealso [metnordic_merge()] [cwatm_convert_nc()]
+#' @seealso [metnordic_merge_daily()] [cwatm_convert_nc()]
 #' @author Moritz Shore
 #'
 #' @param filepath path to .nc file to be reprojected
@@ -23,6 +23,8 @@
 #' @importFrom dplyr  %>%
 #' @importFrom ncdf4 nc_open ncatt_get
 metnordic_reproject <- function(filepath, outfile, projstring = NULL){
+
+  ## TODO: you should use a CRS object or something instead of a projstring...
 
   ## Projecting the NC file using terra.
   ncfile <- nc_open(filepath)

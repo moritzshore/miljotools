@@ -7,3 +7,16 @@ inst/doc
 /doc/
 /Meta/
 .RData
+/vignettes/indiv_poly
+/vignettes/cs10point
+/vignettes/cs10_basin
+/vignettes/indiv_files
+/vignettes/indiv_point
+/vignettes/merged_poly
+vignettes/cs10_basin.zip
+vignettes/cs10point.zip
+/vignettes/extracted
+/vignettes/aggregated
+vignettes/cwatm_ready.nc
+vignettes/reprojected_example.nc
+/vignettes/merged_daily

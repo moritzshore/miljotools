@@ -2,13 +2,14 @@
 #'
 #' Downloads MET Nordic re-analysis data using an OPENDAP url. This function
 #' ideally takes input from `metnordic_buildquery()` and provides input for
-#' `metnordic_aggregate()`.
+#' `metnordic_aggregate()`. If you are having issues with downloads, make sure
+#' to check https://status.met.no/ for server (THREDDS) status.
 #'
 #' Code largely adapted from this handy guide:
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
 #' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @seealso [metnordic_buildquery()] [metnordic_aggregate()]
+#' @seealso [metnordic_buildquery()] [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_hourly]
 #'
 #' @author Moritz Shore
 #'
@@ -16,7 +17,7 @@
 #' @param outdir String: Location where the .nc file should be written.
 #' @param vars Vector: MET Nordic Variables to extract. See: [MET Nordic variables](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters)
 #' @param overwrite Logical: Overwrite files if they already exist?
-#' @param preview Logical: Print preview?
+#' @param verbose Logical: Print preview?
 #'
 #' @return String: file paths to generated files
 #' @export
@@ -26,7 +27,7 @@
 #' @importFrom dplyr  %>%
 #' @import ncdf4
 #' @importFrom stringr str_remove str_replace str_replace
-metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = TRUE){
+metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = TRUE){
   # url <- "https://thredds.met.no/thredds/dodsC/metpparchivev3/2012/09/01/met_analysis_1_0km_nordic_20120901T10Z.nc?x[448:1:652],y[868:1:1071],latitude[868:1:1071][448:1:652],longitude[868:1:1071][448:1:652],altitude[868:1:1071][448:1:652],air_temperature_2m[0:1:0][868:1:1071][448:1:652],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][868:1:1071][448:1:652],relative_humidity_2m[0:1:0][868:1:1071][448:1:652],precipitation_amount[0:1:0][868:1:1071][448:1:652],wind_speed_10m[0:1:0][868:1:1071][448:1:652],wind_direction_10m[0:1:0][868:1:1071][448:1:652]"
   # TODO: add nc_open_retry
 
@@ -100,7 +101,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
     # Getting variable
     var_array <- ncvar_get(ncin,variable)
     # print a preview of the file
-    if(preview){
+    if(verbose){
       grid <- expand.grid(x=x, y=y)
       cutpts <- seq(min(var_array),max(var_array), length = 10)
       if(all(cutpts == 0)){ cutpts <- c(1:10)}
@@ -146,8 +147,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, preview = T
 
     # add global attributes
     ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable",variable))
-    ncatt_put(ncout,0,"institution","Sourced from MetNordic, (met.no) Downloaded and processed by NIBIO")
-    history <- paste("Creaed by miljotools version",utils::packageVersion("miljotools"), "on", date())
+    ncatt_put(ncout,0,"institution","Sourced from MetNordic (met.no)")
+    history <- paste("Created by miljotools version",utils::packageVersion("miljotools"), "on", date())
     ncatt_put(ncout,0,"history",history)
     ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
     ncatt_put(ncout,0,"Conventions","CF=1.6")

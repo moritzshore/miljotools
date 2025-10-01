@@ -4,14 +4,14 @@
 \alias{metnordic_coordwindow}
 \title{Get a MET Nordic Coordinate Window}
 \usage{
-metnordic_coordwindow(area_path, area_buffer = 0, preview = FALSE)
+metnordic_coordwindow(area_path, area_buffer = 0, verbose = FALSE)
 }
 \arguments{
 \item{area_path}{String: path to shapefile of region / point (this must have point or polygon geometry!)}
 
 \item{area_buffer}{Integer: buffer in m to place around shapefile / point}
 
-\item{preview}{Logical: plot preview the coordinate window?}
+\item{verbose}{Logical: plot the coordinate window?}
 }
 \value{
 returns a list of the min and max x and y cells for downloading.

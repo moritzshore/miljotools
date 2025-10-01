@@ -11,11 +11,11 @@ metnordic_aggregate(
   day,
   outpath,
   overwrite = TRUE,
-  preview = TRUE
+  verbose = TRUE
 )
 }
 \arguments{
-\item{directory}{String: Path to the source files}
+\item{directory}{String: Path to the source files (as downloaded by \code{metnordic_download()} or \code{metnordic_download_daterange()})}
 
 \item{variable}{String: MET Nordic variable to aggregate (ie. "precipitation_amount", \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{(see more)})}
 
@@ -27,7 +27,7 @@ metnordic_aggregate(
 
 \item{overwrite}{Logical: overwrite existing file?}
 
-\item{preview}{Logical: plot map?}
+\item{verbose}{Logical: plot map?}
 }
 \value{
 String: path to written file
@@ -50,7 +50,7 @@ from Pat Bartlein, bartlein@uoregon.edu
 
 }
 \seealso{
-\code{\link[=metnordic_merge]{metnordic_merge()}} \code{\link[=metnordic_download]{metnordic_download()}}
+\code{\link[=metnordic_merge_daily]{metnordic_merge_daily()}} \code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}}
 }
 \author{
 Moritz Shore

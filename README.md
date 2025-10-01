@@ -26,7 +26,7 @@ Note: This unofficial side project is still in its infancy, and currently does n
 
 ## Installing `miljotools` <a name="install"></a>
 
-You can install and load `miljotools` from the GitHub repository using the following command:
+You can install and use `miljotools` in `R`, downloaded from the GitHub repository using the following command:
 
 ``` r
 # install remotes, if not already present

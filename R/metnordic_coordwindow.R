@@ -10,21 +10,36 @@
 #'
 #' @param area_path String: path to shapefile of region / point (this must have point or polygon geometry!)
 #' @param area_buffer Integer: buffer in m to place around shapefile / point
-#' @param preview Logical: plot preview the coordinate window?
+#' @param verbose Logical: plot the coordinate window?
 #'
 #' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
 #'
 #' @examples
 #' # TODO
-metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
+metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
+
+  if(area_buffer < 0){
+    area_buffer = 0
+  }
+
+  # if it already is a shape file, then no need to read it
+  if(methods::is(area_path, "sf")){
+    area <- area_path
+  }else if(methods::is(area_path, "character")){
+    # if it is a string, then read it
+    area <- sf::read_sf(area_path)
+  }else{
+    stop("`area` parameter not recognized! please pass either a filepath to a .shp file, or an `sf` object!\n")
+  }
+
 
   # get a base file to find the right x y
-  mt_print(preview, function_name = "metnordic_coordwindow","getting base file..")
+  mt_print(verbose, function_name = "metnordic_coordwindow","getting base file..")
   filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
   ncin <- nc_open_retry(filename)
   if(ncin$filename == filename){
-    mt_print(preview, function_name = "metnordic_coordwindow","basefile downloaded.")
+    mt_print(verbose, function_name = "metnordic_coordwindow","basefile downloaded.")
   }else{stop("error downloading basefile:\n", filename)}
   x <- ncdf4::ncvar_get(ncin, "x")
   y <- ncdf4::ncvar_get(ncin, "y")
@@ -33,14 +48,13 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
   # lambert conform conical (the projection used by met reanalysis)
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection)
-  mt_print(preview, function_name = "metnordic_coordwindow","Loading and projecting shapefile...")
-  area <- sf::read_sf(area_path)
+  mt_print(verbose, function_name = "metnordic_coordwindow","Loading and projecting shapefile...")
   # Transform the shapefile to the metno projection
   area <- sf::st_transform(area, crs = proj_crs)
 
   # get the geometry type (either point or polygon)
   area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
-  mt_print(preview, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
+  mt_print(verbose, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
 
   # routine for if a point was passed
   if (area_attr == "sfc_POINT") {
@@ -62,21 +76,22 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     index_x <- which(min_diff_x == x_diff)
     index_y <- which(min_diff_y == y_diff)
 
-    if(preview){
-      df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
-                         coords = c("x", "y"),
-                         crs = sf::st_crs(proj_crs))
+    df <- sf::st_as_sf(x = data.frame(x = x[index_x], y = y[index_y]),
+                       coords = c("x", "y"),
+                       crs = sf::st_crs(proj_crs))
+    metadist <- (sf::st_distance(df, area) %>% round(0))[1,1]
+
+    if(verbose){
+
       area$name = "provided file"
       plot = mapview::mapview(df, layer.name = "Nearest Re-analysis Gridpoint", col.regions = "orange")+
         mapview::mapview(area, layer.name = "User location", col.regions = "blue")
-
       print(plot)
-      mydist <- sf::st_distance(df, area) %>% round(0)
-      mt_print(preview, function_name = "metnordic_coordwindow","Note: Selected grid cell distance from provided point is: ", paste0(mydist, " meters"))
+      mt_print(verbose, "metnordic_coordwindow",
+               "Note: Selected grid cell distance (in meters) to desired location:",metadist)
     }
 
-
-    return(list(index_x = index_x, index_y = index_y))
+    return(list(index_x = index_x, index_y = index_y, metadist = metadist))
 
   } else{
     # routine for if the polygon was passed.
@@ -85,7 +100,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     # drop the Z coordinate (extra stability)
     area <- sf::st_zm(area)
     # Buffer the shapefile to the user defined amount
-    mt_print(preview, function_name = "metnordic_coordwindow","buffering shapefile: ", paste(area_buffer, "m"))
+    mt_print(verbose, function_name = "metnordic_coordwindow","buffering shapefile: ", paste(area_buffer, "m"))
 
     if(area_buffer > 0){
       area_buff <- sf::st_buffer(x = area, dist = area_buffer)
@@ -101,14 +116,14 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     xmax <- wsbox[["xmax"]]
 
     # previewing coverage
-    if(preview){
+    if(verbose){
       # old mapview solution
       plot <- mapview::mapview(wsbox, col.region = "blue")+
         mapview::mapview(area_buff, col.region = "red")+
         mapview::mapview(area, col.region = "orange")
       print(plot)
     }
-    mt_print(preview, function_name = "metnordic_coordwindow","calculating coordinate window...")
+    mt_print(verbose, function_name = "metnordic_coordwindow","calculating coordinate window...")
 
     ## Finding the nearest neighbor to each corner
     # calculate the difference in value
@@ -128,8 +143,9 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     index_xmax <- which(min_diff_xmax == x_mx_diff)
     index_ymin <- which(min_diff_ymin == y_mn_diff)
     index_ymax <- which(min_diff_ymax == y_mx_diff)
+    metadist = NA
 
-    if(preview){mt_print(preview, function_name = "metnordic_coordwindow",
+    if(verbose){mt_print(verbose, function_name = "metnordic_coordwindow",
                          "coordinate window is:", paste0("xmin=", index_xmin,
                                                          " xmax=", index_xmax,
                                                          " xmin=",index_ymin,
@@ -137,7 +153,8 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, preview = FALSE){
     return(list(index_xmin = index_xmin,
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,
-                index_ymax = index_ymax))
+                index_ymax = index_ymax,
+                metadist = metadist))
   }
 }
 

@@ -1,91 +1,32 @@
-#' Merge MET Nordic Files (daily)
+#' Merge MET Nordic files (hourly)
 #'
-#' This function merges **daily** MET Nordic files into a single .nc file for a
-#' single variable. The input data should be the output data of
-#' `metnordic_aggregate()`. This function provides input for
-#' `metnordic_reproject()`. For **hourly** merging, please use `metnordic_merge_hourly()`
+#' This function lets you combine the hourly files downloaded by
+#' `download_metnordic()` into single files. **Note**, these files are separate
+#' per variable!
 #'
-#' Code largely adapted from this handy guide:
-#' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
-#' from Pat Bartlein, bartlein@uoregon.edu
+#' @param folderpath (String) folder where individual files are located
+#' @param variable (String) MET Nordic variable to combine
+#' @param outpath (String) folder where to write the file
+#' @param n_cores (Integer) Number of cores to use for parallel processing (Defaults to max - 2)
+#' @param overwrite (Boolean) overwrite existing file?
 #'
-#' @seealso [metnordic_aggregate()] [metnordic_reproject()] [metnordic_merge_hourly()]
-#' @author Moritz Shore
+#' @importFrom parallel  detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
 #'
-#' @param folderpath String: Outpath of files from `metnordic_aggregate()`.
-#' @param variable String: [MET Nordic variable](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters) to be used (**NOTE:** don't forget suffix such as 'mean', 'sum', 'min', or 'max').
-#' @param outpath String: Folder path where to write files.
-#' @param overwrite Logical: Overwrite existing file?
-#'
-#' @returns file path of generated files
+#' @returns path of written file
 #' @export
 #'
-#' @examples
-#' # TODO
-#' @importFrom abind abind
-#' @importFrom dplyr %>% first last
-#' @importFrom stringr str_split
-metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FALSE) {
-
-  # testing par set:
-  #
-  # targetnc  <- nc_open("../staging_ground/test_miljotools/testing_pr_nor2.nc")
-  # targetnc
-  #
-  # # PARS
-  # folderpath <- "../staging_ground/test_miljotools/bigdaily/"
-  # variable = "precipitation_amount"
-  # outpath = "../staging_ground/test_miljotools/bigyearly/"
-  # overwrite = TRUE
-  #START
-
-  # here we grab NC files and filter then by variable.
+#' @seealso [metnordic_download()] [metnordic_extract()]
+metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE) {
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
   long_fps_filt <- long_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
 
-  # This opens all the files at once for the given varible, and then binds them
-  # along the time axis (along = 3) to create a data cube.
-  vect_open_return <- function(filepaths){
-    ncfile <- nc_open(filepaths)
-    slice <- ncvar_get(ncfile, variable)
-    nc_close(ncfile)
-    return(slice)
-  }
-  datacube <- lapply(long_fps_filt, vect_open_return) %>% abind(along = 3)
-
-  # here we determine the correct format for the time dimension
-  # "days since 1901-01-01 00:00:00.0"
-  # note, UNSTABLE! dependent on file path ([,6] and [,1])
-  daily_filenames <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
-  dateformat <- paste0(substring(daily_filenames, 1,4), "-", substring(daily_filenames, 5,6), "-", substring(daily_filenames, 7,8)) %>% as.Date()
-  dayssince1901 <- (dateformat-as.Date("1901-01-01")) %>% as.numeric()
-  daterange <- paste0(daily_filenames %>% first(),"to", daily_filenames %>% last())
-
-  ### the rest is largely copied from the other metnordic functions
-  # with a few adjustments for the time dimension.
-
-  # create the file path to be written, check if it already exists. if the
-  # overwrite flag is enabled, then the existing file is delted to be created
-  # again. if not, the function skips this file.
-  write_fp <- paste0("MetNordic_", variable, "_", daterange, ".nc")
-  full_write_fp <- paste0(outpath, "/", write_fp)
-  dir.create(outpath, showWarnings = F)
-  if(file.exists(full_write_fp)){
-    if(overwrite){
-      warning("file already exists, overwriting: ", write_fp)
-      removed = file.remove(full_write_fp)
-      if(removed == FALSE){stop("error with removing file",full_write_fp )}
-    }else{
-      warning(write_fp, "already exists, skipping..")
-      return(FALSE)
-    }
-  }
-
+  templatenc <- nc_open(long_fps_filt[1])
   # opening the first nc file to serve as a template. many attributes are
   # extracted
-  templatenc <- nc_open(long_fps_filt[1])
   ### Elaborate NC file definition scheme: (mostly copied from `download_metnordic()`)
   lon <- ncvar_get(templatenc,"lon")
   lat <- ncvar_get(templatenc,"lat")
@@ -101,17 +42,97 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   ny <- dim(y)
   fillvalue <- 1e32
 
+  # here we determine the correct format for the time dimension
+  # "days since 1901-01-01 00:00:00.0"
+  # note, UNSTABLE! dependent on file path ([,6] and [,1])
+  filenames_date <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
+
+  # WARNING I think you should remove strftime! --> I checked the summer time, seems to work. but no october in the range i tested
+  dateformat <-  paste0(
+    substring(filenames_date, 1, 4),
+    "-",
+    substring(filenames_date, 5, 6),
+    "-",
+    substring(filenames_date, 7, 8),
+    " ",
+    substring(filenames_date, 10, 11),
+    ":00:00"
+  ) %>% as_datetime() %>% strftime(tz = "UTC")
+
+
+  full_date_range <- seq(dateformat[1] %>% as_datetime(), dateformat[length(dateformat)] %>% as_datetime(), by = "hour") %>% strftime(tz = "UTC")
+
+  vect_open_return_na <- function(timestamp) {
+
+    filedate <- paste0(
+      substr(timestamp, 0, 4),
+      substr(timestamp, 6, 7),
+      substr(timestamp, 9, 10),
+      "T",
+      substr(timestamp, 12, 13),
+      "Z_", variable, ".nc"
+    )
+    print(filedate)
+
+    filepath = list.files(folderpath, pattern = filedate, full.names = T)
+    if(length(filepath) == 0){
+      slice = matrix(data = NA, nrow = nx, ncol = ny)
+    }else{
+      ncfile <- ncdf4::nc_open(filepath)
+      slice <- ncdf4::ncvar_get(ncfile, variable)
+      ncdf4::nc_close(ncfile)
+    }
+    return(slice)
+  }
+
+  if(is.null(n_cores)){
+    n_cores = parallel::detectCores() - 2
+  }
+  logfilepath = paste0(dirname(folderpath),"/", variable, "_parallel_log.txt")
+  cl <-parallel::makeCluster(n_cores, outfile ="parlog.log")
+  doParallel::registerDoParallel(cl)
+  result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
+  parallel::stopCluster(cl)
+  datacube <- result %>% abind::abind(along = 3)
+
+  # create the file path to be written, check if it already exists. if the
+  # overwrite flag is enabled, then the existing file is deleted to be created
+  # again. if not, the function skips this file.
+  daterange <- paste0(filenames_date[1],"-", filenames_date[length(filenames_date)])
+  write_fp <- paste0("metno-", variable, "_", daterange, ".nc")
+  full_write_fp <- paste0(outpath, "/", write_fp)
+  dir.create(outpath, showWarnings = F)
+  if(file.exists(full_write_fp)){
+    if(overwrite){
+      warning("file already exists, overwriting: ", write_fp, "\n")
+      removed = file.remove(full_write_fp)
+      if(removed == FALSE){stop("error with removing file",full_write_fp )}
+    }else{
+      warning(write_fp, "already exists, skipping..")
+      return(full_write_fp)
+    }
+  }
+
+
+
   # define dimensions
   xdim <- ncdim_def("x",units="m",
                     longname="eastward distance from southwest corner of domain in projection coordinates",as.double(x))
   ydim <- ncdim_def("y",units="m",
                     longname="northward distance from southwest corner of domain in projection coordinates",as.double(y))
+
+
   ### Time dimensions:
   # the upper one is from the handy guide im using, the lower one from the source
   # ncdf4 files for senorgeCWATM. not sure which to use..
-  tunits <- "days since 1900-01-01 00:00:00.0 -0:00"
-  tunits <- "days since 1901-01-01 00:00:00.0"
-  timedim <- ncdim_def(name = "time",units = tunits,vals = as.double(dayssince1901), unlim = F, calendar = "proleptic_gregorian")
+  tunits <- "hours since 1901-01-01 01:00:00"
+  source_date = as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
+  first_date = full_date_range[1]
+  basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
+  #basehour <- basehour - 1
+  post_hours <- c(1:length(full_date_range))
+  hours_since_1901_01 <-basehour+post_hours
+  timedim <- ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
 
   dlname <- "Longitude of cell center"
   lon_def <- ncvar_def("lon","degrees_east",list(xdim,ydim),NULL,dlname,prec="double")
@@ -163,8 +184,8 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   ncatt_put(ncout,"lambert_conformal_conic","_CoordinateAxisTypes","GeoX GeoY")
 
   # add global attributes (TODO: cleanup)
-  ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",variable, "(daily)"))
-  ins_text <- paste0("Sourced from MetNordic, Downloaded and processed NIBIO using miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
+  ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable ",variable, "(hourly)"))
+  ins_text <- paste0("Sourced from MetNordic ++ Downloaded and processed miljotools version ",utils::packageVersion("miljotools"), " (https://github.com/moritzshore/miljotools)")
   ncatt_put(ncout,0,"institution",ins_text)
   history <- paste("Creaed ", date())
   ncatt_put(ncout,0,"history",history)
@@ -174,9 +195,6 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   # close the file, writing data to disk
   nc_close(ncout)
 
-  # return file path:
   return(full_write_fp)
 }
-
-
 

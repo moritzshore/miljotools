@@ -4,7 +4,7 @@
 \alias{metnordic_download}
 \title{Download a MET Nordic Data URL}
 \usage{
-metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
+metnordic_download(url, outdir, vars, overwrite = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{url}{String: OPENDAP url to be downloaded (from `metnordic_buildquery()).}
@@ -15,7 +15,7 @@ metnordic_download(url, outdir, vars, overwrite = FALSE, preview = TRUE)
 
 \item{overwrite}{Logical: Overwrite files if they already exist?}
 
-\item{preview}{Logical: Print preview?}
+\item{verbose}{Logical: Print preview?}
 }
 \value{
 String: file paths to generated files
@@ -23,7 +23,8 @@ String: file paths to generated files
 \description{
 Downloads MET Nordic re-analysis data using an OPENDAP url. This function
 ideally takes input from \code{metnordic_buildquery()} and provides input for
-\code{metnordic_aggregate()}.
+\code{metnordic_aggregate()}. If you are having issues with downloads, make sure
+to check https://status.met.no/ for server (THREDDS) status.
 }
 \details{
 Code largely adapted from this handy guide:
@@ -34,7 +35,7 @@ from Pat Bartlein, bartlein@uoregon.edu
 #TODO
 }
 \seealso{
-\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}}
+\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}} \link{metnordic_merge_hourly}
 }
 \author{
 Moritz Shore

@@ -10,7 +10,9 @@
 # https://status.met.no/
 
 
-#' Download data from the MetNordic Re-Analysis v3 dataset
+#' Download data from the MetNordic Re-Analysis v3 dataset (LEGACY)
+#'
+#' **NOTE:** This is a legacy function and is no longer supported.
 #'
 #' The MET Nordic rerun archive version 3 can be accessed using this
 #' function. Please see below for more details.
@@ -272,7 +274,9 @@ get_metno_reanalysis3 <-
 
 
 ### MET Nordic Daily Aggregation
-#' Downscale MetNo Reanalysis3 data to daily resolution
+#' Downscale MetNo Reanalysis3 data to daily resolution (Legacy)
+#'
+#' **NOTE:** This is a legacy function and is no longer supported.
 #'
 #' This function takes the hourly data from get_metno_reanalysis3() and
 #' recalculates it into daily (temporal) resolution.

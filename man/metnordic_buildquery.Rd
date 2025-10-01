@@ -9,12 +9,13 @@ metnordic_buildquery(
   mn_variables,
   fromdate,
   todate,
-  grid_resolution,
-  verbose
+  grid_resolution = 1,
+  dataset = "reanalysis",
+  verbose = FALSE
 )
 }
 \arguments{
-\item{bounding_coords}{as determined by \code{metnordic_coordwindow()}}
+\item{bounding_coords}{as passed by \code{metnordic_coordwindow()}}
 
 \item{mn_variables}{MET Nordic variables (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{documentation})}
 
@@ -23,6 +24,10 @@ metnordic_buildquery(
 \item{todate}{ie. "2020-12-31 23:00:00"}
 
 \item{grid_resolution}{an integer, ie. 3 for 3x3 km grid.}
+
+\item{dataset}{either 'reanalysis' for the re-run archive, 'operational' for
+the operational archive, or 'continuous' to source from both, depending on
+timerange.}
 
 \item{verbose}{print to console?}
 }
@@ -41,7 +46,7 @@ resolution. The results of this function can be downloaded when passed to
 # TODO
 }
 \seealso{
-\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}}
+\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}}
 }
 \author{
 Moritz Shore

@@ -1,4 +1,8 @@
-#' Create SWAT+ meteo input from MetNo Reanalysis3 data
+#' Create SWAT+ meteo input from MetNo Reanalysis3 data (SUPERSEDED)
+#'
+#' **SUPERSEDED**. Note: intended use of this function is within `swatplus_metnordic()`
+#'
+#' @seealso [swatplus_metnordic()]
 #'
 #' Takes data gathered by `get_metno_reanalysis3()` and downscaled by
 #' `reanalysis3_daily()` and creates SWAT+ meteo input files and weather
@@ -240,83 +244,113 @@ reanalysis3_swatinput <-
     }
   }
 
-#' Generate SWAT+ weather input for any watershed in the nordics.
+
+#' Apply MetNordic meteo data to a SWAT+ setup
 #'
-#' This function combines 3 `miljotools` functions in a single gridded data
-#' retrieval and processing pipeline to write and assign weather data to a SWAT+
-#' setup. The functions involved are
+#' This function takes the output from `metnordic_extract_grid()` and applies it
+#' to a SWAT+ setup, with the help of [SWATprepR](https://biopsichas.github.io/SWATprepR/).
 #'
-#' 1. `get_metno_reanalysis3()` downloads and processes the hourly gridded
-#' reanalysis data for the nordics
+#' @seealso [metnordic_extract_grid()]
 #'
-#' 2. `reanalysis3_daily()` converts these hourly timeseries into daily.
+#' @param directory path to weather data as created by `metnordic_extract_grid()`
+#' @param swat_setup path to SWAT+ setup
+#' @param write_wgn should the weather generator be written?
+#' @param start optional parameter to define start date of time series
+#' @param end optional parameter to define end date of time series4
+#' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
+#' @param verbose
 #'
-#' 3. `reanalysis3_swatinput()` converts these timeseries into a SWAT+
-#' compatible format as well as generating the weather generator, and updating
-#' SWAT+ input files with the help of the R-package `SWARTprepR`
-#'
-#' For more details please see the help pages of the individual functions. Also
-#' please note the the package `SWATprepR` is required for this pipeline.
-#'
-#' @param area The catchment area to retrieve data for. (must be a shapefile)
-#' @param swat_setup The path to your SWAT+ setup (input files, aka TxtInOut)
-#' @param grid_resolution (integer) desired resolution of downloaded grid in kilometers.
-#' @param directory directory to download and process data in
-#' @param from start of the to-be-dowloaded timeseries (ie. and min: "2012-09-01
-#'   10:00:00")
-#' @param to end of the to-be-dowloaded timeseries (ie. and max: "2023-01-31
-#'   10:00:00")
-#' @param area_buffer optional buffer in meters around the provided area
-#' @param verbose print status messages?
-#' @param precision Optional, which precision (integer) should the hourly data
-#'   be rounded down to when converted from daily to hourly. Default is '2'
-#'   decimal places.
-#' @param write_wgn would you like to calculate and write the weather generator?
-#' @param sqlite_path optionally, you can pass the path of your .sqlite file in
-#'   order to update the database with your new met files
-#'
-#' @author Moritz Shore, Svajunas Plunge
-#'
+#' @returns path to SWAT+ setup
 #' @export
 #'
-swat_weather_input_chain <-
-  function(area,
-           swat_setup,
-           grid_resolution = 1,
-           directory = NULL,
-           from = NULL,
-           to = NULL,
-           area_buffer = 1500,
-           verbose = TRUE,
-           precision = 2,
-           write_wgn = TRUE,
-           sqlite_path = NULL) {
+#'
+swatplus_metnordic <- function(directory,
+                               swat_setup,
+                               write_wgn = TRUE,
+                               start = NA,
+                               end = NA,
+                               sqlite_path = NULL,
+                               verbose) {
+  output <- paste0(getwd(), "/swatplus_metnordic_temp")
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
+  dir.create(output)
 
-    path1 <- get_metno_reanalysis3(
-      area,
-      directory = directory,
-      fromdate =  from,
-      todate = to,
-      area_buffer = area_buffer,
-      preview = verbose,
-      grid_resolution = grid_resolution
-    )
+  # convert to daily
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading data..")
+  all_data <- list.files(directory, full.names = T, pattern = "extract_grid") %>% vroom::vroom(id = "station", show_col_types = F)
+  all_data <- all_data %>% mutate(station = (station %>% str_split(pattern = "metnordic_extract_grid_", simplify = T))[,2] %>% str_remove(".csv"),
+                                  day = as.Date(date))
 
-    path2 <- reanalysis3_daily(
-      path = path1,
-      outpath = directory,
-      verbose = verbose,
-      precision = precision
-    )
+  # summarize
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting to daily..")
 
+  daily_data <- all_data %>% group_by(station, day) %>% summarize(
+    air_temperature_2m = mean(air_temperature_2m) %>% round(2),
+    min_air  = min(air_temperature_2m) %>% round(2),
+    max_air = max(air_temperature_2m) %>% round(2),
+    relative_humidity_2m = mean(relative_humidity_2m) %>% round(2),
+    wind_speed_10m = mean(wind_speed_10m) %>% round(2),
+    integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time = sum(integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time) %>% round(2),
+    precipitation_amount = sum(precipitation_amount) %>% round(2)
+  )  %>%  select(station, daily = day, air_temperature_2m, relative_humidity_2m, wind_speed_10m, integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time, precipitation_amount, max_temp = max_air, min_temp = min_air)
 
-    path3 <- reanalysis3_swatinput(
-      path = path2,
-      swat_setup = swat_setup,
-      write_wgn = write_wgn,
-      sqlite_path = sqlite_path,
-      verbose = verbose
-    )
+  write_indiv_station <- function(stat_id){
+    data = daily_data %>% filter(station == stat_id) %>% ungroup() %>% select(-station)
+    filename = paste0("station_", stat_id)
+    filepath = paste0(output, "/", filename, ".csv")
+    write_csv(x = data, file = filepath)
+    return(TRUE)
+  }
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing files to", output)
 
-    print("miljotools: pipeline finished!")
+  daily_data$station %>% unique() %>% as.numeric() %>% sort() %>% as.character() -> all_stations
+  dump = lapply(all_stations, write_indiv_station)
+
+  ## Write metadata
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading metadata..")
+
+  readmeta <- function(fp){
+   s1 =  read.table(sep = "=", file = fp) %>% as_tibble()
+   ID = s1$V2[1] %>% str_replace(" plot", "ID")
+   Name = s1$V2[1] %>% str_replace(" plot", "vstation_")
+   Elevation = s1$V2[5] %>% as.numeric()
+   Source = ""
+
+   # converting to lon lat
+    x = s1$V2[3]
+    y = s1$V2[4]
+
+    st_as_sf(x = data.frame(x = x, y = y),
+             coords = c("x", "y"),
+             crs =  "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000") %>%
+      st_transform(coordpair, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") %>%
+      st_coordinates() -> geocoords
+  Long = geocoords[1]
+  Lat = geocoords[2]
+  data.frame(ID = ID, Name = Name, Elevation = Elevation, Source = Source, Long = Long, Lat = Lat) %>% return()
+  }
+
+  all_meta_files <- metadata <- list.files(directory, full.names = T, pattern = "_meta_")
+  lapply(all_meta_files, readmeta) -> metadf
+
+  do.call("rbind",args = metadf) %>% as_tibble() -> final_meta
+
+  filepath = paste0(output, "/", "metadata.csv")
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing metadata to:", filepath)
+  write_csv(x = final_meta, file = filepath)
+
+  #NEXT: do SWAP prepr
+  miljotools::reanalysis3_swatinput(
+    path = output,
+    swat_setup = swat_setup,
+    write_wgn = T,
+    start = NA,
+    end = NA,
+    sqlite_path = NULL,
+    verbose =  verbose,
+    backup =  F
+  )
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Finished! deleting temp directory", output)
+  unlink(output, recursive = T)
+  return(swat_setup)
   }

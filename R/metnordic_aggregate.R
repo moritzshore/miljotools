@@ -11,13 +11,13 @@
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
 #' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @seealso [metnordic_merge()] [metnordic_download()]
-#' @param directory String: Path to the source files
+#' @seealso [metnordic_merge_daily()] [metnordic_download()] [metnordic_download_daterange()]
+#' @param directory String: Path to the source files (as downloaded by `metnordic_download()` or `metnordic_download_daterange()`)
 #' @param variable String: MET Nordic variable to aggregate (ie. "precipitation_amount", [(see more)](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param day String: day to convert ("YYYYMMDD" format, ie. "20150901")
 #' @param method String: method of aggregation ("mean", "min", "max", "sum")
 #' @param outpath String: path to directory of to be created files
-#' @param preview Logical: plot map?
+#' @param verbose Logical: plot map?
 #' @param overwrite Logical: overwrite existing file?
 #'
 #' @return String: path to written file
@@ -32,7 +32,7 @@
 #' @importFrom dplyr  %>%
 #' @importFrom abind abind
 #' @importFrom stringr str_split str_remove
-metnordic_aggregate <- function(directory, variable, method, day, outpath, overwrite = TRUE, preview = TRUE) {
+metnordic_aggregate <- function(directory, variable, method, day, outpath, overwrite = TRUE, verbose = TRUE) {
   # testing par set
   # directory = "../staging_ground/test_miljotools/MetNordicDownload12_04_2024_16-08-44/"
   # day = "20150902"
@@ -100,7 +100,7 @@ metnordic_aggregate <- function(directory, variable, method, day, outpath, overw
   }
 
   # plot
-  if (preview) {
+  if (verbose) {
     graphics::image(flat_cube, main = paste0(var_name, " ", day))
   }
 

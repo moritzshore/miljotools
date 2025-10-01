@@ -2,7 +2,7 @@
 % Please edit documentation in R/swatplus_metnordic.R
 \name{reanalysis3_swatinput}
 \alias{reanalysis3_swatinput}
-\title{Create SWAT+ meteo input from MetNo Reanalysis3 data}
+\title{Create SWAT+ meteo input from MetNo Reanalysis3 data (SUPERSEDED)}
 \usage{
 reanalysis3_swatinput(
   path,
@@ -37,11 +37,15 @@ update your database). Warning: start and end parameters will be ignored in this
 Files are generated in provided paths
 }
 \description{
+\strong{SUPERSEDED}. Note: intended use of this function is within \code{swatplus_metnordic()}
+}
+\seealso{
+\code{\link[=swatplus_metnordic]{swatplus_metnordic()}}
+
 Takes data gathered by \code{get_metno_reanalysis3()} and downscaled by
 \code{reanalysis3_daily()} and creates SWAT+ meteo input files and weather
 generators for your SWAT+ input with help from SWATprepR.
-}
-\details{
+
 \strong{NOTE} Default parameter value for \code{mn_variables} in \code{get_metno_reanalysis3()}  is required for this to work.
 
 \strong{NOTE} package \code{SWATprepR} is required for this function
