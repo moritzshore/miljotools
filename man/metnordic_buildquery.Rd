@@ -46,7 +46,7 @@ resolution. The results of this function can be downloaded when passed to
 # TODO
 }
 \seealso{
-\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}}
+\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}}
 }
 \author{
 Moritz Shore

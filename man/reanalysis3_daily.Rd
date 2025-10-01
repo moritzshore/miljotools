@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnorenal3.R
 \name{reanalysis3_daily}
 \alias{reanalysis3_daily}
-\title{Downscale MetNo Reanalysis3 data to daily resolution}
+\title{Downscale MetNo Reanalysis3 data to daily resolution (Legacy)}
 \usage{
 reanalysis3_daily(path, outpath = NULL, verbose = FALSE, precision = 2)
 }
@@ -19,6 +19,9 @@ reanalysis3_daily(path, outpath = NULL, verbose = FALSE, precision = 2)
 path of written files
 }
 \description{
+\strong{NOTE:} This is a legacy function and is no longer supported.
+}
+\details{
 This function takes the hourly data from get_metno_reanalysis3() and
 recalculates it into daily (temporal) resolution.
 }

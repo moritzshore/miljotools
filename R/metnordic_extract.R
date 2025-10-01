@@ -4,7 +4,7 @@
 #'
 #' This function extracts timeseries from (hourly) files from the chain
 #' `metnordic_coordwindow()` -->  `metnordic_buildquery()` -->
-#' `metnordic_coordmetnordic_download()` --> `metnordic_merge_hourly()` -->
+#' `metnordic_download_daterange()` --> `metnordic_merge_hourly()` -->
 #' `metnordic_extract()`. This function extracts from the nearest grid cell, if
 #' you would like a bi-linear interpolation of the nearest 4 cells, please try
 #' `metnordic_extract_grid()`
@@ -23,6 +23,8 @@
 #' @param outdir (string) directory in which to write the file (.csv)
 #' @param name (string) name of the file (will be added to filename)
 #' @param verbose (boolean) print?
+#'
+#' @seealso [metnordic_extract_grid()] [metnordic_merge_hourly()] [swap_metnordic()]
 #'
 #' @returns path to written file
 #' @export

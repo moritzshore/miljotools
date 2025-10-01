@@ -9,7 +9,7 @@
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
 #' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @seealso [metnordic_buildquery()] [metnordic_aggregate()]
+#' @seealso [metnordic_buildquery()] [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_hourly]
 #'
 #' @author Moritz Shore
 #'

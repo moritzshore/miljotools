@@ -32,5 +32,5 @@ This function lets you combine the hourly files downloaded by
 per variable!
 }
 \seealso{
-\code{\link[=metnordic_download]{metnordic_download()}}
+\code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_extract]{metnordic_extract()}}
 }

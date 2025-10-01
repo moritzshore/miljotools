@@ -7,7 +7,7 @@
 #' resolution. The results of this function can be downloaded when passed to
 #' `metnordic_download()`.
 #'
-#' @seealso [metnordic_coordwindow()] [metnordic_download()]
+#' @seealso [metnordic_coordwindow()] [metnordic_download()] [metnordic_download_daterange()]
 #' @author Moritz Shore
 #'
 #' @param bounding_coords as passed by `metnordic_coordwindow()`

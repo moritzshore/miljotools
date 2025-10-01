@@ -29,5 +29,5 @@ where it left off. If you are having issues with downloads, make sure to
 check https://status.met.no/ for server (THREDDS) status.
 }
 \seealso{
-\code{\link[=metnordic_buildquery]{metnordic_buildquery()}}
+\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_merge_hourly]{metnordic_merge_hourly()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}}
 }

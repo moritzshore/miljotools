@@ -2,7 +2,7 @@
 % Please edit documentation in R/metnorenal3.R
 \name{get_metno_reanalysis3}
 \alias{get_metno_reanalysis3}
-\title{Download data from the MetNordic Re-Analysis v3 dataset}
+\title{Download data from the MetNordic Re-Analysis v3 dataset (LEGACY)}
 \usage{
 get_metno_reanalysis3(
   area,
@@ -39,10 +39,12 @@ file area. Additionally one metadata file (.csv) is written with the
 attributes of each other file
 }
 \description{
-The MET Nordic rerun archive version 3 can be accessed using this
-function. Please see below for more details.
+\strong{NOTE:} This is a legacy function and is no longer supported.
 }
 \details{
+The MET Nordic rerun archive version 3 can be accessed using this
+function. Please see below for more details.
+
 For instructions on how to use this function, you can visit the article on
 the \href{https://moritzshore.github.io/miljotools/articles/metno_reanal.html}{web page}.
 

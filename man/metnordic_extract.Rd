@@ -32,8 +32,11 @@ path to written file
 \description{
 This function extracts timeseries from (hourly) files from the chain
 \code{metnordic_coordwindow()} -->  \code{metnordic_buildquery()} -->
-\code{metnordic_coordmetnordic_download()} --> \code{metnordic_merge_hourly()} -->
+\code{metnordic_download_daterange()} --> \code{metnordic_merge_hourly()} -->
 \code{metnordic_extract()}. This function extracts from the nearest grid cell, if
 you would like a bi-linear interpolation of the nearest 4 cells, please try
 \code{metnordic_extract_grid()}
+}
+\seealso{
+\code{\link[=metnordic_extract_grid]{metnordic_extract_grid()}} \code{\link[=metnordic_merge_hourly]{metnordic_merge_hourly()}} \code{\link[=swap_metnordic]{swap_metnordic()}}
 }

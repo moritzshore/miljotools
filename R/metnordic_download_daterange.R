@@ -17,7 +17,7 @@
 #' @returns path to download directory
 #' @export
 #'
-#' @seealso [metnordic_buildquery()]
+#' @seealso [metnordic_buildquery()] [metnordic_merge_hourly()] [metnordic_aggregate()]
 metnordic_download_daterange <- function(queries, directory, mn_variables, verbose = FALSE) {
   # these are all the urls that should be downloaded
   urls <- queries$full_urls

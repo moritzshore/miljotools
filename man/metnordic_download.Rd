@@ -35,7 +35,7 @@ from Pat Bartlein, bartlein@uoregon.edu
 #TODO
 }
 \seealso{
-\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}}
+\code{\link[=metnordic_buildquery]{metnordic_buildquery()}} \code{\link[=metnordic_aggregate]{metnordic_aggregate()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}} \link{metnordic_merge_hourly}
 }
 \author{
 Moritz Shore

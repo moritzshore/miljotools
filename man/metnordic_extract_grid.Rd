@@ -27,7 +27,7 @@ metnordic_extract_grid(
 \item{verbose}{Boolean, print status}
 }
 \value{
-nothing
+path to written files
 }
 \description{
 This function takes the files from \code{metnordic_merge_hourly()} and extracts

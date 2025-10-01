@@ -11,8 +11,8 @@
 #' ([link](https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-projected-netcdf-file))
 #' from Pat Bartlein, bartlein@uoregon.edu
 #'
-#' @seealso [metnordic_merge_daily()] [metnordic_download()]
-#' @param directory String: Path to the source files
+#' @seealso [metnordic_merge_daily()] [metnordic_download()] [metnordic_download_daterange()]
+#' @param directory String: Path to the source files (as downloaded by `metnordic_download()` or `metnordic_download_daterange()`)
 #' @param variable String: MET Nordic variable to aggregate (ie. "precipitation_amount", [(see more)](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param day String: day to convert ("YYYYMMDD" format, ie. "20150901")
 #' @param method String: method of aggregation ("mean", "min", "max", "sum")

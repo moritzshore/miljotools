@@ -17,7 +17,7 @@
 #' @returns path of written file
 #' @export
 #'
-#' @seealso [metnordic_download()]
+#' @seealso [metnordic_download()] [metnordic_extract()]
 metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE) {
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
