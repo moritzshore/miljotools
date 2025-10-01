@@ -1,23 +1,3 @@
-if(FALSE){
-  # testing par set
-  # libs
-  require(crayon)
-  require(ncdf4)
-  require(terra)
-  require(tibble)
-  require(sf)
-  require(mapview)
-  require(dplyr)
-  require(readr)
-  require(lubridate)
-  # pars
-  verbose = TRUE
-  area <- sf::read_sf("../staging_ground/test_miljotools/shp/cs10_basin.shp")
-  merged_path <- "../../masters-thesis/data/macroclimate/netcdf/merged/"
-  outdir <- "TEMPOUTDIRSWAT"
-  mn_variables <- c("air_temperature_2m", "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time", "relative_humidity_2m", "precipitation_amount", "wind_speed_10m")
-}
-
 #' Extract data on a (ir)regular grid basis
 #'
 #' This function takes the files from `metnordic_merge_hourly()` and extracts
@@ -36,11 +16,12 @@ if(FALSE){
 #' @param outdir String, Folder where data will be written
 #' @param verbose Boolean, print status
 #'
-#' @returns nothing
+#' @returns path to written files
 #' @export
 #'
 #' @importFrom sf st_geometry_type
 #' @importFrom raster xyFromCell
+#' @importFrom tidyterra geom_spatraster
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -51,46 +32,19 @@ metnordic_extract_grid <- function(merged_path,
 
   # sub functions
   get_overlapping_cells <- function(merged_path, area_overlap){
-    # Open up the first file to extract the coordinates
     filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
-    basemap <- nc_open(filepaths[1])
-    basemap_lon <- ncvar_get(basemap, "lon") %>% as.vector()
-    basemap_lat <- ncvar_get(basemap, "lat") %>% as.vector()
-
-    basemap_x <- ncvar_get(basemap, "x") %>% as.vector()
-    basemap_y <- ncvar_get(basemap, "y") %>% as.vector()
-    basemapgrid <- expand.grid(basemap_x, basemap_y) %>% tibble()
-    colnames(basemapgrid) <- c("x", "y")
-    nc_close(basemap)
-
-    # convert the coordinates into a spatial object
-    points <- tibble(lon = basemap_lon, lat = basemap_lat)
-    gridtry2 <- st_as_sf(x = basemapgrid,
-                         coords = c("x", "y"),
-                         crs =  "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000")
-
-    projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-    grid.sf <- st_as_sf(x = points,
-                        coords = c("lon", "lat"),
-                        crs = projcrs)
-    # load the first file as a raster and convert it the lat lon grid to the
-    # projected CRS. Also project the area overlap to the correct crs
-    myrast <- terra::rast(filepaths[1]) %>% terra::project("+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000")
-
     rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
                                                               crs =  crs(rasterfile))
-    # plot(myrast[[1]])
+    myrast <- terra::rast(filepaths[1])
     grid.sf.proj <- st_transform(testpoints, st_crs(rasterfile))
     area_overlap <- st_transform(area_overlap, st_crs(rasterfile))
     # figure out which ones are touching the area_overlap buffer
     pnts_trans <- grid.sf.proj %>% mutate(
       intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
     grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
-    #mapview(area_buffered) + mapview(grid.sf.proj, col.region = "orange")+ mapview(grid, col.region = "green")
-    diagnostic = FALSE
-    if(diagnostic){
-      ggplot() +  geom_spatraster(data=myrast[[1]])+
+    if(verbose){
+      ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
         geom_sf(data = area_buffered, alpha = .3, color = "green")+
         geom_sf(data = area, alpha = .3, color = "lightgreen")+
         geom_sf(data = testpoints, color = "darkorange")+
@@ -217,4 +171,6 @@ metnordic_extract_grid <- function(merged_path,
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
   }
+  mt_print(verbose, function_name = "metnordic_extract_grid", text = "Finished.")
+  return(outdir)
 }
