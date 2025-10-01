@@ -134,7 +134,7 @@ coord_window_point <- metnordic_coordwindow(example_point_geometry)
 ```
 
 This gives us a list containing the minimum and maximum x and y cells to
-download the data from.
+download the data from. `metadist` is NA for polygon geometries.
 
 ```{r, results='hold'}
 paste0(names(coord_window_poly), collapse = ", ")
@@ -159,7 +159,7 @@ download from the server. For that we also need to decide the following:
     these are [defined
     here](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters "MET No Variables").
 2.  `fromdate` and `todate` are time stamps for the period you would
-    like to download. Make sure to follow the format below:
+    like to download. Make sure to follow the formatting requirements.
 3.  `grid_resolution` is the resolution at which the area will be
     downloaded. For very large regions where a dense network of grid
     cells is not needed, this parameter can be used. A setting of `3`
