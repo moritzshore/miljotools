@@ -28,6 +28,7 @@ Imports:
     stringr,
     terra,
     tibble,
+    tidyterra,
     vroom
 Suggests:
     devtools,
