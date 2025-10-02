@@ -93,7 +93,16 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   doParallel::registerDoParallel(cl)
   result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
   parallel::stopCluster(cl)
-  datacube <- result %>% abind::abind(along = 3)
+
+  # if this is the case, a single point NC file has been downloaded.
+  if(result[[1]] %>% dim() %>% length() == 1){
+   stop("sorry, this function does not support merging NC files from a point geometry (1D). Please consider downloading from a polygon area (2D) or try using `metnordic_csv()")
+  }else if(result[[1]] %>% dim() %>% length() == 2){
+    # if this is the case, a 2D area has been downloaded.
+    datacube <- result %>% abind::abind(along = 3)
+  }else{
+    stop("Format not recognized.")
+  }
 
   # create the file path to be written, check if it already exists. if the
   # overwrite flag is enabled, then the existing file is deleted to be created
