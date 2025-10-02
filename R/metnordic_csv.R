@@ -54,7 +54,6 @@ metnordic_point <-
     ### Extracting the distance to point (if applicable), and saving for later
     # TODO: swich to return list instead of this method.
     metadist <- bounding_coords$metadist
-    bounding_coords<- bounding_coords[-length(bounding_coords)]
 
     ### Building download queries
     mt_print(verbose, "metnordic_csv", "building query", paste0("from '", dataset, "' dataset"))
