@@ -17,6 +17,7 @@ Imports:
     doParallel,
     dplyr,
     foreach,
+    ggplot2,
     lubridate,
     mapview,
     methods,
@@ -33,7 +34,6 @@ Imports:
 Suggests:
     devtools,
     fs,
-    ggplot2,
     ggrepel,
     ggtern,
     knitr,
