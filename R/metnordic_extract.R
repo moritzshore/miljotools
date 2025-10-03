@@ -184,7 +184,7 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
 
   if(verbose){
     xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
-    xy$geom_line <- st_union(xy$geometry, xy$geometry.1) %>% st_transform(crs = st_crs(proj_crs)) %>% st_cast("LINESTRING")
+    xy$geom_line <- sf::st_union(xy$geometry, xy$geometry.1) %>% sf::st_transform(crs = st_crs(proj_crs)) %>% sf::st_cast("LINESTRING")
     sf::st_geometry(xy) <- "geom_line"
     map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
     map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
