@@ -24,6 +24,7 @@ Imports:
     ncdf4,
     parallel,
     purrr,
+    raster,
     readr,
     sf,
     stringr,
