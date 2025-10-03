@@ -371,7 +371,7 @@ agg_path <- metnordic_aggregate(directory = "indiv_poly/",
 ```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
 data <- brick(agg_path)
 spatast <- data  %>% rast()
-plot(spatast, main = "air_temperature_2m_mean \n(2019-06-01)")
+plot(spatast, main = "mean temp \n(2019-06-01)")
 ```
 
 Now that was only a single day, and usually you would like to aggregate
@@ -381,9 +381,8 @@ parallel over multiple cores. If a day in your date range does not
 contain 24 individual files (24hrs) it will not be created and in the
 returning list will be labelled with `FALSE`.
 
-```{r, eval = RUN_VIGNETTE}
+```{r, eval = F}
 agg_dr = metnordic_aggregate_daterange(directory =  "indiv_poly/", variable = "air_temperature_2m", method = "max", start = start, end = end, outpath = "aggregated_range/")
-agg_dr %>% unname() %>% unlist()
 ```
 
 ## Merging
@@ -466,8 +465,9 @@ cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
 
 ## SWAP
 
-SWAP, being a field scale model, needs point data. Therefore we convert
-from the `metnordic_extract()` function.
+SWAP, being a field scale model, needs point data. We can use the output
+of `metnordic_extract()` in the function `swap_metnordic()` to create a
+meteo file for the SWAP model.
 
 ```{r, eval = RUN_VIGNETTE}
 swap_metnordic(
