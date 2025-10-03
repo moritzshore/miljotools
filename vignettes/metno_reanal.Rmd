@@ -365,7 +365,7 @@ agg_path <- metnordic_aggregate(directory = "indiv_poly/",
                                 method = "mean",
                                 day =  "20190601",
                                 outpath = "aggregated/",
-                                verbose =F, overwrite = T)
+                                verbose = F, overwrite = T)
 ```
 
 ```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
@@ -489,7 +489,8 @@ folders <- c(
   "./indiv_point",
   "./indiv_poly",
   "./merged_daily",
-  "./merged_poly"
+  "./merged_poly",
+  "./aggregated_range"
 )
 
 unlink(folders, recursive = T)
