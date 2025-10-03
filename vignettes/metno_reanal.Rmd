@@ -13,13 +13,14 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(gifski)
+RUN_VIGNETTE = FALSE
 ```
 
 [Author]{.underline}: Moritz Shore
 
 [Date]{.underline}: October, 2023
 
-[Last Update]{.underline}: March 15th, 2025
+[Last Update]{.underline}: October 2nd, 2025
 
 # Introduction
 
@@ -109,7 +110,7 @@ or an `sf` object in the R environment. Here is an example:
 > (By the way, these files are publicly available, so you can try this
 > code yourself)
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
 # downloading example files:
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10point.zip", destfile = "cs10point.zip")
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
@@ -128,7 +129,7 @@ map1+map2
 Now, with our geometries loaded, we can create coordinate windows for
 them. We will also buffer our polygon shapefile to ensure full coverage.
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 coord_window_poly <- metnordic_coordwindow(example_polygon_geometry, area_buffer = 1500)
 coord_window_point <- metnordic_coordwindow(example_point_geometry)
 ```
@@ -136,7 +137,7 @@ coord_window_point <- metnordic_coordwindow(example_point_geometry)
 This gives us a list containing the minimum and maximum x and y cells to
 download the data from. `metadist` is NA for polygon geometries.
 
-```{r, results='hold'}
+```{r, results='hold', eval = RUN_VIGNETTE}
 paste0(names(coord_window_poly), collapse = ", ")
 paste0(coord_window_poly, collapse = ", ")
 ```
@@ -145,7 +146,7 @@ The `metadist` entry is only needed for point geometry and indicates the
 distance to the nearest data set grid cell. Of course, for this geometry
 there are only two coordinates:
 
-```{r, results='hold'}
+```{r, results='hold', eval = RUN_VIGNETTE}
 paste0(names(coord_window_point), collapse = ", ")
 paste0(coord_window_point, collapse = ", ")
 ```
@@ -177,13 +178,19 @@ download from the server. For that we also need to decide the following:
 
 Determining our settings:
 
-```{r}
-my_variables = c("air_temperature_2m", "precipitation_amount")
+```{r, eval = RUN_VIGNETTE}
+my_variables =c(
+  "air_temperature_2m",
+  "relative_humidity_2m",
+  "wind_speed_10m",
+  "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time",
+  "precipitation_amount"
+)
 start = "2019-06-01 00:00:00"
-end = "2019-06-01 23:00:00"
+end = "2019-06-03 00:00:00"
 ```
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 queries_poly <- metnordic_buildquery(bounding_coords = coord_window_poly,
                                 mn_variables = my_variables,
                                 fromdate = start, todate = end, 
@@ -192,7 +199,7 @@ queries_poly <- metnordic_buildquery(bounding_coords = coord_window_poly,
 
 And for point geometry:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 queries_point <- metnordic_buildquery(bounding_coords = coord_window_point,
                                 mn_variables = my_variables,
                                 fromdate = start, todate = end, 
@@ -201,14 +208,14 @@ queries_point <- metnordic_buildquery(bounding_coords = coord_window_point,
 
 We now have the files we want to download:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 queries_point$filenames %>% head()
 ```
 
 And the `OPenDaP` download urls: (just one as an example, as they are
 very long).
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 queries_poly$full_urls[1]
 ```
 
@@ -221,12 +228,13 @@ queries_poly$full_urls[1]
 Now we are ready to download the files. Lets download 14:00 as it rained
 at that time, a bit:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 poly_path <- "indiv_poly/"
 dir.create(poly_path, showWarnings = F)
 fps <- metnordic_download(url = queries_poly$full_urls[15],
                           outdir = poly_path,
-                          vars = my_variables)
+                          vars = my_variables, verbose = F)
+(fps[[1]] %>% terra::rast())[[1]] %>% plot()
 ```
 
 Please note, the downloaded files are separated per variable. Why?
@@ -237,9 +245,9 @@ per-variable separation can sometimes be useful.
 ## Download a Date Range
 
 Now of course, you would like to download not just one file, but the
-whole daterange, the following function allows you to do this.
+whole date range, the following function allows you to do this.
 
-```{r,  eval = FALSE}
+```{r, eval = RUN_VIGNETTE}
 dl_path = metnordic_download_daterange(
   queries = queries_poly,
   directory = poly_path,
@@ -255,7 +263,7 @@ Please note! `metnordic_download()` and `metnordic_download_daterange()`
 do not yet work for point geometries. As an alternative, you can use the
 `metnordic_point()` function
 
-```{r, eval = FALSE}
+```{r, eval = RUN_VIGNETTE}
 point_path <- "indiv_point/"
 dir.create(point_path, showWarnings = F)
 point_dl_path <- metnordic_point(
@@ -269,7 +277,7 @@ point_dl_path <- metnordic_point(
 
 # Viewing the data:
 data <- read_csv("indiv_point/METNORDIC_point.csv", show_col_types = F)
-plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_point() download")
+plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_point() \ndownload")
 ```
 
 # Merging Hourly Files
@@ -278,16 +286,21 @@ If you are working with hourly data, the next logical step would be to
 merge the per-hour per-variable files into simply per-variable files.
 You can do this like so:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 outpath = "merged_poly/"
 dir.create(outpath, showWarnings = F)
-merge_path = metnordic_merge_hourly(folderpath = poly_path,
-                                    variable = "air_temperature_2m",
-                                    outpath = outpath)
+
+custom_merge <- function(variable) {
+  metnordic_merge_hourly(folderpath = poly_path,
+                         variable = variable,
+                         outpath = outpath)
+}
+
+res = lapply(X = my_variables, FUN = custom_merge)
 ```
 
-```{r gif, fig.align='center', fig.cap="Hourly Air Temperature in K", message=FALSE, warning=FALSE, animation.hook='gifski', interval=0.2, echo=TRUE}
-data <- brick(merge_path)
+```{r gif, fig.align='center', fig.cap="Hourly Air Temperature in K", message=FALSE, warning=FALSE, animation.hook='gifski', interval=0.2, echo=TRUE, eval = RUN_VIGNETTE}
+data <- brick(res[[1]])
 spatast <- data  %>% rast()
 hours = dim(data)[3]
 for (i in c(1:hours)) {
@@ -300,22 +313,40 @@ for (i in c(1:hours)) {
 In most cases, one would want a time series from a point on this map,
 `metnordic_extract()` does exactly this.
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 dir.create("extracted", showWarnings = F)
 metnordic_extract(
-  directory = "merged_poly",
-  mn_variables = "air_temperature_2m",
+  directory = "./merged_poly",
+  mn_variables = my_variables,
   point = example_point_geometry,
-  outdir = "extracted",
+  outdir = "./extracted",
   name = "vignette_example",
   verbose = T
 )
 ```
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 # Viewing the data:
 data <- read_csv("extracted//METNORDIC_point_vignette_example.csv", show_col_types = F)
 plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_extract() data")
+```
+
+If you would like to extract at multiple points, or all points within an
+area, you can use `metnordic_extract_grid()` . This function creates a
+data file and a metadata file for each point.
+
+```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
+extracted_path = metnordic_extract_grid(
+  merged_path =  "merged_poly/",
+  area = example_polygon_geometry,
+  mn_variables = my_variables,
+  outdir = "./extracted_grid",
+  verbose = F
+)
+```
+
+```{r, eval = RUN_VIGNETTE}
+extracted_path %>% list.files(pattern = "extract_grid_", full.names = T) %>% first() %>% read_csv(show_col_types = F) %>% head()
 ```
 
 # Further processing the data cube
@@ -327,7 +358,7 @@ to keep working with the NetCDF4 data cube. If you would like to have
 the data in daily form, you can aggregate it (summarize) using
 `metnordic_aggregate()`:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 dir.create("aggregated/", showWarnings = F)
 agg_path <- metnordic_aggregate(directory = "indiv_poly/", 
                                 variable = "air_temperature_2m",
@@ -337,19 +368,18 @@ agg_path <- metnordic_aggregate(directory = "indiv_poly/",
                                 verbose = F, overwrite = T)
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
 data <- brick(agg_path)
 spatast <- data  %>% rast()
-plot(spatast, main = "air_temperature_2m_mean (2019-06-01)")
+plot(spatast, main = "air_temperature_2m_mean \n(2019-06-01)")
 ```
 
 Now that was only a single day, and usually you would like to aggregate
 very many days all at once. A dedicated function for this does not exist
 yet, but you can easily write a for loop (or better yet – parallelize
-it). I have written such code, if you would like to see it as an example
-feel free to contact me. Someday it will be in the package.
+it).
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 # TODO: add `metnordic_aggregate_daterange()` to package. 
 ```
 
@@ -360,8 +390,14 @@ miljotools, like so:
 
 > Tip: don't forget to add the method of aggregation as a suffix!
 
-```{r}
-# TODO download two days instead of one so that this makes more sense
+```{r, eval = RUN_VIGNETTE}
+# aggregating a second day to merge it
+agg_path <- metnordic_aggregate(directory = "indiv_poly/", 
+                                variable = "air_temperature_2m",
+                                method = "mean",
+                                day =  "20190602",
+                                outpath = "aggregated/",
+                                verbose = F, overwrite = T)
 dir.create("merged_daily/")
 merged_fp <- metnordic_merge_daily(folderpath = "aggregated/",
                                    variable = "air_temperature_2m_mean",
@@ -373,13 +409,13 @@ merged_fp <- metnordic_merge_daily(folderpath = "aggregated/",
 If your use-case requires your NetCDF file to be in a specific
 projection, you can re-project it like so:
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 metnordic_reproject(filepath = merged_fp,
                     outfile = "reprojected_example.nc",
                     projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
 reproj <- rast("reprojected_example.nc")
 mapview(reproj)
 ```
@@ -394,8 +430,25 @@ has been implemented for three models, in order of implementation:
 
 ## SWAT+
 
-```{r}
-# TODO
+You can apply MET Nordic data to a SWAT+ setup with the function
+`swatplus_metnordic()` . This is done with the aid of
+[SWATprepR](https://biopsichas.github.io/SWATprepR/). You will need to
+use the files written by `metnordic_extract_grid()`.
+
+```{r, eval = F}
+# downloading an example SWAT+ project
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip", destfile = "cs10_txt.zip")
+unzip("cs10_txt.zip")
+
+swatplus_metnordic(directory = extracted_path, swat_setup = "cs10_txt/", verbose = T)
+```
+
+```{r include=FALSE, eval = RUN_VIGNETTE}
+# downloading an example SWAT+ project
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip", destfile = "cs10_txt.zip")
+unzip("cs10_txt.zip")
+
+swatplus_metnordic(directory = extracted_path, swat_setup = "cs10_txt/", verbose = T)
 ```
 
 ## CWatM
@@ -404,7 +457,7 @@ CWatM takes in NetCDF files, We take the file as projected by
 `metnordic_reproject()` into the correct projection for the setup. Note,
 this needs to be done per variable.
 
-```{r}
+```{r, eval = RUN_VIGNETTE}
 cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
 ```
 
@@ -413,13 +466,32 @@ cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
 SWAP, being a field scale model, needs point data. Therefore we convert
 from the `metnordic_extract()` function.
 
-```{r}
-# TODO, download all SWAP variables to get this to work
+```{r, eval = RUN_VIGNETTE}
 swap_metnordic(
   dldir = "extracted/",
   name = "vignette_example",
   outpath = "metnordic.met",
-  timescale = "daily",
-  verbose = T
+  timescale = "daily")
+```
+
+```{r include=FALSE, eval = RUN_VIGNETTE}
+# cleaup
+folders <- c(
+  "./aggregated",
+  "./cs10_basin",
+  "./cs10_txt",
+  "./cs10point",
+  "./extracted",
+  "./extracted_grid",
+  "./indiv_point",
+  "./indiv_poly",
+  "./merged_daily",
+  "./merged_poly"
 )
+
+unlink(folders, recursive = T)
+
+files <- c("cs10_basin.zip", "cs10_txt.zip", "cs10point.zip", "metnordic.met", "reprojected_example.nc", "cwatm_ready.nc", "parlog.log")
+
+file.remove(files)
 ```
