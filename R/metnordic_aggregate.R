@@ -50,7 +50,7 @@ metnordic_aggregate <- function(directory, variable, method, day, outpath, overw
   dir.create(outpath, showWarnings = F)
 
   if(length(short_fp)!= 24){
-    warning("only", length(short_fp), "hours detected on", day, "skipping...")
+    warning("only ", length(short_fp), " hours detected on ", day, " skipping...")
     return(FALSE)
   }
 
