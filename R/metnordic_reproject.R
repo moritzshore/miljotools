@@ -27,7 +27,7 @@ metnordic_reproject <- function(filepath, outfile, projstring = NULL){
   ## TODO: you should use a CRS object or something instead of a projstring...
 
   ## Projecting the NC file using terra.
-  ncfile <- nc_open(filepath)
+  ncfile <- ncdf4::nc_open(filepath)
   varid <- (ncfile$var %>% names())[1]
   varname <- ncdf4::ncatt_get(ncfile, varid)
   ncfile_spatrast <- terra::rast(filepath)
