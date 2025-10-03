@@ -365,7 +365,7 @@ agg_path <- metnordic_aggregate(directory = "indiv_poly/",
                                 method = "mean",
                                 day =  "20190601",
                                 outpath = "aggregated/",
-                                verbose = F, overwrite = T)
+                                verbose =F, overwrite = T)
 ```
 
 ```{r message=FALSE, warning=FALSE, eval = RUN_VIGNETTE}
@@ -375,18 +375,21 @@ plot(spatast, main = "air_temperature_2m_mean \n(2019-06-01)")
 ```
 
 Now that was only a single day, and usually you would like to aggregate
-very many days all at once. A dedicated function for this does not exist
-yet, but you can easily write a for loop (or better yet – parallelize
-it).
+very many days all at once. For this, you can use the function
+`metnordic_aggregate_daterange()`, which performs the operation in
+parallel over multiple cores. If a day in your date range does not
+contain 24 individual files (24hrs) it will not be created and in the
+returning list will be labelled with `FALSE`.
 
 ```{r, eval = RUN_VIGNETTE}
-# TODO: add `metnordic_aggregate_daterange()` to package. 
+agg_dr = metnordic_aggregate_daterange(directory =  "indiv_poly/", variable = "air_temperature_2m", method = "max", start = start, end = end, outpath = "aggregated_range/")
+agg_dr %>% unname() %>% unlist()
 ```
 
 ## Merging
 
 Now we would usually merge the aggregated days together, with
-miljotools, like so:
+`miljotools`, like so:
 
 > Tip: don't forget to add the method of aggregation as a suffix!
 
