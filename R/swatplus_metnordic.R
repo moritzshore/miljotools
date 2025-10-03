@@ -258,10 +258,12 @@ reanalysis3_swatinput <-
 #' @param start optional parameter to define start date of time series
 #' @param end optional parameter to define end date of time series4
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
-#' @param verbose
+#' @param verbose print to console?
 #'
 #' @returns path to SWAT+ setup
 #' @export
+#'
+#' @importFrom dplyr summarize
 #'
 #'
 swatplus_metnordic <- function(directory,
@@ -271,6 +273,7 @@ swatplus_metnordic <- function(directory,
                                end = NA,
                                sqlite_path = NULL,
                                verbose) {
+  coordpair <- station <- min_air <- max_air <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
@@ -310,7 +313,7 @@ swatplus_metnordic <- function(directory,
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading metadata..")
 
   readmeta <- function(fp){
-   s1 =  read.table(sep = "=", file = fp) %>% as_tibble()
+   s1 =  utils::read.table(sep = "=", file = fp) %>% as_tibble()
    ID = s1$V2[1] %>% str_replace(" plot", "ID")
    Name = s1$V2[1] %>% str_replace(" plot", "vstation_")
    Elevation = s1$V2[5] %>% as.numeric()

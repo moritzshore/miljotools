@@ -72,6 +72,10 @@ Sand column: "sand" in percent format (\%), decimal = "."
 }
 \examples{
 # for demonstration purposes, use path of package
+
+# currently broken due to dependency issue (ggtern)
+if(FALSE){
+
  example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 
 classify_soil(
@@ -83,6 +87,8 @@ classify_soil(
   decimal = ".",
   write = FALSE # FALSE just for demonstration
 )
+
+}
 
 }
 \author{

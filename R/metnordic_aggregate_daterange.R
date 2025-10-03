@@ -25,6 +25,8 @@
 #'   (24 individual files) to aggregated from.
 #' @export
 #'
+#' @importFrom stringr str_remove_all
+#'
 #' @seealso [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_daily()]
 #'
 metnordic_aggregate_daterange <- function(directory, variable, method, start, end, outpath, overwrite = TRUE, n_cores = NULL, verbose = TRUE){

@@ -27,7 +27,7 @@ swatplus_metnordic(
 
 \item{sqlite_path}{path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
 
-\item{verbose}{}
+\item{verbose}{print to console?}
 }
 \value{
 path to SWAT+ setup

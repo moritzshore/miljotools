@@ -47,7 +47,9 @@ Suggests:
     SWATprepR,
     writexl,
     ggplot2,
-    tidyterra
+    tidyterra,
+    utils,
+    viridis
 VignetteBuilder: 
     knitr
 Remotes: 
