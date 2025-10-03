@@ -183,6 +183,7 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   elevation = alt_grid[index_x, index_y]
 
   if(verbose){
+    geom_line <- geometry <- NULL
     xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
     xy$geom_line <- sf::st_union(xy$geometry, xy$geometry.1) %>% sf::st_transform(crs = st_crs(proj_crs)) %>% sf::st_cast("LINESTRING")
     sf::st_geometry(xy) <- "geom_line"
