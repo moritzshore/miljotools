@@ -26,6 +26,7 @@
 #' @export
 #'
 #' @importFrom stringr str_remove_all
+#' @importFrom dplyr  %>%
 #'
 #' @seealso [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_daily()]
 #'
@@ -33,7 +34,7 @@ metnordic_aggregate_daterange <- function(directory, variable, method, start, en
   # Creating date range from start to end dates
   daterange = seq(from  = start %>% as.Date(), to = end %>% as.Date())
   # converting it into the correct format (THIS MIGHT NOT BE STABLE DEPENDING ON LOCALE?)
-  daterange %>% str_remove_all("-") -> dayformat
+  daterange %>% stringr::str_remove_all("-") -> dayformat
   # Lapply ready version
   custom_agg <- function(current_day){
     metnordic_aggregate(
