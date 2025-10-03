@@ -81,7 +81,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% as_datetime() #%>% strftime() this causes issues with summer time, do not use!
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% lubridate::as_datetime() #%>% strftime() this causes issues with summer time, do not use!
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
     res <- tibble(date = datetime, variable = timeseries)
@@ -92,7 +92,6 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
   extract_all_vars <- function(the_var) {
     infp = list.files(directory, the_var, full.names = T)
-    #print(paste0("extracting from:", infp))
     extract_var(infp = infp,
                 point = point,
                 variable =  the_var)
@@ -100,8 +99,8 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
   reslist <- lapply(X = mn_variables, FUN = extract_all_vars)
 
-  datestart <-  reslist[[1]][[1]][1] %>% as_datetime()
-  dateend <-  reslist[[1]][[1]][length(reslist[[1]][[1]])] %>% as_datetime()
+  datestart <-  reslist[[1]][[1]][1] %>% lubridate::as_datetime()
+  dateend <-  reslist[[1]][[1]][length(reslist[[1]][[1]])] %>% lubridate::as_datetime()
   daterange <- seq(from = datestart, to = dateend, by = "hour")
   full_df <- tibble(date = daterange)
 
@@ -110,9 +109,6 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     dis <- reslist[[i]]
     full_df<-left_join(full_df, reslist[[i]], by = "date", relationship = "one-to-one")
   }
-  #full_df2 <- lapply(FUN = join_vars, X = reslist)
-
-  #full_df <- do.call("cbind", reslist) %>% dplyr::select(all_of(c("date", mn_variables))) %>% tibble()
   writefp <- paste0(outdir, "/METNORDIC_point_", name, ".csv")
   metafp <- paste0(outdir, "/METNORDIC_meta_", name, ".csv")
 
@@ -125,7 +121,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
 get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbose){
   infp = list.files(directory, mn_variables[1], full.names = T)
-
+  if(length(infp) > 1){stop("multiple files of the same variable [", mn_variables[1],"] detected in '", directory, "' Only one is allowed!")}
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   point_proj <- sf::st_transform(point, crs = projection)
   coordinate <- sf::st_coordinates(point_proj)
