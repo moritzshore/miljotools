@@ -65,6 +65,32 @@ swap_metnordic <- function(dldir, name, outpath, timescale = "daily", verbose = 
     )
   }
 
+  ## Check that all days have 24 hours, otherwise remove them
+  indf %>% mutate(day = date %>% as.Date()) -> indf
+  indf %>% group_by(day) %>% summarize(hours = n()) %>% left_join(indf, by = "day") -> indf
+  indf %>% filter(hours < 24) %>% pull(day) %>% unique() %>% as.Date() %>% sort()-> incomplete_days
+  indf %>% pull(date) %>% range() %>% as.Date() -> date_range
+  indf_filt <- indf
+
+  if(length(incomplete_days) > 0){
+    if(incomplete_days[1] == date_range[1]){
+      mt_print(verbose, "swap_metnordic", "The FIRST day has less than 24 hours and will be removed", paste0("(", incomplete_days[1], ")"))
+      indf_filt <- indf_filt %>% filter(day != date_range[1])
+    }
+    if(length(incomplete_days) == 2){
+      if(incomplete_days[length(incomplete_days)] == date_range[2]){
+        mt_print(verbose, "swap_metnordic", "The LAST day has less than 24 hours and will be removed", paste0("(", incomplete_days[length(incomplete_days)], ")"))
+        indf_filt <- indf_filt %>% filter(day != date_range[2])
+      }
+    }
+    # if still not all the days have 24 hours:
+    if(((indf_filt %>% pull(hours) == 24) %>% all()) == FALSE){
+      stop("the following days are missing hours: ", indf_filt %>% filter(hours < 24) %>% pull(day), "please fix.")
+    }
+  }
+
+  indf <- indf_filt
+
   # Check that rswap is installed
   if ("rswap" %in% utils::installed.packages()) {
     # if it is installed, check if it is loaded
@@ -136,7 +162,7 @@ swap_metnordic <- function(dldir, name, outpath, timescale = "daily", verbose = 
   ### Rainfall intensity.
   # to my knowledge, WET is the fraction of the day in which it rained.
   indf$DATE <- lubridate::date(indf$date)
-  # the cutoff of 0.01 is kind of arbitraty, but metnordic often has extremely low
+  # the cutoff of 0.01 is kind of arbitrary, but metnordic often has extremely low
   # precipitation values, which count as rain, but are near 0. So this ignores
   # them.
   indf<-indf %>% mutate(qrain = ifelse(precipitation_amount >= 0.01, yes = 1, no = 0))
