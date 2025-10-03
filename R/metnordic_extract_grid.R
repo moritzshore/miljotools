@@ -22,6 +22,7 @@
 #' @importFrom sf st_geometry_type
 #' @importFrom raster xyFromCell
 #' @importFrom tidyterra geom_spatraster
+#' @importFrom ggplot2 ggplot geom_sf theme_bw
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -44,12 +45,12 @@ metnordic_extract_grid <- function(merged_path,
       intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
     grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
     if(verbose){
-      ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
-        geom_sf(data = area_buffered, alpha = .3, color = "green")+
-        geom_sf(data = area, alpha = .3, color = "lightgreen")+
-        geom_sf(data = testpoints, color = "darkorange")+
-        geom_sf(data = grid, color = "darkgreen")+
-        theme_bw() +  viridis::scale_fill_viridis(option="E")
+      ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
+        ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
+        ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
+        ggplot2::geom_sf(data = testpoints, color = "darkorange")+
+        ggplot2::geom_sf(data = grid, color = "darkgreen")+
+        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="E")
     }
     return(grid)
   }
@@ -67,8 +68,11 @@ metnordic_extract_grid <- function(merged_path,
   extract_grid_cells <- function(variable){
     # Grab the right file
     filepath <- list.files(merged_path, pattern = variable, full.names = T)
+    if(length(filepath) == 0){
+      stop("Variable of type `", variable, "` not found! perhaps you have not merged it or downloaded it yet?")
+    }
     # load" the raster data
-    print(paste0("extracting: ", variable))
+    mt_print(verbose, "extract_grid_cells", text = "extracting:", text2 = variable)
     varrast <- terra::rast(filepath)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
 
@@ -87,7 +91,7 @@ metnordic_extract_grid <- function(merged_path,
 
   # main
   dir.create(outdir)
-
+  writeLines("hi", paste0(outdir, "/hi.txt"))
   # check if regular grid was provided:
 
    if(st_geometry_type(area) == "POLYGON"){
@@ -98,7 +102,7 @@ metnordic_extract_grid <- function(merged_path,
      }
 
   if(regular){
-    area_buffered <- st_buffer(area, buffer)
+    area_buffered <- sf::st_buffer(area, buffer)
     grid <- get_overlapping_cells(merged_path = merged_path, area_overlap = area_buffered)
   }else{
     # if the grid is not regular, just use the provided shapefile
@@ -122,7 +126,8 @@ metnordic_extract_grid <- function(merged_path,
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
-      cat(paste0(" >> working on station ", i, "...\n"))
+      mt_print(verbose, "metnordic_extract_grid", "Working on station", paste(i, "/",station_nr), rflag = T)
+      if(verbose){cat("\n")}
       varlist <- lapply(X = matrix_list, get_timeseries)
       yes <- varlist %>% purrr::reduce(full_join, by = "date")
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
@@ -138,7 +143,7 @@ metnordic_extract_grid <- function(merged_path,
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
-    cat("Finished.\n")
+    mt_print(verbose, "extract_grid_cells", text = "Finished")
   }else{
     warning("functionality for non-regular not proofed yet..")
     for (i in c(1:station_nr)) {
@@ -155,12 +160,14 @@ metnordic_extract_grid <- function(merged_path,
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
-      cat(paste0("\rworking on station ", i, "..."))
+      mt_print(verbose, function_name = "metnordic_extract_grid", text = "Working on station", text2 =  paste(i, "/",station_nr), rflag = T)
+      if(verbose){cat("\n")}
       varlist <- lapply(X = matrix_list, get_timeseries)
       yes <- varlist %>% purrr::reduce(full_join, by = "date")
       fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
       write_csv(x = yes, file = fp)
 
+      # TODO: rewrite this, its super slow.
       metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = area[i,],

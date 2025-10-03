@@ -54,7 +54,6 @@ metnordic_point <-
     ### Extracting the distance to point (if applicable), and saving for later
     # TODO: swich to return list instead of this method.
     metadist <- bounding_coords$metadist
-    bounding_coords<- bounding_coords[-length(bounding_coords)]
 
     ### Building download queries
     mt_print(verbose, "metnordic_csv", "building query", paste0("from '", dataset, "' dataset"))
@@ -145,7 +144,7 @@ csv_download_ncfiles <- function(directory,
     already_downloaded_urls <- already_downloaded_urls$written_urls
     already_downloaded_urls <- full_urls %in% already_downloaded_urls %>% which()
     full_urls <- full_urls[-already_downloaded_urls]
-    warning("not downloading [", length(already_downloaded_urls), "] urls which have previously been written to disk.")
+    warning(" not downloading [", length(already_downloaded_urls), "] urls which have previously been written to disk.")
     append_flag = TRUE
   }else{
     append_flag = FALSE

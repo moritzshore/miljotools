@@ -74,7 +74,7 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   dir.create(outpath, showWarnings = F)
   if(file.exists(full_write_fp)){
     if(overwrite){
-      warning("file already exists, overwriting: ", write_fp)
+      warning(" file already exists, overwriting: ", write_fp)
       removed = file.remove(full_write_fp)
       if(removed == FALSE){stop("error with removing file",full_write_fp )}
     }else{
