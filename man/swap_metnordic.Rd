@@ -15,7 +15,7 @@ swap_metnordic(dldir, name, outpath, timescale = "daily", verbose = FALSE)
 
 \item{timescale}{"daily" or "hourly". (hourly not supported yet)}
 
-\item{verbose}{print some stuff to console?}
+\item{verbose}{logical, print some stuff to console}
 }
 \value{
 path to written .met file

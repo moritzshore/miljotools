@@ -17,7 +17,6 @@ Imports:
     doParallel,
     dplyr,
     foreach,
-    ggplot2,
     lubridate,
     mapview,
     methods,
@@ -30,11 +29,11 @@ Imports:
     stringr,
     terra,
     tibble,
-    tidyterra,
     vroom
 Suggests:
     devtools,
     fs,
+    gifski,
     ggrepel,
     ggtern,
     knitr,
@@ -46,7 +45,9 @@ Suggests:
     roxygen2,
     rswap,
     SWATprepR,
-    writexl
+    writexl,
+    ggplot2,
+    tidyterra
 VignetteBuilder: 
     knitr
 Remotes: 

@@ -21,8 +21,6 @@
 #'
 #' @importFrom sf st_geometry_type
 #' @importFrom raster xyFromCell
-#' @importFrom tidyterra geom_spatraster
-#' @importFrom ggplot2 ggplot geom_sf theme_bw
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -37,7 +35,7 @@ metnordic_extract_grid <- function(merged_path,
     rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
                                                               crs =  crs(rasterfile))
-    myrast <- terra::rast(filepaths[1])
+
     grid.sf.proj <- st_transform(testpoints, st_crs(rasterfile))
     area_overlap <- st_transform(area_overlap, st_crs(rasterfile))
     # figure out which ones are touching the area_overlap buffer
@@ -45,6 +43,9 @@ metnordic_extract_grid <- function(merged_path,
       intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
     grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
     if(verbose){
+      required_packages <- c("ggplot2", "tidyterra")
+      install_missing_packs(required_packages)
+      myrast <- terra::rast(filepaths[1])
       ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
         ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
         ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
@@ -75,11 +76,9 @@ metnordic_extract_grid <- function(merged_path,
     mt_print(verbose, "extract_grid_cells", text = "extracting:", text2 = variable)
     varrast <- terra::rast(filepath)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
-
-    diagnostic = FALSE
-    if(diagnostic){
-      require(ggplot2)
-      require(tidyterra)
+    if(FALSE){
+      required_packages <- c("ggplot2", "tidyterra")
+      install_missing_packs(required_packages)
       ggplot() +  geom_spatraster(data=varrast[[1]])+
         geom_sf(data = area)+
         geom_sf(data = grid)+
