@@ -37,7 +37,7 @@ metnordic_aggregate_daterange <- function(directory, variable, method, start, en
   daterange %>% stringr::str_remove_all("-") -> dayformat
   # Lapply ready version
   custom_agg <- function(current_day){
-    metnordic_aggregate(
+    miljotools::metnordic_aggregate(
       directory = directory,
       variable = variable,
       method = method,
@@ -58,7 +58,7 @@ metnordic_aggregate_daterange <- function(directory, variable, method, start, en
   mt_print(verbose, "metnordic_aggregate_daterange", paste("Aggregating", length(dayformat), "days"), paste0("On ", n_cores, " threads."))
   cl <-parallel::makeCluster(n_cores)
   doParallel::registerDoParallel(cl)
-  result <- foreach(day = dayformat, .packages = "miljotools") %dopar% {custom_agg(current_day = day)}
+  result <- foreach(day = dayformat) %dopar% {custom_agg(current_day = day)}
   parallel::stopCluster(cl)
   # naming the return list by date
   names(result) <- dayformat

@@ -495,7 +495,7 @@ folders <- c(
 
 unlink(folders, recursive = T)
 
-files <- c("cs10_basin.zip", "cs10_txt.zip", "cs10point.zip", "metnordic.met", "reprojected_example.nc", "cwatm_ready.nc", "parlog.log")
+files <- c("cs10_basin.zip", "cs10_txt.zip", "cs10point.zip", "metnordic.met", "reprojected_example.nc", "cwatm_ready.nc", "parlog.log", "Rplots.pdf")
 
 file.remove(files)
 ```
