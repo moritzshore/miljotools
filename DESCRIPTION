@@ -35,7 +35,6 @@ Suggests:
     fs,
     gifski,
     ggrepel,
-    ggtern,
     knitr,
     lattice,
     plotly,
