@@ -53,12 +53,11 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
   area <- sf::st_transform(area, crs = proj_crs)
 
   # get the geometry type (either point or polygon)
-  area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
+  area_attr <- sf::st_geometry(area) %>% attr("class") %>% dplyr::nth(1)
   mt_print(verbose, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
 
   # routine for if a point was passed
   if (area_attr == "sfc_POINT") {
-
     coordinate <- sf::st_coordinates(area)
     point_x <- coordinate[1]
     point_y <- coordinate[2]
@@ -149,7 +148,19 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
                          "coordinate window is:", paste0("xmin=", index_xmin,
                                                          " xmax=", index_xmax,
                                                          " xmin=",index_ymin,
-                                                         " ymax=",index_ymax))}
+                                                         " ymax=",index_ymax))
+
+      # Define the bounding box
+      bbox_coords <- c(x[index_xmin], y[index_ymin], x[index_xmax], y[index_ymax])
+
+      box_coords <- c(-index_xmin, index_ymin, -index_xmax, index_ymax)
+      names(bbox_coords) = c("xmin","ymin","xmax","ymax")
+      bbp = st_as_sfc(st_bbox(bbox_coords))
+      st_crs(bbp) = st_crs(area)
+      plot + mapview(bbp, col.region = "green", label = "MN Polygon") -> plot2
+      print(plot2)
+
+      }
     return(list(index_xmin = index_xmin,
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,
