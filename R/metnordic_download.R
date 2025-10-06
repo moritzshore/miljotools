@@ -105,8 +105,18 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
       grid <- expand.grid(x=x, y=y)
       cutpts <- seq(min(var_array),max(var_array), length = 10)
       if(all(cutpts == 0)){ cutpts <- c(1:10)}
-      print(lattice::levelplot(main = paste(date, variable), var_array ~ x * y, data=grid, at=cutpts, cuts=11, pretty=T,
-                               col.regions=c(grDevices::rgb(1,1,1),RColorBrewer::brewer.pal(9,"Blues"))))
+      print(
+        lattice::levelplot(
+          main = paste(date, variable),
+          var_array ~ x * y,
+          data = grid,
+          at = cutpts,
+          cuts = 11,
+          pretty = T,
+          aspect = "iso",
+          col.regions = c(grDevices::rgb(1, 1, 1), RColorBrewer::brewer.pal(9, "Blues"))
+        )
+      )
     }
 
     # put variables
@@ -156,12 +166,13 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
     ncdf4::ncatt_put(ncout,0,"source URL",url)
 
     # close the file, writing data to disk
-    ncdf4::nc_close(ncin)
     ncdf4::nc_close(ncout)
 
     return(varncfname)
   }
 
   # creating
-  lapply(vars, vectorized_create_nc) %>% return()
+  lapply(vars, vectorized_create_nc) -> retlist
+  ncdf4::nc_close(ncin)
+  return(retlist)
 }
