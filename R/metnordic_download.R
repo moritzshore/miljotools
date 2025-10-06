@@ -140,6 +140,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","longitude_of_central_meridian", as.double(longitude_of_central_meridian))
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","latitude_of_projection_origin", as.double(latitude_of_projection_origin))
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","standard_parallel", c(standard_parallel, standard_parallel))
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","earth_radius", earth_radius)
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_easting",false_easting)
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_northing",false_northing)
     ncdf4::ncatt_put(ncout,"lambert_conformal_conic","_CoordinateTransformType","Projection")
