@@ -69,7 +69,7 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     # station.
     bbox_width = index_xmax - index_xmin
     bbox_height = index_ymax - index_ymin
-    if(verbose){cat(green(italic("you have a grid of ", black(bold(bbox_width)), "x", black(bold(bbox_height)),"..",bbox_width*bbox_height, "cells\n")))}
+    mt_print(verbose, "metnordic_buildquery", "You have a grid of:", paste0(bbox_width, " x ", bbox_height, " (", bbox_width*bbox_height, " cells)"))
     if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
     if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
 
@@ -83,7 +83,7 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     ystep = grid_resolution
 
     # print grid resolution
-    if(verbose){cat(green(italic("generating urls with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+    mt_print(verbose, "metnordic_buildquery", "generating urls with a grid size of:", paste0(xstep, " x ", ystep, " km"))
   }else{stop("bounding coords not recognized. please generate with 'metnordic_coordwindow()'")}
 
   ## paste together the vars
