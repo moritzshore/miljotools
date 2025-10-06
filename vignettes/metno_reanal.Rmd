@@ -470,7 +470,7 @@ SWAP, being a field scale model, needs point data. We can use the output
 of `metnordic_extract()` in the function `swap_metnordic()` to create a
 meteo file for the SWAP model.
 
-```{r, eval = RUN_VIGNETTE}
+```{r, eval = FALSE}
 swap_metnordic(
   dldir = "extracted/",
   name = "vignette_example",
