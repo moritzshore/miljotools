@@ -25,7 +25,7 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   dir.create(directory, showWarnings = F, recursive = T)
   # these are the files that have already been written
   if(list.files(directory) %>% length() > 0){
-    already_downloaded <- paste0((list.files(directory) %>% str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
+    already_downloaded <- paste0((list.files(directory) %>% stringr::str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
     # these are the files that then should not be re-downloaded
     dont_redownload <- queries$filenames %in% already_downloaded %>% which()
     # these are the files that should be downloaded
@@ -45,13 +45,12 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
       url = url,
       outdir = directory,
       vars = mn_variables,
-      overwrite = F,
+      overwrite = T,
       verbose = F
     )
     i = i + 1
   }
   if(verbose){cat("\n")}
   mt_print(verbose, "metnordic_download_daterange", text = "Download Finished.")
-
   return(directory)
 }
