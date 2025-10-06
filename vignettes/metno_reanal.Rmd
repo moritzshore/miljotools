@@ -87,11 +87,12 @@ required libraries need to be loaded for this example workflow:
 require(miljotools)
 require(dplyr)
 require(sf)
+require(stars)
 require(mapview)
 require(readr)
 require(raster)
-library(terra)
-library(tidyterra)
+require(terra)
+require(tidyterra)
 ```
 
 # Coordinate Window
