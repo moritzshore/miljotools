@@ -84,7 +84,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% lubridate::as_datetime() #%>% strftime() this causes issues with summer time, do not use!
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
-    res <- tibble(date = datetime, variable = timeseries)
+    res <- tibble::tibble(date = datetime, variable = timeseries)
     colnames(res) <- c("date", variable)
     ncdf4::nc_close(ncin)
     return(res)
@@ -102,7 +102,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   datestart <-  reslist[[1]][[1]][1] %>% lubridate::as_datetime()
   dateend <-  reslist[[1]][[1]][length(reslist[[1]][[1]])] %>% lubridate::as_datetime()
   daterange <- seq(from = datestart, to = dateend, by = "hour")
-  full_df <- tibble(date = daterange)
+  full_df <- tibble::tibble(date = daterange)
 
   # left joining in case of NAs
   for (i in c(1:length(reslist))) {
@@ -185,16 +185,15 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   if(verbose){
     geom_line <- geometry <- NULL
     xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
-    xy$geom_line <- sf::st_union(xy$geometry, xy$geometry.1) %>% sf::st_transform(crs = st_crs(proj_crs)) %>% sf::st_cast("LINESTRING")
     sf::st_geometry(xy) <- "geom_line"
-    map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
-    map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
-    map3 = mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
+    map1 = mapview::mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
+    map2 = mapview::mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
+    map3 = mapview::mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
     plot <- map1+map2+map3
     print(plot)
   }
 
-  meta_tib <- tibble(
+  meta_tib <- tibble::tibble(
     name = name,
     variables = mn_variables %>% paste(collapse = ","),
     metno_x = x[index_x],
