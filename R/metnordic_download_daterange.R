@@ -38,10 +38,9 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   }
   # this is how many still need downloading
   ix = length(urls)
-  # downloading each file in a foreloop
+  # downloading each file in a for loop
   for (url in remaining_urls) {
-    # TODO convert to mt_print()
-    if(verbose){cat(paste0("\rdownloading ...[", i, "/", ix, "] >> ", queries$filenames[i]))}
+    mt_print(verbose, "metnordic_download_daterange", text = "Downloading..", paste0("[", i, "/", ix, "] >> ", queries$filenames[i]), rflag = T)
     return = metnordic_download(
       url = url,
       outdir = directory,
@@ -51,7 +50,8 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
     )
     i = i + 1
   }
-  if(verbose){cat("\rDownload Finished.")}
+  if(verbose){cat("\n")}
+  mt_print(verbose, "metnordic_download_daterange", text = "Download Finished.")
 
   return(directory)
 }
