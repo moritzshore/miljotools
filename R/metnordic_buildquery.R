@@ -16,7 +16,7 @@
 #' @param todate ie. "2020-12-31 23:00:00"
 #' @param dataset either 'reanalysis' for the re-run archive, 'operational' for
 #'   the operational archive, or 'continuous' to source from both, depending on
-#'   timerange.
+#'   time range.
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
 #'
@@ -86,9 +86,10 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     if(verbose){cat(green(italic("generating urls with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
   }else{stop("bounding coords not recognized. please generate with 'metnordic_coordwindow()'")}
 
-  # paste together the vars
-  x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
-  y_q <- paste0("[", y1, ":", ystep,":", y2, "]")
+  ## paste together the vars
+  # Subtract 1 from the x and y because OPDENDAP starts at 0 but R starts at 1
+  x_q <- paste0("[", x1-1, ":", xstep,":", x2-1, "]")
+  y_q <- paste0("[", y1-1, ":", ystep,":", y2-1, "]")
   time_q <- paste0("[",time1, ":", timestep,":", time2, "]")
 
   latitude <- paste0("latitude", y_q, x_q)
