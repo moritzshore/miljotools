@@ -88,8 +88,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   if(is.null(n_cores)){
     n_cores = parallel::detectCores() - 2
   }
-  logfilepath = paste0(dirname(folderpath),"/", variable, "_parallel_log.txt")
-  cl <-parallel::makeCluster(n_cores, outfile ="parlog.log")
+  cl <-parallel::makeCluster(n_cores)
   doParallel::registerDoParallel(cl)
   result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
   parallel::stopCluster(cl)
