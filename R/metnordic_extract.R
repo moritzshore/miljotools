@@ -92,6 +92,9 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
   extract_all_vars <- function(the_var) {
     infp = list.files(directory, the_var, full.names = T)
+    if(infp %>% length() == 0){
+      stop(" '", the_var, "' does not exist in '", directory, "', did you forget to merge it?")
+    }
     extract_var(infp = infp,
                 point = point,
                 variable =  the_var)
@@ -121,7 +124,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
 get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbose){
   infp = list.files(directory, mn_variables[1], full.names = T)
-  if(length(infp) > 1){stop("multiple files of the same variable [", mn_variables[1],"] detected in '", directory, "' Only one is allowed!")}
+  if(length(infp) > 1){stop("multiple files of the same variable [", mn_variables[1],"] detected in '", directory, "' Only one is allowed! Make sure to merge individual files with `metnordic_merge_hourly()`")}
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   point_proj <- sf::st_transform(point, crs = projection)
   coordinate <- sf::st_coordinates(point_proj)
