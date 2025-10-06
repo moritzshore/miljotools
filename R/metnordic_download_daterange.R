@@ -22,7 +22,7 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   # these are all the urls that should be downloaded
   urls <- queries$full_urls
   # this is where the files will be written
-  dir.create(directory, showWarnings = F)
+  dir.create(directory, showWarnings = F, recursive = T)
   # these are the files that have already been written
   if(list.files(directory) %>% length() > 0){
     already_downloaded <- paste0((list.files(directory) %>% str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
