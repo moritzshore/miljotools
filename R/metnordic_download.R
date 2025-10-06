@@ -32,6 +32,7 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
   # TODO: add nc_open_retry
 
   # create filename and check if it already does. if it does, do not download.
+  dir.create(outdir, recursive = T)
   filename <- ((url %>% stringr::str_split(pattern = ".nc", simplify = T))[1,1] %>% stringr::str_split("/", simplify = T)) %>% as.list() %>% dplyr::last()
   ncfname <- paste0(outdir,"/", filename, ".nc")
   if(file.exists(ncfname)){
