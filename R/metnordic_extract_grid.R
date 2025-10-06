@@ -38,12 +38,12 @@ metnordic_extract_grid <- function(merged_path,
     }
     rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
-                                                              crs =  crs(rasterfile))
+                                                              crs =  terra::crs(rasterfile))
 
     grid.sf.proj <- st_transform(testpoints, st_crs(rasterfile))
     area_overlap <- st_transform(area_overlap, st_crs(rasterfile))
     # figure out which ones are touching the area_overlap buffer
-    pnts_trans <- grid.sf.proj %>% mutate(
+    pnts_trans <- grid.sf.proj %>% dplyr::mutate(
       intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
     grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
     if(verbose){
