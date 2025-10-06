@@ -33,6 +33,9 @@ metnordic_extract_grid <- function(merged_path,
   # sub functions
   get_overlapping_cells <- function(merged_path, area_overlap){
     filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
+    if(length(filepaths) == 0){
+      stop("No files found! (Make sure to provide a path to a directory, not a file)\nIn: >>",merged_path, "<<")
+    }
     rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
                                                               crs =  crs(rasterfile))
@@ -90,10 +93,8 @@ metnordic_extract_grid <- function(merged_path,
 
 
   # main
-  dir.create(outdir)
-  writeLines("hi", paste0(outdir, "/hi.txt"))
+  dir.create(outdir, recursive = T)
   # check if regular grid was provided:
-
    if(st_geometry_type(area) == "POLYGON"){
      regular = TRUE
    }else if((area %>% st_geometry_type() == "POINT") %>% all()){0
