@@ -21,6 +21,7 @@
 #'
 #' @importFrom sf st_geometry_type
 #' @importFrom raster xyFromCell
+#' @importFrom dplyr full_join
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,

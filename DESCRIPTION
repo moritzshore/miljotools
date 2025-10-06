@@ -35,7 +35,6 @@ Suggests:
     fs,
     gifski,
     ggrepel,
-    ggtern,
     knitr,
     lattice,
     plotly,
@@ -47,7 +46,10 @@ Suggests:
     SWATprepR,
     writexl,
     ggplot2,
-    tidyterra
+    tidyterra,
+    utils,
+    viridis,
+    stars
 VignetteBuilder: 
     knitr
 Remotes: 

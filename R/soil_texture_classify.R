@@ -41,6 +41,10 @@
 #'
 #' @examples
 #' # for demonstration purposes, use path of package
+#'
+#' # currently broken due to dependency issue (ggtern)
+#' if(FALSE){
+#'
 #'  example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 #'
 #' classify_soil(
@@ -52,6 +56,8 @@
 #'   decimal = ".",
 #'   write = FALSE # FALSE just for demonstration
 #' )
+#'
+#' }
 #'
 #' @return Returns path to written file
 #'
@@ -73,7 +79,8 @@ classify_soil <-
            write = FALSE){
 
     # install required packages
-    required_packages <- c("readxl", "writexl", "utils", "stringr", "ggplot2", "ggtern", "RColorBrewer", "plotly", "grDevices")
+    # removed 'ggtern'
+    required_packages <- c("readxl", "writexl", "utils", "stringr", "ggplot2", "RColorBrewer", "plotly", "grDevices")
     install_missing_packs(required_packages)
 
     # REQUIRED to fill these out!
@@ -794,7 +801,7 @@ classify_soil <-
       }else{
         # non interactive ggplot (seems to be pretty broken now that ggtern is no longer
         # supported.. cannot use ggsave)
-        outplot <- plot_data %>% ggtern::ggtern(ggplot2::aes(
+        outplot <- plot_data %>% ggtern(ggplot2::aes(
           y = clay,
           z = silt,
           x = sand,

@@ -15,12 +15,14 @@
 #'
 #' @seealso [metnordic_extract()]
 #' @importFrom readr read_csv write_csv
-#' @importFrom dplyr %>% group_by mutate select distinct left_join ungroup all_of
+#' @importFrom dplyr %>% group_by mutate select distinct left_join ungroup all_of summarize n pull
 #' @importFrom crayon green italic
 #' @importFrom lubridate date day month year
 #' @importFrom stringr str_pad
 swap_metnordic <- function(dldir, name, outpath, timescale = "daily", verbose = FALSE){
-  .data <- NULL # R CMD CHECK appeasement
+  # R CMD CHECK appeasement
+  .data <- NULL
+  hours <- precipitation_amount <- qrain <- NULL
   # parsing paths
   dl_path <- paste0(dldir, "/METNORDIC_point_", name, ".csv")
   meta_path <- paste0(dldir, "/METNORDIC_meta_", name, ".csv")
