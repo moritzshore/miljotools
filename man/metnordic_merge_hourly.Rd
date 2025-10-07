@@ -9,7 +9,8 @@ metnordic_merge_hourly(
   variable,
   outpath,
   n_cores = NULL,
-  overwrite = FALSE
+  overwrite = FALSE,
+  verbose = F
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ metnordic_merge_hourly(
 \item{n_cores}{(Integer) Number of cores to use for parallel processing (Defaults to max - 2)}
 
 \item{overwrite}{(Boolean) overwrite existing file?}
+
+\item{verbose}{(Boolean) print status?}
 }
 \value{
 path of written file
