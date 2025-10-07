@@ -136,6 +136,8 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   ncin <- ncdf4::nc_open(infp)
   x <- ncdf4::ncvar_get(ncin, "x")
   y <- ncdf4::ncvar_get(ncin, "y")
+  alt <- ncdf4::ncvar_get(ncin, "altitude")
+
   # TODO Add altitude to download always!
   #alt <- ncdf4::ncvar_get(ncin, "altitude")
   meta_text <- ncdf4::ncatt_get(ncin,varid = 0, attname = "institution")
@@ -164,26 +166,7 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   coordinate <- sf::st_coordinates(point_proj)
   point_x <- coordinate[1]
   point_y <- coordinate[2]
-
-
-  reffile = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
-  nc_elevation <- ncdf4::nc_open(reffile)
-  x <- ncdf4::ncvar_get(nc_elevation, "x")
-  y <- ncdf4::ncvar_get(nc_elevation, "y")
-  alt_grid <- ncdf4::ncvar_get(nc = nc_elevation, varid = "altitude")
-  ncdf4::nc_close(nc_elevation)
-  x_diff <- abs(x-point_x)
-  y_diff <- abs(y-point_y)
-
-  # find the minimum
-  min_diff_x <- min(x_diff)
-  min_diff_y <- min(y_diff)
-
-  # find the index of the minimum
-  index_x <- which(min_diff_x == x_diff)
-  index_y <- which(min_diff_y == y_diff)
-
-  elevation = alt_grid[index_x, index_y]
+  elevation = alt[index_x, index_y]
 
   if(verbose){
     geom_line <- geometry <- NULL
