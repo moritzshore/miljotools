@@ -22,6 +22,7 @@
 #' @importFrom sf st_geometry_type
 #' @importFrom raster xyFromCell
 #' @importFrom dplyr full_join
+#' @importFrom purrr quietly
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -29,6 +30,9 @@ metnordic_extract_grid <- function(merged_path,
                                    mn_variables,
                                    outdir,
                                    verbose) {
+  purrr::quietly(.f =  terra::rast) -> myrastfunc
+  purrr::quietly(raster::raster) -> quietraster
+
 
   # sub functions
   get_overlapping_cells <- function(merged_path, area_overlap){
@@ -36,26 +40,30 @@ metnordic_extract_grid <- function(merged_path,
     if(length(filepaths) == 0){
       stop("No files found! (Make sure to provide a path to a directory, not a file)\nIn: >>",merged_path, "<<")
     }
-    rasterfile <- raster::raster(filepaths[1])
-    testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% st_as_sf(coords = c("x", "y"),
+    # quietly cuz of annoying warning messages that i cant turn off
+    rasterfile <- quietraster(filepaths[1])$result
+    testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% sf::st_as_sf(coords = c("x", "y"),
                                                               crs =  terra::crs(rasterfile))
 
-    grid.sf.proj <- st_transform(testpoints, st_crs(rasterfile))
-    area_overlap <- st_transform(area_overlap, st_crs(rasterfile))
+    grid.sf.proj <- sf::st_transform(testpoints, sf::st_crs(rasterfile))
+    area_overlap <- sf::st_transform(area_overlap, sf::st_crs(rasterfile))
     # figure out which ones are touching the area_overlap buffer
     pnts_trans <- grid.sf.proj %>% dplyr::mutate(
-      intersection = as.integer(st_intersects(grid.sf.proj, area_overlap)))
+      intersection = as.integer(sf::st_intersects(grid.sf.proj, area_overlap)))
     grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
     if(verbose){
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
-      myrast <- terra::rast(filepaths[1])
+      # quietly cuz of annoying warning messages that i cant turn off
+      myrastfunc(filepaths[1])$result -> myrast
       ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
         ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
         ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
         ggplot2::geom_sf(data = testpoints, color = "darkorange")+
         ggplot2::geom_sf(data = grid, color = "darkgreen")+
-        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="E")
+        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="E")+
+        ggplot2::ggtitle("Overlapping grid cells")-> plot
+      print(plot)
     }
     return(grid)
   }
@@ -77,8 +85,8 @@ metnordic_extract_grid <- function(merged_path,
       stop("Variable of type `", variable, "` not found! perhaps you have not merged it or downloaded it yet?")
     }
     # load" the raster data
-    mt_print(verbose, "extract_grid_cells", text = "extracting:", text2 = variable)
-    varrast <- terra::rast(filepath)
+    mt_print(verbose, "metnordic_extract_grid", text = "extracting:", text2 = variable)
+    varrast <- myrastfunc(filepath)$result
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
@@ -93,7 +101,7 @@ metnordic_extract_grid <- function(merged_path,
 
 
   # main
-  dir.create(outdir, recursive = T)
+  dir.create(outdir, recursive = T, showWarnings = F)
   # check if regular grid was provided:
    if(sf::st_geometry_type(area) == "POLYGON"){
      regular = TRUE
@@ -127,8 +135,7 @@ metnordic_extract_grid <- function(merged_path,
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
-      mt_print(verbose, "metnordic_extract_grid", "Working on station", paste(i, "/",station_nr), rflag = T)
-      if(verbose){cat("\n")}
+      mt_print(verbose, "metnordic_extract_grid", "Working on station", paste0("(",i, "/",station_nr,")"), rflag = T)
       varlist <- lapply(X = matrix_list, get_timeseries)
       yes <- varlist %>% purrr::reduce(full_join, by = "date")
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
@@ -144,7 +151,7 @@ metnordic_extract_grid <- function(merged_path,
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
-    mt_print(verbose, "extract_grid_cells", text = "Finished")
+
   }else{
     warning("functionality for non-regular not proofed yet..")
     for (i in c(1:station_nr)) {
@@ -179,6 +186,7 @@ metnordic_extract_grid <- function(merged_path,
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
   }
-  mt_print(verbose, function_name = "metnordic_extract_grid", text = "Finished.")
+  if(verbose){cat("\n")}
+  mt_print(verbose, function_name = "metnordic_extract_grid", text = "Finished. Files located here:", outdir)
   return(outdir)
 }
