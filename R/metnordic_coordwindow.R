@@ -149,6 +149,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
       bbp = sf::st_as_sfc(sf::st_bbox(bbox_coords))
       sf::st_crs(bbp) = sf::st_crs(area)
       # Define Grid cells
+      Var1 <- Var2 <- NULL # RMD CHECK APEASEMENT
       xs <- which(x >= x[index_xmin] & x <= x[index_xmax])
       ys <- which(y >= y[index_ymin] & y <= y[index_ymax])
       expand.grid(x[xs],y[ys]) %>% tibble::as_tibble() %>%
