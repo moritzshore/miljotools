@@ -17,6 +17,7 @@
 #'
 #' @examples
 #' # TODO
+#' @importFrom sf 'st_crs<-'
 metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
 
   if(area_buffer < 0){
@@ -32,7 +33,6 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
   }else{
     stop("`area` parameter not recognized! please pass either a filepath to a .shp file, or an `sf` object!\n")
   }
-
 
   # get a base file to find the right x y
   mt_print(verbose, function_name = "metnordic_coordwindow","getting base file..")
@@ -53,12 +53,11 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
   area <- sf::st_transform(area, crs = proj_crs)
 
   # get the geometry type (either point or polygon)
-  area_attr <- sf::st_geometry(area) %>% attr("class") %>% nth(1)
+  area_attr <- sf::st_geometry(area) %>% attr("class") %>% dplyr::nth(1)
   mt_print(verbose, function_name = "metnordic_coordwindow","geometry detected:", area_attr)
 
   # routine for if a point was passed
   if (area_attr == "sfc_POINT") {
-
     coordinate <- sf::st_coordinates(area)
     point_x <- coordinate[1]
     point_y <- coordinate[2]
@@ -115,14 +114,6 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
     xmin <- wsbox[["xmin"]]
     xmax <- wsbox[["xmax"]]
 
-    # previewing coverage
-    if(verbose){
-      # old mapview solution
-      plot <- mapview::mapview(wsbox, col.region = "blue")+
-        mapview::mapview(area_buff, col.region = "red")+
-        mapview::mapview(area, col.region = "orange")
-      print(plot)
-    }
     mt_print(verbose, function_name = "metnordic_coordwindow","calculating coordinate window...")
 
     ## Finding the nearest neighbor to each corner
@@ -145,11 +136,34 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
     index_ymax <- which(min_diff_ymax == y_mx_diff)
     metadist = NA
 
-    if(verbose){mt_print(verbose, function_name = "metnordic_coordwindow",
+    if(verbose){
+      mt_print(verbose, function_name = "metnordic_coordwindow",
                          "coordinate window is:", paste0("xmin=", index_xmin,
                                                          " xmax=", index_xmax,
                                                          " xmin=",index_ymin,
-                                                         " ymax=",index_ymax))}
+                                                         " ymax=",index_ymax))
+      ## previewing coverage
+      # Define the bounding box
+      bbox_coords <- c(x[index_xmin], y[index_ymin], x[index_xmax], y[index_ymax])
+      names(bbox_coords) = c("xmin","ymin","xmax","ymax")
+      bbp = sf::st_as_sfc(sf::st_bbox(bbox_coords))
+      sf::st_crs(bbp) = sf::st_crs(area)
+      # Define Grid cells
+      Var1 <- Var2 <- NULL # RMD CHECK APEASEMENT
+      xs <- which(x >= x[index_xmin] & x <= x[index_xmax])
+      ys <- which(y >= y[index_ymin] & y <= y[index_ymax])
+      expand.grid(x[xs],y[ys]) %>% tibble::as_tibble() %>%
+        dplyr::rename(x = Var1, y = Var2) %>%
+        sf::st_as_sf(coords = c("x", "y"), crs = proj_crs) -> gridpoints
+      # Map view
+          mapview::mapview(wsbox, col.region = "grey",alpha.region = .3, layer.name = "Buffer bounding box", legend = FALSE, label = "Buffer BBOX")+
+          mapview::mapview(area_buff, col.region = "lightblue",alpha.region = .3, layer.name = "Buffer", legend = F)+
+          mapview::mapview(area, col.region = "white", alpha.region = .3,layer.name = "Provided Polygon", legend = FALSE)+
+          mapview::mapview(bbp, col.region = "blue", alpha.region = .3, layer.name = "MET Nordic Subset", legend = F)+
+          mapview::mapview(gridpoints, legend = FALSE) -> mymap
+        print(mymap)
+    }
+
     return(list(index_xmin = index_xmin,
                 index_xmax = index_xmax,
                 index_ymin = index_ymin,

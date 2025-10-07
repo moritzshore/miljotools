@@ -32,7 +32,8 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
   # TODO: add nc_open_retry
 
   # create filename and check if it already does. if it does, do not download.
-  filename <- ((url %>% stringr::str_split(pattern = ".nc", simplify = T))[1,1] %>% stringr::str_split("/", simplify = T)) %>% as.list() %>% last()
+  dir.create(outdir, recursive = T, showWarnings = F)
+  filename <- ((url %>% stringr::str_split(pattern = ".nc", simplify = T))[1,1] %>% stringr::str_split("/", simplify = T)) %>% as.list() %>% dplyr::last()
   ncfname <- paste0(outdir,"/", filename, ".nc")
   if(file.exists(ncfname)){
     if(overwrite == FALSE){
@@ -52,77 +53,91 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
   # function early.
   if(is.null(ncin)){return(NULL)}
 
-  lon <- ncvar_get(ncin,"longitude")
-  lat <- ncvar_get(ncin,"latitude")
+  lon <- ncdf4::ncvar_get(ncin,"longitude")
+  lat <- ncdf4::ncvar_get(ncin,"latitude")
   nlat <- dim(lat)
   nlon <- dim(lon)
-  x <- ncvar_get(ncin,"x")
-  xlname <- ncatt_get(ncin,"x","standard_name")
-  xunits <- ncatt_get(ncin,"x","units")
+  x <- ncdf4::ncvar_get(ncin,"x")
+  xlname <- ncdf4::ncatt_get(ncin,"x","standard_name")
+  xunits <- ncdf4::ncatt_get(ncin,"x","units")
   nx <- dim(x)
-  y <- ncvar_get(ncin,"y")
-  ylname <- ncatt_get(ncin,"y","standard_name")
-  yunits <- ncatt_get(ncin,"y","units")
+  y <- ncdf4::ncvar_get(ncin,"y")
+  ylname <- ncdf4::ncatt_get(ncin,"y","standard_name")
+  yunits <- ncdf4::ncatt_get(ncin,"y","units")
   ny <- dim(y)
 
+  ## Define altitude
+  alt <- ncdf4::ncvar_get(ncin, "altitude")
   # get time [broken] this does not work because of the strange things metnordic
   # does with the time dimension:
   # time <- ncvar_get(ncin,"time",start = )
 
 
   # define dimensions
-  xdim <- ncdim_def("x",units="m",
+  xdim <- ncdf4::ncdim_def("x",units="m",
                     longname="eastward distance from southwest corner of domain in projection coordinates",as.double(x))
-  ydim <- ncdim_def("y",units="m",
+  ydim <- ncdf4::ncdim_def("y",units="m",
                     longname="northward distance from southwest corner of domain in projection coordinates",as.double(y))
-  timedim <- ncdim_def(name = "time", units = "hour",
+  timedim <- ncdf4::ncdim_def(name = "time", units = "hour",
                        vals = 1, unlim = F, calendar = "hourly")
 
 
 
   dlname <- "Longitude of cell center"
-  lon_def <- ncvar_def("lon","degrees_east",list(xdim,ydim),NULL,dlname,prec="double")
+  lon_def <- ncdf4::ncvar_def("lon","degrees_east",list(xdim,ydim),NULL,dlname,prec="double")
   dlname <- "Latitude of cell center"
-  lat_def <- ncvar_def("lat","degrees_north",list(xdim,ydim),NULL,dlname,prec="double")
+  lat_def <- ncdf4::ncvar_def("lat","degrees_north",list(xdim,ydim),NULL,dlname,prec="double")
   dlname <- "Lambert_Conform_Conical"
-  proj_def <- ncvar_def("lambert_conformal_conic","1",NULL,NULL,longname=dlname,prec="char")
+  proj_def <- ncdf4::ncvar_def("lambert_conformal_conic","1",NULL,NULL,longname=dlname,prec="char")
   fillvalue <- 1e32
 
+  alt_def <- ncdf4::ncvar_def(name = "altitude", units = "m", dim = list(xdim, ydim), prec = "integer")
   # creates nc file for given var
   vectorized_create_nc <- function(variable){
     varncfname <- ncfname %>% stringr::str_replace(".nc", paste0("_",variable, ".nc"))
-    dlname <- ncatt_get(ncin,variable,"standard_name")
-    dunits <- ncatt_get(ncin,variable,"units")
-    current_var_def <- ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
+    dlname <- ncdf4::ncatt_get(ncin,variable,"standard_name")
+    dunits <- ncdf4::ncatt_get(ncin,variable,"units")
+    current_var_def <- ncdf4::ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,dlname$value,prec="double")
 
     date <- filename %>% stringr::str_remove("met_analysis_1_0km_nordic_")
-    ncout <- nc_create(varncfname,list(current_var_def,lon_def,lat_def,proj_def),force_v4=TRUE)
+    ncout <- ncdf4::nc_create(varncfname,list(current_var_def,alt_def, lon_def,lat_def,proj_def),force_v4=TRUE)
 
     # Getting variable
-    var_array <- ncvar_get(ncin,variable)
+    var_array <- ncdf4::ncvar_get(ncin,variable)
     # print a preview of the file
     if(verbose){
       grid <- expand.grid(x=x, y=y)
       cutpts <- seq(min(var_array),max(var_array), length = 10)
       if(all(cutpts == 0)){ cutpts <- c(1:10)}
-      print(lattice::levelplot(main = paste(date, variable), var_array ~ x * y, data=grid, at=cutpts, cuts=11, pretty=T,
-                               col.regions=c(grDevices::rgb(1,1,1),RColorBrewer::brewer.pal(9,"Blues"))))
+      print(
+        lattice::levelplot(
+          main = paste(date, variable),
+          var_array ~ x * y,
+          data = grid,
+          at = cutpts,
+          cuts = 11,
+          pretty = T,
+          aspect = "iso",
+          col.regions = c(grDevices::rgb(1, 1, 1), RColorBrewer::brewer.pal(9, "Blues"))
+        )
+      )
     }
 
     # put variables
-    ncvar_put(ncout,current_var_def,var_array)
-    ncvar_put(ncout,lon_def,lon)
-    ncvar_put(ncout,lat_def,lat)
+    ncdf4::ncvar_put(ncout,current_var_def,var_array)
+    ncdf4::ncvar_put(ncout,lon_def,lon)
+    ncdf4::ncvar_put(ncout,lat_def,lat)
+    ncdf4::ncvar_put(ncout, alt_def, alt)
 
     # put additional attributes into dimension and data variables
-    ncatt_put(ncout,"x","axis","X")
-    ncatt_put(ncout,"x","standard_name","projection_x_coordinate")
-    ncatt_put(ncout,"x","_CoordinateAxisType","GeoX")
-    ncatt_put(ncout,"y","axis","Y")
-    ncatt_put(ncout,"y","standard_name","projection_y_coordinate")
-    ncatt_put(ncout,"y","_CoordinateAxisType","GeoY")
-    ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
-    ncatt_put(ncout, variable,"coordinates", "lat lon")
+    ncdf4::ncatt_put(ncout,"x","axis","X")
+    ncdf4::ncatt_put(ncout,"x","standard_name","projection_x_coordinate")
+    ncdf4::ncatt_put(ncout,"x","_CoordinateAxisType","GeoX")
+    ncdf4::ncatt_put(ncout,"y","axis","Y")
+    ncdf4::ncatt_put(ncout,"y","standard_name","projection_y_coordinate")
+    ncdf4::ncatt_put(ncout,"y","_CoordinateAxisType","GeoY")
+    ncdf4::ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
+    ncdf4::ncatt_put(ncout, variable,"coordinates", "lat lon")
 
     # put the CRS attributes
     projname <- "lambert_conformal_conic"
@@ -134,32 +149,35 @@ metnordic_download <- function(url, outdir, vars, overwrite = FALSE, verbose = T
     # false_northing <- 4612545.65137
     false_easting <- 0
     false_northing <- 0
-    ncatt_put(ncout,"lambert_conformal_conic","name",projname)
-    ncatt_put(ncout,"lambert_conformal_conic","long_name",projname)
-    ncatt_put(ncout,"lambert_conformal_conic","grid_mapping_name",projname)
-    ncatt_put(ncout,"lambert_conformal_conic","longitude_of_central_meridian", as.double(longitude_of_central_meridian))
-    ncatt_put(ncout,"lambert_conformal_conic","latitude_of_projection_origin", as.double(latitude_of_projection_origin))
-    ncatt_put(ncout,"lambert_conformal_conic","standard_parallel", c(standard_parallel, standard_parallel))
-    ncatt_put(ncout,"lambert_conformal_conic","false_easting",false_easting)
-    ncatt_put(ncout,"lambert_conformal_conic","false_northing",false_northing)
-    ncatt_put(ncout,"lambert_conformal_conic","_CoordinateTransformType","Projection")
-    ncatt_put(ncout,"lambert_conformal_conic","_CoordinateAxisTypes","GeoX GeoY")
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","name",projname)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","long_name",projname)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","grid_mapping_name",projname)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","longitude_of_central_meridian", as.double(longitude_of_central_meridian))
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","latitude_of_projection_origin", as.double(latitude_of_projection_origin))
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","standard_parallel", c(standard_parallel, standard_parallel))
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","earth_radius", earth_radius)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_easting",false_easting)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_northing",false_northing)
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","_CoordinateTransformType","Projection")
+    ncdf4::ncatt_put(ncout,"lambert_conformal_conic","_CoordinateAxisTypes","GeoX GeoY")
 
     # add global attributes
-    ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable",variable))
-    ncatt_put(ncout,0,"institution","Sourced from MetNordic (met.no)")
+    ncdf4::ncatt_put(ncout,0,"title",paste0("MET Nordic dataset variable",variable))
+    ncdf4::ncatt_put(ncout,0,"institution","Sourced from MetNordic (met.no)")
     history <- paste("Created by miljotools version",utils::packageVersion("miljotools"), "on", date())
-    ncatt_put(ncout,0,"history",history)
-    ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
-    ncatt_put(ncout,0,"Conventions","CF=1.6")
-    ncatt_put(ncout,0,"source URL",url)
+    ncdf4::ncatt_put(ncout,0,"history",history)
+    ncdf4::ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
+    ncdf4::ncatt_put(ncout,0,"Conventions","CF=1.6")
+    ncdf4::ncatt_put(ncout,0,"source URL",url)
 
     # close the file, writing data to disk
-    nc_close(ncout)
+    ncdf4::nc_close(ncout)
 
     return(varncfname)
   }
 
   # creating
-  lapply(vars, vectorized_create_nc) %>% return()
+  lapply(vars, vectorized_create_nc) -> retlist
+  ncdf4::nc_close(ncin)
+  return(retlist)
 }

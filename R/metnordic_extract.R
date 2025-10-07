@@ -84,7 +84,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
     datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% lubridate::as_datetime() #%>% strftime() this causes issues with summer time, do not use!
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
-    res <- tibble(date = datetime, variable = timeseries)
+    res <- tibble::tibble(date = datetime, variable = timeseries)
     colnames(res) <- c("date", variable)
     ncdf4::nc_close(ncin)
     return(res)
@@ -92,6 +92,9 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
   extract_all_vars <- function(the_var) {
     infp = list.files(directory, the_var, full.names = T)
+    if(infp %>% length() == 0){
+      stop(" '", the_var, "' does not exist in '", directory, "', did you forget to merge it?")
+    }
     extract_var(infp = infp,
                 point = point,
                 variable =  the_var)
@@ -102,7 +105,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   datestart <-  reslist[[1]][[1]][1] %>% lubridate::as_datetime()
   dateend <-  reslist[[1]][[1]][length(reslist[[1]][[1]])] %>% lubridate::as_datetime()
   daterange <- seq(from = datestart, to = dateend, by = "hour")
-  full_df <- tibble(date = daterange)
+  full_df <- tibble::tibble(date = daterange)
 
   # left joining in case of NAs
   for (i in c(1:length(reslist))) {
@@ -121,7 +124,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
 
 get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbose){
   infp = list.files(directory, mn_variables[1], full.names = T)
-  if(length(infp) > 1){stop("multiple files of the same variable [", mn_variables[1],"] detected in '", directory, "' Only one is allowed!")}
+  if(length(infp) > 1){stop("multiple files of the same variable [", mn_variables[1],"] detected in '", directory, "' Only one is allowed! Make sure to merge individual files with `metnordic_merge_hourly()`")}
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   point_proj <- sf::st_transform(point, crs = projection)
   coordinate <- sf::st_coordinates(point_proj)
@@ -133,6 +136,8 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   ncin <- ncdf4::nc_open(infp)
   x <- ncdf4::ncvar_get(ncin, "x")
   y <- ncdf4::ncvar_get(ncin, "y")
+  alt <- ncdf4::ncvar_get(ncin, "altitude")
+
   # TODO Add altitude to download always!
   #alt <- ncdf4::ncvar_get(ncin, "altitude")
   meta_text <- ncdf4::ncatt_get(ncin,varid = 0, attname = "institution")
@@ -161,40 +166,20 @@ get_meta <- function(directory, name, mn_variables, point, proj_crs=NULL, verbos
   coordinate <- sf::st_coordinates(point_proj)
   point_x <- coordinate[1]
   point_y <- coordinate[2]
-
-
-  reffile = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
-  nc_elevation <- ncdf4::nc_open(reffile)
-  x <- ncdf4::ncvar_get(nc_elevation, "x")
-  y <- ncdf4::ncvar_get(nc_elevation, "y")
-  alt_grid <- ncdf4::ncvar_get(nc = nc_elevation, varid = "altitude")
-  ncdf4::nc_close(nc_elevation)
-  x_diff <- abs(x-point_x)
-  y_diff <- abs(y-point_y)
-
-  # find the minimum
-  min_diff_x <- min(x_diff)
-  min_diff_y <- min(y_diff)
-
-  # find the index of the minimum
-  index_x <- which(min_diff_x == x_diff)
-  index_y <- which(min_diff_y == y_diff)
-
-  elevation = alt_grid[index_x, index_y]
+  elevation = alt[index_x, index_y]
 
   if(verbose){
     geom_line <- geometry <- NULL
     xy <- cbind(df %>% dplyr::select(geometry), point_proj %>% dplyr::select(geometry))
-    xy$geom_line <- sf::st_union(xy$geometry, xy$geometry.1) %>% sf::st_transform(crs = st_crs(proj_crs)) %>% sf::st_cast("LINESTRING")
     sf::st_geometry(xy) <- "geom_line"
-    map1 = mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
-    map2 =  mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
-    map3 = mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
+    map1 = mapview::mapview(point_proj %>% dplyr::select(geometry), col.region = "orange", label = "Provided Point", layer.name = "Provided Point")
+    map2 = mapview::mapview(df %>% dplyr::select(geometry), col.region = "purple", label = "MET Nordic Grid Cell Center", layer.name = "MET Nordic Gridcell")
+    map3 = mapview::mapview(xy %>% dplyr::select(geom_line), layer.name = paste0("Distance = ", metadist, " m"), color = "black", label = paste0(metadist, " m"))
     plot <- map1+map2+map3
     print(plot)
   }
 
-  meta_tib <- tibble(
+  meta_tib <- tibble::tibble(
     name = name,
     variables = mn_variables %>% paste(collapse = ","),
     metno_x = x[index_x],

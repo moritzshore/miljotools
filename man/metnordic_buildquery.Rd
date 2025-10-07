@@ -27,7 +27,7 @@ metnordic_buildquery(
 
 \item{dataset}{either 'reanalysis' for the re-run archive, 'operational' for
 the operational archive, or 'continuous' to source from both, depending on
-timerange.}
+time range.}
 
 \item{verbose}{print to console?}
 }

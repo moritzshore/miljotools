@@ -16,7 +16,7 @@
 #' @param todate ie. "2020-12-31 23:00:00"
 #' @param dataset either 'reanalysis' for the re-run archive, 'operational' for
 #'   the operational archive, or 'continuous' to source from both, depending on
-#'   timerange.
+#'   time range.
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
 #'
@@ -69,7 +69,7 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     # station.
     bbox_width = index_xmax - index_xmin
     bbox_height = index_ymax - index_ymin
-    if(verbose){cat(green(italic("you have a grid of ", black(bold(bbox_width)), "x", black(bold(bbox_height)),"..",bbox_width*bbox_height, "cells\n")))}
+    mt_print(verbose, "metnordic_buildquery", "You have a grid of:", paste0(bbox_width, " x ", bbox_height, " (", bbox_width*bbox_height, " cells)"))
     if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
     if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
 
@@ -83,12 +83,13 @@ metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate
     ystep = grid_resolution
 
     # print grid resolution
-    if(verbose){cat(green(italic("generating urls with grid size of", black(bold(xstep)), "x", black(bold(ystep)), "km \n")))}
+    mt_print(verbose, "metnordic_buildquery", "generating urls with a grid size of:", paste0(xstep, " x ", ystep, " km"))
   }else{stop("bounding coords not recognized. please generate with 'metnordic_coordwindow()'")}
 
-  # paste together the vars
-  x_q <- paste0("[", x1, ":", xstep,":", x2, "]")
-  y_q <- paste0("[", y1, ":", ystep,":", y2, "]")
+  ## paste together the vars
+  # Subtract 1 from the x and y because OPDENDAP starts at 0 but R starts at 1
+  x_q <- paste0("[", x1-1, ":", xstep,":", x2-1, "]")
+  y_q <- paste0("[", y1-1, ":", ystep,":", y2-1, "]")
   time_q <- paste0("[",time1, ":", timestep,":", time2, "]")
 
   latitude <- paste0("latitude", y_q, x_q)

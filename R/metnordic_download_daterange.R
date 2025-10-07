@@ -22,14 +22,18 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   # these are all the urls that should be downloaded
   urls <- queries$full_urls
   # this is where the files will be written
-  dir.create(directory, showWarnings = F)
+  dir.create(directory, showWarnings = F, recursive = T)
   # these are the files that have already been written
   if(list.files(directory) %>% length() > 0){
-    already_downloaded <- paste0((list.files(directory) %>% str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
+    already_downloaded <- paste0((list.files(directory) %>% stringr::str_split("Z_", simplify = T))[, 1] %>% unique(), "Z.nc")
     # these are the files that then should not be re-downloaded
     dont_redownload <- queries$filenames %in% already_downloaded %>% which()
     # these are the files that should be downloaded
-    remaining_urls <- urls[-dont_redownload]
+    if(dont_redownload %>% length() > 1){
+      remaining_urls <- urls[-dont_redownload]
+    }else{
+      remaining_urls <- urls
+    }
     # this is how many have already been downloaded (only for printing)
     i = length(dont_redownload)
   }else{
@@ -38,20 +42,19 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
   }
   # this is how many still need downloading
   ix = length(urls)
-  # downloading each file in a foreloop
+  # downloading each file in a for loop
   for (url in remaining_urls) {
-    # TODO convert to mt_print()
-    if(verbose){cat(paste0("\rdownloading ...[", i, "/", ix, "] >> ", queries$filenames[i]))}
+    mt_print(verbose, "metnordic_download_daterange", text = "Downloading..", paste0("[", i, "/", ix, "] >> ", queries$filenames[i]), rflag = T)
     return = metnordic_download(
       url = url,
       outdir = directory,
       vars = mn_variables,
-      overwrite = F,
+      overwrite = T,
       verbose = F
     )
     i = i + 1
   }
-  if(verbose){cat("\rDownload Finished.")}
-
+  if(verbose){cat("\n")}
+  mt_print(verbose, "metnordic_download_daterange", text = "Download Finished.")
   return(directory)
 }

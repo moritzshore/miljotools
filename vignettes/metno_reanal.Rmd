@@ -252,17 +252,16 @@ whole date range, the following function allows you to do this.
 dl_path = metnordic_download_daterange(
   queries = queries_poly,
   directory = poly_path,
-  mn_variables = my_variables,
-)
-
+  mn_variables = my_variables)
 list.files(dl_path) %>% head()
 ```
 
 ## Downloading from Point Geometry
 
-Please note! `metnordic_download()` and `metnordic_download_daterange()`
-do not yet work for point geometries. As an alternative, you can use the
-`metnordic_point()` function
+Please note! `metnordic_download()` and `metnordic_download_daterange()` do not
+work for point geometries. You're meant to extract from downloaded .nc files
+using point locations. But, if you really don't want to do that, you can use the
+`metnordic_point()` function:
 
 ```{r, eval = RUN_VIGNETTE}
 point_path <- "indiv_point/"
@@ -273,12 +272,12 @@ point_dl_path <- metnordic_point(
   fromdate = start,
   todate = end,
   mn_variables = my_variables,
-  verbose = F
-)
-
+  verbose = F)
 # Viewing the data:
 data <- read_csv("indiv_point/METNORDIC_point.csv", show_col_types = F)
-plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_point() \ndownload")
+plot(data$date, data$air_temperature_2m-273.15, type = "b", 
+     ylab = "air_temperature_2m", xlab = "Timestamp", 
+     main = "metnordic_point() \ndownload")
 ```
 
 # Merging Hourly Files
@@ -290,13 +289,12 @@ You can do this like so:
 ```{r, eval = RUN_VIGNETTE}
 outpath = "merged_poly/"
 dir.create(outpath, showWarnings = F)
-
 custom_merge <- function(variable) {
   metnordic_merge_hourly(folderpath = poly_path,
                          variable = variable,
-                         outpath = outpath)
+                         outpath = outpath,
+                         verbose = T, overwrite = T)
 }
-
 res = lapply(X = my_variables, FUN = custom_merge)
 ```
 
@@ -322,14 +320,15 @@ metnordic_extract(
   point = example_point_geometry,
   outdir = "./extracted",
   name = "vignette_example",
-  verbose = T
-)
+  verbose = T)
 ```
 
 ```{r, eval = RUN_VIGNETTE}
 # Viewing the data:
 data <- read_csv("extracted//METNORDIC_point_vignette_example.csv", show_col_types = F)
-plot(data$date, data$air_temperature_2m-273.15,type = "b", ylab = "air_temperature_2m", xlab = "Timestamp", main = "metnordic_extract() data")
+plot(data$date, data$air_temperature_2m - 273.15,
+  type = "b", ylab = "air_temperature_2m",
+  xlab = "Timestamp", main = "metnordic_extract() data")
 ```
 
 If you would like to extract at multiple points, or all points within an
@@ -347,7 +346,8 @@ extracted_path = metnordic_extract_grid(
 ```
 
 ```{r, eval = RUN_VIGNETTE}
-extracted_path %>% list.files(pattern = "extract_grid_", full.names = T) %>% first() %>% read_csv(show_col_types = F) %>% head()
+extracted_path %>% list.files(pattern = "extract_grid_", full.names = T) %>%
+  first() %>% read_csv(show_col_types = F) %>% head()
 ```
 
 # Further processing the data cube
@@ -383,7 +383,13 @@ contain 24 individual files (24hrs) it will not be created and in the
 returning list will be labelled with `FALSE`.
 
 ```{r, eval = F}
-agg_dr = metnordic_aggregate_daterange(directory =  "indiv_poly/", variable = "air_temperature_2m", method = "max", start = start, end = end, outpath = "aggregated_range/")
+agg_dr = metnordic_aggregate_daterange(
+  directory =  "indiv_poly/",
+  variable = "air_temperature_2m",
+  method = "max",
+  start = start,
+  end = end,
+  outpath = "aggregated_range/")
 ```
 
 ## Merging
@@ -443,7 +449,7 @@ use the files written by `metnordic_extract_grid()`.
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip", destfile = "cs10_txt.zip")
 unzip("cs10_txt.zip")
 
-swatplus_metnordic(directory = extracted_path, swat_setup = "cs10_txt/", verbose = T)
+swatplus_metnordic(directory = extracted_path, swat_setup = "cs10_txt/")
 ```
 
 ```{r include=FALSE, eval = RUN_VIGNETTE}
@@ -480,6 +486,8 @@ swap_metnordic(
 
 ```{r include=FALSE, eval = RUN_VIGNETTE}
 # cleaup
+rm(list=ls())
+gc()
 folders <- c(
   "./aggregated",
   "./cs10_basin",
