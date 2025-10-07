@@ -95,9 +95,9 @@ metnordic_extract_grid <- function(merged_path,
   # main
   dir.create(outdir, recursive = T)
   # check if regular grid was provided:
-   if(st_geometry_type(area) == "POLYGON"){
+   if(sf::st_geometry_type(area) == "POLYGON"){
      regular = TRUE
-   }else if((area %>% st_geometry_type() == "POINT") %>% all()){0
+   }else if((area %>% sf::st_geometry_type() == "POINT") %>% all()){0
      regular = FALSE}else{
        stop("Geometry type not understood! Must be either a single POLYGON or multiple POINT geometries. \n >> You supplied: ", st_geometry_type(area))
      }
