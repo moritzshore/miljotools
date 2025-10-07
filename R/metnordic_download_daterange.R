@@ -29,7 +29,11 @@ metnordic_download_daterange <- function(queries, directory, mn_variables, verbo
     # these are the files that then should not be re-downloaded
     dont_redownload <- queries$filenames %in% already_downloaded %>% which()
     # these are the files that should be downloaded
-    remaining_urls <- urls[-dont_redownload]
+    if(dont_redownload %>% length() > 1){
+      remaining_urls <- urls[-dont_redownload]
+    }else{
+      remaining_urls <- urls
+    }
     # this is how many have already been downloaded (only for printing)
     i = length(dont_redownload)
   }else{
