@@ -343,7 +343,7 @@ swatplus_metnordic <- function(directory,
   write_csv(x = final_meta, file = filepath)
 
   #NEXT: do SWAP prepr
-  miljotools::reanalysis3_swatinput(
+  reanalysis3_swatinput(
     path = output,
     swat_setup = swat_setup,
     write_wgn = T,
