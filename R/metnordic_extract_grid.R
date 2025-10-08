@@ -70,7 +70,7 @@ metnordic_extract_grid <- function(merged_path,
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',) %>% as_datetime() %>% format()
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',tz = "UTC")
     return(datetime)
   }
   extract_grid_cells <- function(variable){
@@ -132,7 +132,8 @@ metnordic_extract_grid <- function(merged_path,
       }
       mt_print(verbose, "metnordic_extract_grid", "Working on station", paste0("(",i, "/",station_nr,")"), rflag = T)
       varlist <- lapply(X = matrix_list, get_timeseries)
-      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      yes <- varlist %>% purrr::reduce(dplyr::full_join, by = "date")
+      yes$date <- yes$date %>% format() %>% lubridate::as_datetime() # whis is the format needed?
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
       readr::write_csv(x = yes, file = fp)
       metadf = get_meta(directory = merged_path,
@@ -170,12 +171,11 @@ metnordic_extract_grid <- function(merged_path,
       fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
       write_csv(x = yes, file = fp)
 
-      # TODO: rewrite this, its super slow.
       metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = area[i,],
                         name = paste0("plot", i),
-                        verbose = verbose
+                        verbose = F
       )
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
