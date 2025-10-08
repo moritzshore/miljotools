@@ -801,6 +801,8 @@ classify_soil <-
       }else{
         # non interactive ggplot (seems to be pretty broken now that ggtern is no longer
         # supported.. cannot use ggsave)
+        ggtern <- NULL
+        stop("ggtern is currently broken and needs fixing, see issue #35 \n https://github.com/moritzshore/miljotools/issues/35")
         outplot <- plot_data %>% ggtern(ggplot2::aes(
           y = clay,
           z = silt,
