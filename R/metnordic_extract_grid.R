@@ -22,7 +22,6 @@
 #' @importFrom sf st_geometry_type st_intersects
 #' @importFrom raster xyFromCell
 #' @importFrom dplyr full_join
-#' @importFrom purrr quietly
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -30,10 +29,6 @@ metnordic_extract_grid <- function(merged_path,
                                    mn_variables,
                                    outdir,
                                    verbose) {
-  purrr::quietly(.f =  terra::rast) -> myrastfunc
-  purrr::quietly(raster::raster) -> quietraster
-
-
   # sub functions
   get_overlapping_cells <- function(merged_path, area_overlap){
     filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
@@ -41,7 +36,7 @@ metnordic_extract_grid <- function(merged_path,
       stop("No files found! (Make sure to provide a path to a directory, not a file)\nIn: >>",merged_path, "<<")
     }
     # quietly cuz of annoying warning messages that i cant turn off
-    rasterfile <- quietraster(filepaths[1])$result
+    rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% sf::st_as_sf(coords = c("x", "y"),
                                                               crs =  terra::crs(rasterfile))
 
@@ -55,7 +50,7 @@ metnordic_extract_grid <- function(merged_path,
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
       # quietly cuz of annoying warning messages that i cant turn off
-      myrastfunc(filepaths[1])$result -> myrast
+      terra::rast(filepaths[1], mn_variables[1]) -> myrast
       ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
         ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
         ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
@@ -86,7 +81,7 @@ metnordic_extract_grid <- function(merged_path,
     }
     # load" the raster data
     mt_print(verbose, "metnordic_extract_grid", text = "extracting:", text2 = variable)
-    varrast <- myrastfunc(filepath)$result
+    varrast <- terra::rast(filepath, variable)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
