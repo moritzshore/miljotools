@@ -19,7 +19,7 @@
 #' @returns path to written files
 #' @export
 #'
-#' @importFrom sf st_geometry_type
+#' @importFrom sf st_geometry_type st_intersects
 #' @importFrom raster xyFromCell
 #' @importFrom dplyr full_join
 #' @importFrom purrr quietly

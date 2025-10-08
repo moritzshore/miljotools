@@ -13,14 +13,14 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(gifski)
-RUN_VIGNETTE = TRUE
+RUN_VIGNETTE = FALSE
 ```
 
 [Author]{.underline}: Moritz Shore
 
 [Date]{.underline}: October, 2023
 
-[Last Update]{.underline}: October 2nd, 2025
+[Last Update]{.underline}: October, 2025
 
 # Introduction
 

@@ -1,6 +1,6 @@
 #' Create SWAT+ meteo input from MetNo Reanalysis3 data (SUPERSEDED)
 #'
-#' **SUPERSEDED**. Note: intended use of this function is within `swatplus_metnordic()`
+#' **SUPERSEDED**. Note: intended use of this function is within `swatplus_metnordic()` This is now an internal function.
 #'
 #' @seealso [swatplus_metnordic()]
 #'
@@ -25,7 +25,7 @@
 #' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
 #'
 #' @return Files are generated in provided paths
-#' @export
+#' @keywords internal
 #'
 #' @author Moritz Shore, Svajunas Plunge
 #'
@@ -273,7 +273,7 @@ swatplus_metnordic <- function(directory,
                                end = NA,
                                sqlite_path = NULL,
                                verbose) {
-  coordpair <- station <- min_air <- max_air <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
+  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
@@ -343,7 +343,7 @@ swatplus_metnordic <- function(directory,
   write_csv(x = final_meta, file = filepath)
 
   #NEXT: do SWAP prepr
-  miljotools::reanalysis3_swatinput(
+  reanalysis3_swatinput(
     path = output,
     swat_setup = swat_setup,
     write_wgn = T,

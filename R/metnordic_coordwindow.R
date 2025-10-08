@@ -17,7 +17,9 @@
 #'
 #' @examples
 #' # TODO
-#' @importFrom sf 'st_crs<-'
+#' @importFrom sf 'st_crs<-' read_sf st_bbox st_buffer st_zm
+#' @importFrom dplyr rename
+#' @importFrom mapview mapview
 metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
 
   if(area_buffer < 0){

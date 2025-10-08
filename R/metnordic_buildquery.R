@@ -22,6 +22,7 @@
 #'
 #' @returns character vector of all the OPENDAP URLs to download.
 #' @export
+#' @importFrom lubridate hour day year
 #'
 #' @examples
 #' # TODO
