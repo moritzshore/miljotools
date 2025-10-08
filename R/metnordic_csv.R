@@ -46,6 +46,8 @@ metnordic_point <-
            dataset = "continuous",
            verbose = TRUE
   ){
+    warning("Warning, this function will be retired in the next update, please transition to the new system.
+             \n https://moritzshore.github.io/miljotools/articles/metno_reanal.html")
 
     ### Getting the bouding box
     mt_print(verbose, "metnordic_csv", "getting coordinates..")
