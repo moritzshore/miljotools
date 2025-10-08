@@ -48,7 +48,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   # note, UNSTABLE! dependent on file path ([,6] and [,1])
   filenames_date <- ((stringr::str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% stringr::str_split(pattern = "-", simplify = T))[,1]
 
-  # WARNING I think you should remove strftime! --> I checked the summer time, seems to work. but no october in the range i tested
+  # Converting the file names into date times.
   dateformat <-  paste0(
     substring(filenames_date, 1, 4),
     "-",
@@ -63,8 +63,8 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
 
   full_date_range <- seq(dateformat[1] %>% lubridate::as_datetime(), dateformat[length(dateformat)] %>% lubridate::as_datetime(), by = "hour") %>% strftime(tz = "UTC")
 
+  # function to extract data from every file (used in parallel)
   vect_open_return_na <- function(timestamp) {
-
     filedate <- paste0(
       substr(timestamp, 0, 4),
       substr(timestamp, 6, 7),
@@ -73,8 +73,6 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
       substr(timestamp, 12, 13),
       "Z_", variable, ".nc"
     )
-    print(filedate)
-
     filepath = list.files(folderpath, pattern = filedate, full.names = T)
     if(length(filepath) == 0){
       slice = matrix(data = NA, nrow = nx, ncol = ny)
@@ -86,6 +84,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     return(slice)
   }
 
+  ## Merge in parallel
   if(is.null(n_cores)){
     n_cores = parallel::detectCores() - 2
   }
@@ -123,18 +122,13 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     }
   }
 
-
-
-  # define dimensions
+  ### Define
+  ## X and Y dimensions
   xdim <- ncdf4::ncdim_def("x",units="m",
                     longname="eastward distance from southwest corner of domain in projection coordinates",as.double(x))
   ydim <- ncdf4::ncdim_def("y",units="m",
                     longname="northward distance from southwest corner of domain in projection coordinates",as.double(y))
-
-
-  ### Time dimensions:
-  # the upper one is from the handy guide im using, the lower one from the source
-  # ncdf4 files for senorgeCWATM. not sure which to use..
+  ## Time dimensions:
   tunits <- "hours since 1901-01-01 01:00:00"
   source_date = lubridate::as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
   first_date = full_date_range[1]
@@ -144,25 +138,26 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   hours_since_1901_01 <-basehour+post_hours
   timedim <- ncdf4::ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
 
+  # Spatial Definitions
   lon_def  <- ncdf4::ncvar_def(name = "lon",units = "degrees_east",dim = list(xdim,ydim),NULL, longname = "Longitude of cell center",prec="double")
   lat_def  <- ncdf4::ncvar_def(name = "lat",units = "degrees_north",dim = list(xdim,ydim),missval = NULL, longname = "Latitude of cell center",prec="double")
   proj_def <- ncdf4::ncvar_def(name = "lambert_conformal_conic",units = "1",dim = NULL,missval = NULL, prec="char")
   alt_def  <- ncdf4::ncvar_def(name = "altitude",units = "m",dim = list(xdim,ydim),missval = NULL, prec="integer")
 
-
   dunits <- ncdf4::ncatt_get(templatenc,variable,"units")
   current_var_def <-  ncdf4::ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,variable,prec="double")
   ncdf4::nc_close(templatenc)
 
-  # creating the new file
+  ### Creating the new file
   ncout <-  ncdf4::nc_create(full_write_fp,list(current_var_def,alt_def, lon_def,lat_def,proj_def),force_v4=TRUE)
-  # put variables
+
+  # Adding the data
   ncdf4::ncvar_put(ncout,current_var_def,datacube)
   ncdf4::ncvar_put(ncout,lon_def,lon)
   ncdf4::ncvar_put(ncout,lat_def,lat)
   ncdf4::ncvar_put(ncout, alt_def, alt)
 
-  # put additional attributes into dimension and data variables
+  # Add additional attributes into dimension and data variables
   ncdf4::ncatt_put(ncout,"x","axis","X")
   ncdf4::ncatt_put(ncout,"x","standard_name","projection_x_coordinate")
   ncdf4::ncatt_put(ncout,"x","_CoordinateAxisType","GeoX")
@@ -172,14 +167,11 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
   ncdf4::ncatt_put(ncout, variable,"coordinates", "lat lon")
 
-  # put the CRS attributes
   projname <- "lambert_conformal_conic"
   longitude_of_central_meridian = 15
   latitude_of_projection_origin <- 63
   earth_radius <- 6371000
   standard_parallel <- 63
-  # false_easting <- 5632642.22547
-  # false_northing <- 4612545.65137
   false_easting <- 0
   false_northing <- 0
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","name",projname)
@@ -202,9 +194,11 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
   ncdf4::ncatt_put(ncout,0,"Conventions","CF=1.6")
   ncdf4::ncatt_put(ncout,0,"source files",folderpath)
-  # close the file, writing data to disk
+
+  # Close the file, writing data to disk
   ncdf4::nc_close(ncout)
 
+  # Return the filepath
   return(full_write_fp)
 }
 
