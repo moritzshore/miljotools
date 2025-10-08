@@ -144,6 +144,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   proj_def <- ncdf4::ncvar_def(name = "lambert_conformal_conic",units = "1",dim = NULL,missval = NULL, prec="char")
   alt_def  <- ncdf4::ncvar_def(name = "altitude",units = "m",dim = list(xdim,ydim),missval = NULL, prec="integer")
 
+  # Variable definition
   dunits <- ncdf4::ncatt_get(templatenc,variable,"units")
   current_var_def <-  ncdf4::ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,variable,prec="double")
   ncdf4::nc_close(templatenc)
@@ -167,6 +168,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
   ncdf4::ncatt_put(ncout, variable,"coordinates", "lat lon")
 
+  # Add the CRS attributes
   projname <- "lambert_conformal_conic"
   longitude_of_central_meridian = 15
   latitude_of_projection_origin <- 63
