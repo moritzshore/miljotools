@@ -9,6 +9,7 @@
 #' @param outpath (String) folder where to write the file
 #' @param n_cores (Integer) Number of cores to use for parallel processing (Defaults to max - 2)
 #' @param overwrite (Boolean) overwrite existing file?
+#' @param verify (Boolean) an optional check to see if all files to be merged are incremental (Recommended!)
 #' @param verbose (Boolean) print status?
 #'
 #' @importFrom parallel  detectCores makeCluster stopCluster
@@ -19,7 +20,8 @@
 #' @export
 #'
 #' @seealso [metnordic_download()] [metnordic_extract()]
-metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE, verbose = F) {
+metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE, verify = FALSE, verbose = FALSE) {
+  # Grabbing files
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
@@ -58,10 +60,34 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     " ",
     substring(filenames_date, 10, 11),
     ":00:00"
-  ) %>% lubridate::as_datetime() %>% strftime(tz = "UTC")
+  )
 
+  # check to see if the conversion worked.
+  if((dateformat[1] %>% lubridate::as_datetime() %>% is("POSIXct")) == FALSE){
+    stop("Something went wrong converting the filenames to dates: \n", dateformat[1] )
+  }
 
-  full_date_range <- seq(dateformat[1] %>% lubridate::as_datetime(), dateformat[length(dateformat)] %>% lubridate::as_datetime(), by = "hour") %>% strftime(tz = "UTC")
+  # A check if all the files are continuously in order
+  # (this could be done a lot faster if i used dataframes i think)
+  if(verify){
+    is_1hr_after <- function(file1, file2){
+      mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",file1,"]"),rflag = T)
+      flag <- (((file1 %>% lubridate::as_datetime() - file2 %>% lubridate::as_datetime()) %>% as.numeric()) == -1)
+      if(flag == FALSE){
+        stop(paste0("files are not incremental! failed at: ", file1, " & ", file2))
+      }
+    }
+    vectorized_1hrafter <- function(date_nr){
+      if(date_nr == length(dateformat)){
+        mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",dateformat[date_nr],"]"),rflag = T)
+        return(TRUE)
+        }
+      is_1hr_after(dateformat[date_nr], dateformat[date_nr+1])
+    }
+    lapply(seq_along(dateformat), vectorized_1hrafter) -> result
+    if(verbose){cat("\n")}
+    mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] All files verfied to be incremental")
+  }
 
   # function to extract data from every file (used in parallel)
   vect_open_return_na <- function(timestamp) {
@@ -88,10 +114,10 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   if(is.null(n_cores)){
     n_cores = parallel::detectCores() - 2
   }
-  mt_print(verbose, "metnordic_merge_hourly", "Merging", paste0(variable, " (using ", n_cores, " threads)"))
+  mt_print(verbose, "metnordic_merge_hourly", paste0("Merging ", length(dateformat), " files: "), paste0(variable, " (using ", n_cores, " threads)"))
   cl <-parallel::makeCluster(n_cores)
   doParallel::registerDoParallel(cl)
-  result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
+  result <- foreach(hour = dateformat) %dopar% {vect_open_return_na(timestamp = hour)}
   parallel::stopCluster(cl)
 
   # if this is the case, a single point NC file has been downloaded.
@@ -130,12 +156,11 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
                     longname="northward distance from southwest corner of domain in projection coordinates",as.double(y))
   ## Time dimensions:
   tunits <- "hours since 1901-01-01 01:00:00"
-  source_date = lubridate::as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
-  first_date = full_date_range[1]
-  basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
-  #basehour <- basehour - 1
-  post_hours <- c(1:length(full_date_range))
-  hours_since_1901_01 <-basehour+post_hours
+  source_date = "1901-01-01 01:00:00"
+  first_date = dateformat[1]
+  basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric() # I confirmed this works using timeanddate.com
+  post_hours <- c(0:(length(dateformat)-1))
+  hours_since_1901_01 <-basehour+post_hours # the first hour should remain unchanged, therefore start @ 0 and length-1
   timedim <- ncdf4::ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
 
   # Spatial Definitions
