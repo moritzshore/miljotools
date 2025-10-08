@@ -273,7 +273,7 @@ swatplus_metnordic <- function(directory,
                                end = NA,
                                sqlite_path = NULL,
                                verbose) {
-  coordpair <- station <- min_air <- max_air <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
+  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
