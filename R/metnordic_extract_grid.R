@@ -64,7 +64,7 @@ metnordic_extract_grid <- function(merged_path,
   }
   get_timestamps <- function(merged_path, variable){
     filepaths <- list.files(merged_path, pattern = variable, full.names = T)
-    ncin <- nc_open(filepaths[1])
+    ncin <- ncdf4::nc_open(filepaths[1])
     ## DATE formatting
     datenumeric <-  ncdf4::ncvar_get(ncin, varid = "time")
     # Then to convert hours to seconds which are the basis for the POSIXt
@@ -83,17 +83,17 @@ metnordic_extract_grid <- function(merged_path,
     mt_print(verbose, "metnordic_extract_grid", text = "extracting:", text2 = variable)
     varrast <- terra::rast(filepath, variable)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
+    # DIAGNOSTICS
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
-      ggplot() +  geom_spatraster(data=varrast[[1]])+
+      ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
         geom_sf(data = area)+
         geom_sf(data = grid)+
         theme_bw() +  viridis::scale_fill_viridis(option="D")
     }
     datamatrix %>% return()
   }
-
 
   # main
   dir.create(outdir, recursive = T, showWarnings = F)
@@ -126,7 +126,7 @@ metnordic_extract_grid <- function(merged_path,
         variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
         time <- get_timestamps(merged_path, variable)
         values <- ret_mat <- matrix[i,] %>% as.vector()
-        ret_df <- tibble(time, values)
+        ret_df <- tibble::tibble(time, values)
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
@@ -134,12 +134,12 @@ metnordic_extract_grid <- function(merged_path,
       varlist <- lapply(X = matrix_list, get_timeseries)
       yes <- varlist %>% purrr::reduce(full_join, by = "date")
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
-      write_csv(x = yes, file = fp)
+      readr::write_csv(x = yes, file = fp)
       metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = grid[i,],
                         name = paste0("plot", i),
-                        verbose = F ## TODO: something is wrong here, the distance should always be 0? some issue with projection?
+                        verbose = F
       )
 
 
@@ -159,14 +159,14 @@ metnordic_extract_grid <- function(merged_path,
         variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
         time <- get_timestamps(merged_path, variable)
         values <- ret_mat <- matrix[i,] %>% as.vector()
-        ret_df <- tibble(time, values)
+        ret_df <- tibble::tibble(time, values)
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
       mt_print(verbose, function_name = "metnordic_extract_grid", text = "Working on station", text2 =  paste(i, "/",station_nr), rflag = T)
       if(verbose){cat("\n")}
       varlist <- lapply(X = matrix_list, get_timeseries)
-      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      yes <- varlist %>% purrr::reduce(dplyr::full_join, by = "date")
       fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
       write_csv(x = yes, file = fp)
 
