@@ -1,6 +1,6 @@
 #' Create SWAT+ meteo input from MetNo Reanalysis3 data (SUPERSEDED)
 #'
-#' **SUPERSEDED**. Note: intended use of this function is within `swatplus_metnordic()`
+#' **SUPERSEDED**. Note: intended use of this function is within `swatplus_metnordic()` This is now an internal function.
 #'
 #' @seealso [swatplus_metnordic()]
 #'
@@ -25,7 +25,7 @@
 #' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
 #'
 #' @return Files are generated in provided paths
-#' @export
+#' @keywords internal
 #'
 #' @author Moritz Shore, Svajunas Plunge
 #'

@@ -37,7 +37,7 @@ update your database). Warning: start and end parameters will be ignored in this
 Files are generated in provided paths
 }
 \description{
-\strong{SUPERSEDED}. Note: intended use of this function is within \code{swatplus_metnordic()}
+\strong{SUPERSEDED}. Note: intended use of this function is within \code{swatplus_metnordic()} This is now an internal function.
 }
 \seealso{
 \code{\link[=swatplus_metnordic]{swatplus_metnordic()}}
@@ -55,3 +55,4 @@ https://github.com/biopsichas/SWATprepR
 \author{
 Moritz Shore, Svajunas Plunge
 }
+\keyword{internal}
