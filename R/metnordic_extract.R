@@ -37,11 +37,11 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   if((point$geometry %>% length()) > 1){stop("you can only pass a single point at a time!")}
   if((sf::st_geometry(point) %>% attr("class") %>% dplyr::nth(1)) != "sfc_POINT"){stop("point is not of correct geometry! needs to be of class 'sfc_POINT'")}
 
-
   # lambert conform conical (the projection used by met reanalysis)
   projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
   proj_crs <- sf::st_crs(projection) # replace with sf::crs()
 
+  # get metadata
   metadf = get_meta(directory = directory,
     mn_variables = mn_variables,
     point = point,
@@ -78,10 +78,16 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
                        coords = c("x", "y"), crs = proj_crs)
 
     datenumeric <-  ncdf4::ncvar_get(ncin, varid = "time")
+    # Files are in UTC:
+    # where timestamp = {year}{month}{day}T{hour}Z (UTC or Zulu Time Zone), e.g.
+    # 20200601T12Z; Year is a 4-digit number (e.g. 2022); month is a 2-digit
+    # number (e.g. 02 for February); and day is a 2-digit number. Files ending
+    # in _latest.nc always point to the most recently produced files.
+
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 00:00:00',) %>% lubridate::as_datetime() #%>% strftime() this causes issues with summer time, do not use!
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00', tz = "UTC")
     brick <- ncdf4::ncvar_get(ncin, varid = variable)
     timeseries <- brick[index_x, index_y, ]
     res <- tibble::tibble(date = datetime, variable = timeseries)
@@ -110,7 +116,7 @@ metnordic_extract <-  function(directory, mn_variables, point, outdir, name, ver
   # left joining in case of NAs
   for (i in c(1:length(reslist))) {
     dis <- reslist[[i]]
-    full_df<-left_join(full_df, reslist[[i]], by = "date", relationship = "one-to-one")
+    full_df<-dplyr::left_join(full_df, reslist[[i]], by = "date", relationship = "one-to-one")
   }
   writefp <- paste0(outdir, "/METNORDIC_point_", name, ".csv")
   metafp <- paste0(outdir, "/METNORDIC_meta_", name, ".csv")

@@ -9,6 +9,7 @@
 #' @param outpath (String) folder where to write the file
 #' @param n_cores (Integer) Number of cores to use for parallel processing (Defaults to max - 2)
 #' @param overwrite (Boolean) overwrite existing file?
+#' @param verify (Boolean) an optional check to see if all files to be merged are incremental (Recommended!)
 #' @param verbose (Boolean) print status?
 #'
 #' @importFrom parallel  detectCores makeCluster stopCluster
@@ -19,7 +20,8 @@
 #' @export
 #'
 #' @seealso [metnordic_download()] [metnordic_extract()]
-metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE, verbose = F) {
+metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE, verify = FALSE, verbose = FALSE) {
+  # Grabbing files
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
@@ -48,7 +50,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   # note, UNSTABLE! dependent on file path ([,6] and [,1])
   filenames_date <- ((stringr::str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% stringr::str_split(pattern = "-", simplify = T))[,1]
 
-  # WARNING I think you should remove strftime! --> I checked the summer time, seems to work. but no october in the range i tested
+  # Converting the file names into date times.
   dateformat <-  paste0(
     substring(filenames_date, 1, 4),
     "-",
@@ -58,13 +60,37 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     " ",
     substring(filenames_date, 10, 11),
     ":00:00"
-  ) %>% lubridate::as_datetime() %>% strftime(tz = "UTC")
+  )
 
+  # check to see if the conversion worked.
+  if((dateformat[1] %>% lubridate::as_datetime() %>% is("POSIXct")) == FALSE){
+    stop("Something went wrong converting the filenames to dates: \n", dateformat[1] )
+  }
 
-  full_date_range <- seq(dateformat[1] %>% lubridate::as_datetime(), dateformat[length(dateformat)] %>% lubridate::as_datetime(), by = "hour") %>% strftime(tz = "UTC")
+  # A check if all the files are continuously in order
+  # (this could be done a lot faster if i used dataframes i think)
+  if(verify){
+    is_1hr_after <- function(file1, file2){
+      mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",file1,"]"),rflag = T)
+      flag <- (((file1 %>% lubridate::as_datetime() - file2 %>% lubridate::as_datetime()) %>% as.numeric()) == -1)
+      if(flag == FALSE){
+        stop(paste0("files are not incremental! failed at: ", file1, " & ", file2))
+      }
+    }
+    vectorized_1hrafter <- function(date_nr){
+      if(date_nr == length(dateformat)){
+        mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",dateformat[date_nr],"]"),rflag = T)
+        return(TRUE)
+        }
+      is_1hr_after(dateformat[date_nr], dateformat[date_nr+1])
+    }
+    lapply(seq_along(dateformat), vectorized_1hrafter) -> result
+    if(verbose){cat("\n")}
+    mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] All files verfied to be incremental")
+  }
 
+  # function to extract data from every file (used in parallel)
   vect_open_return_na <- function(timestamp) {
-
     filedate <- paste0(
       substr(timestamp, 0, 4),
       substr(timestamp, 6, 7),
@@ -73,8 +99,6 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
       substr(timestamp, 12, 13),
       "Z_", variable, ".nc"
     )
-    print(filedate)
-
     filepath = list.files(folderpath, pattern = filedate, full.names = T)
     if(length(filepath) == 0){
       slice = matrix(data = NA, nrow = nx, ncol = ny)
@@ -86,13 +110,14 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     return(slice)
   }
 
+  ## Merge in parallel
   if(is.null(n_cores)){
     n_cores = parallel::detectCores() - 2
   }
-  mt_print(verbose, "metnordic_merge_hourly", "Merging", paste0(variable, " (using ", n_cores, " threads)"))
+  mt_print(verbose, "metnordic_merge_hourly", paste0("Merging ", length(dateformat), " files: "), paste0(variable, " (using ", n_cores, " threads)"))
   cl <-parallel::makeCluster(n_cores)
   doParallel::registerDoParallel(cl)
-  result <- foreach(hour = full_date_range) %dopar% {vect_open_return_na(timestamp = hour)}
+  result <- foreach(hour = dateformat) %dopar% {vect_open_return_na(timestamp = hour)}
   parallel::stopCluster(cl)
 
   # if this is the case, a single point NC file has been downloaded.
@@ -123,46 +148,42 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
     }
   }
 
-
-
-  # define dimensions
+  ### Define
+  ## X and Y dimensions
   xdim <- ncdf4::ncdim_def("x",units="m",
                     longname="eastward distance from southwest corner of domain in projection coordinates",as.double(x))
   ydim <- ncdf4::ncdim_def("y",units="m",
                     longname="northward distance from southwest corner of domain in projection coordinates",as.double(y))
-
-
-  ### Time dimensions:
-  # the upper one is from the handy guide im using, the lower one from the source
-  # ncdf4 files for senorgeCWATM. not sure which to use..
+  ## Time dimensions:
   tunits <- "hours since 1901-01-01 01:00:00"
-  source_date = lubridate::as_datetime("1901-01-01 01:00:00") %>% strftime(tz = "UTC")
-  first_date = full_date_range[1]
-  basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric()
-  #basehour <- basehour - 1
-  post_hours <- c(1:length(full_date_range))
-  hours_since_1901_01 <-basehour+post_hours
+  source_date = "1901-01-01 01:00:00"
+  first_date = dateformat[1]
+  basehour <- difftime(first_date, source_date, units =  "hour") %>% as.numeric() # I confirmed this works using timeanddate.com
+  post_hours <- c(0:(length(dateformat)-1))
+  hours_since_1901_01 <-basehour+post_hours # the first hour should remain unchanged, therefore start @ 0 and length-1
   timedim <- ncdf4::ncdim_def(name = "time" ,units = tunits,vals = hours_since_1901_01, unlim = F, calendar = "proleptic_gregorian")
 
+  # Spatial Definitions
   lon_def  <- ncdf4::ncvar_def(name = "lon",units = "degrees_east",dim = list(xdim,ydim),NULL, longname = "Longitude of cell center",prec="double")
   lat_def  <- ncdf4::ncvar_def(name = "lat",units = "degrees_north",dim = list(xdim,ydim),missval = NULL, longname = "Latitude of cell center",prec="double")
   proj_def <- ncdf4::ncvar_def(name = "lambert_conformal_conic",units = "1",dim = NULL,missval = NULL, prec="char")
   alt_def  <- ncdf4::ncvar_def(name = "altitude",units = "m",dim = list(xdim,ydim),missval = NULL, prec="integer")
 
-
+  # Variable definition
   dunits <- ncdf4::ncatt_get(templatenc,variable,"units")
   current_var_def <-  ncdf4::ncvar_def(variable,dunits$value,list(xdim,ydim,timedim),fillvalue,variable,prec="double")
   ncdf4::nc_close(templatenc)
 
-  # creating the new file
+  ### Creating the new file
   ncout <-  ncdf4::nc_create(full_write_fp,list(current_var_def,alt_def, lon_def,lat_def,proj_def),force_v4=TRUE)
-  # put variables
+
+  # Adding the data
   ncdf4::ncvar_put(ncout,current_var_def,datacube)
   ncdf4::ncvar_put(ncout,lon_def,lon)
   ncdf4::ncvar_put(ncout,lat_def,lat)
   ncdf4::ncvar_put(ncout, alt_def, alt)
 
-  # put additional attributes into dimension and data variables
+  # Add additional attributes into dimension and data variables
   ncdf4::ncatt_put(ncout,"x","axis","X")
   ncdf4::ncatt_put(ncout,"x","standard_name","projection_x_coordinate")
   ncdf4::ncatt_put(ncout,"x","_CoordinateAxisType","GeoX")
@@ -172,14 +193,12 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout, variable,"grid_mapping", "lambert_conformal_conic")
   ncdf4::ncatt_put(ncout, variable,"coordinates", "lat lon")
 
-  # put the CRS attributes
+  # Add the CRS attributes
   projname <- "lambert_conformal_conic"
   longitude_of_central_meridian = 15
   latitude_of_projection_origin <- 63
   earth_radius <- 6371000
   standard_parallel <- 63
-  # false_easting <- 5632642.22547
-  # false_northing <- 4612545.65137
   false_easting <- 0
   false_northing <- 0
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","name",projname)
@@ -187,6 +206,7 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","grid_mapping_name",projname)
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","longitude_of_central_meridian", as.double(longitude_of_central_meridian))
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","latitude_of_projection_origin", as.double(latitude_of_projection_origin))
+  ncdf4::ncatt_put(ncout,"lambert_conformal_conic","earth_radius", as.double(earth_radius))
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","standard_parallel", c(standard_parallel, standard_parallel))
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_easting",false_easting)
   ncdf4::ncatt_put(ncout,"lambert_conformal_conic","false_northing",false_northing)
@@ -202,9 +222,11 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   ncdf4::ncatt_put(ncout,0,"Package URL", "https://github.com/moritzshore/miljotools")
   ncdf4::ncatt_put(ncout,0,"Conventions","CF=1.6")
   ncdf4::ncatt_put(ncout,0,"source files",folderpath)
-  # close the file, writing data to disk
+
+  # Close the file, writing data to disk
   ncdf4::nc_close(ncout)
 
+  # Return the filepath
   return(full_write_fp)
 }
 

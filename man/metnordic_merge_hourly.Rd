@@ -10,7 +10,8 @@ metnordic_merge_hourly(
   outpath,
   n_cores = NULL,
   overwrite = FALSE,
-  verbose = F
+  verify = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ metnordic_merge_hourly(
 \item{n_cores}{(Integer) Number of cores to use for parallel processing (Defaults to max - 2)}
 
 \item{overwrite}{(Boolean) overwrite existing file?}
+
+\item{verify}{(Boolean) an optional check to see if all files to be merged are incremental (Recommended!)}
 
 \item{verbose}{(Boolean) print status?}
 }

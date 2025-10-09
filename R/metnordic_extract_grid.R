@@ -22,7 +22,6 @@
 #' @importFrom sf st_geometry_type st_intersects
 #' @importFrom raster xyFromCell
 #' @importFrom dplyr full_join
-#' @importFrom purrr quietly
 #'
 metnordic_extract_grid <- function(merged_path,
                                    area,
@@ -30,10 +29,6 @@ metnordic_extract_grid <- function(merged_path,
                                    mn_variables,
                                    outdir,
                                    verbose) {
-  purrr::quietly(.f =  terra::rast) -> myrastfunc
-  purrr::quietly(raster::raster) -> quietraster
-
-
   # sub functions
   get_overlapping_cells <- function(merged_path, area_overlap){
     filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
@@ -41,7 +36,7 @@ metnordic_extract_grid <- function(merged_path,
       stop("No files found! (Make sure to provide a path to a directory, not a file)\nIn: >>",merged_path, "<<")
     }
     # quietly cuz of annoying warning messages that i cant turn off
-    rasterfile <- quietraster(filepaths[1])$result
+    rasterfile <- raster::raster(filepaths[1])
     testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% sf::st_as_sf(coords = c("x", "y"),
                                                               crs =  terra::crs(rasterfile))
 
@@ -55,7 +50,7 @@ metnordic_extract_grid <- function(merged_path,
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
       # quietly cuz of annoying warning messages that i cant turn off
-      myrastfunc(filepaths[1])$result -> myrast
+      terra::rast(filepaths[1], mn_variables[1]) -> myrast
       ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
         ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
         ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
@@ -69,13 +64,13 @@ metnordic_extract_grid <- function(merged_path,
   }
   get_timestamps <- function(merged_path, variable){
     filepaths <- list.files(merged_path, pattern = variable, full.names = T)
-    ncin <- nc_open(filepaths[1])
+    ncin <- ncdf4::nc_open(filepaths[1])
     ## DATE formatting
     datenumeric <-  ncdf4::ncvar_get(ncin, varid = "time")
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',) %>% as_datetime() %>% format()
+    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',tz = "UTC")
     return(datetime)
   }
   extract_grid_cells <- function(variable){
@@ -86,19 +81,19 @@ metnordic_extract_grid <- function(merged_path,
     }
     # load" the raster data
     mt_print(verbose, "metnordic_extract_grid", text = "extracting:", text2 = variable)
-    varrast <- myrastfunc(filepath)$result
+    varrast <- terra::rast(filepath, variable)
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
+    # DIAGNOSTICS
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
-      ggplot() +  geom_spatraster(data=varrast[[1]])+
+      ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
         geom_sf(data = area)+
         geom_sf(data = grid)+
         theme_bw() +  viridis::scale_fill_viridis(option="D")
     }
     datamatrix %>% return()
   }
-
 
   # main
   dir.create(outdir, recursive = T, showWarnings = F)
@@ -131,20 +126,21 @@ metnordic_extract_grid <- function(merged_path,
         variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
         time <- get_timestamps(merged_path, variable)
         values <- ret_mat <- matrix[i,] %>% as.vector()
-        ret_df <- tibble(time, values)
+        ret_df <- tibble::tibble(time, values)
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
       mt_print(verbose, "metnordic_extract_grid", "Working on station", paste0("(",i, "/",station_nr,")"), rflag = T)
       varlist <- lapply(X = matrix_list, get_timeseries)
-      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      yes <- varlist %>% purrr::reduce(dplyr::full_join, by = "date")
+      yes$date <- yes$date %>% format() %>% lubridate::as_datetime() # whis is the format needed?
       fp <- paste0(outdir, "/metnordic_extract_grid_", i, ".csv")
-      write_csv(x = yes, file = fp)
+      readr::write_csv(x = yes, file = fp)
       metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = grid[i,],
                         name = paste0("plot", i),
-                        verbose = F ## TODO: something is wrong here, the distance should always be 0? some issue with projection?
+                        verbose = F
       )
 
 
@@ -164,23 +160,22 @@ metnordic_extract_grid <- function(merged_path,
         variable = paste(splitted[1:(length(splitted)-1)], collapse = "_")
         time <- get_timestamps(merged_path, variable)
         values <- ret_mat <- matrix[i,] %>% as.vector()
-        ret_df <- tibble(time, values)
+        ret_df <- tibble::tibble(time, values)
         colnames(ret_df) <- c("date", variable)
         return(ret_df)
       }
       mt_print(verbose, function_name = "metnordic_extract_grid", text = "Working on station", text2 =  paste(i, "/",station_nr), rflag = T)
       if(verbose){cat("\n")}
       varlist <- lapply(X = matrix_list, get_timeseries)
-      yes <- varlist %>% purrr::reduce(full_join, by = "date")
+      yes <- varlist %>% purrr::reduce(dplyr::full_join, by = "date")
       fp <- paste0(outdir, "/METNORDIC_point_plot", i, ".csv")
       write_csv(x = yes, file = fp)
 
-      # TODO: rewrite this, its super slow.
       metadf = get_meta(directory = merged_path,
                         mn_variables = mn_variables,
                         point = area[i,],
                         name = paste0("plot", i),
-                        verbose = verbose
+                        verbose = F
       )
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
