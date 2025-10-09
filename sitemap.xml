@@ -9,18 +9,23 @@
 <url><loc>https://moritzshore.github.io/miljotools/LICENSE.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/classify_soil.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/cwatm_convert_nc.html</loc></url>
-<url><loc>https://moritzshore.github.io/miljotools/reference/get_metno_reanalysis3.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/index.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_aggregate.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_aggregate_daterange.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_buildquery.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_coordwindow.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_download.html</loc></url>
-<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_merge.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_download_daterange.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_extract.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_extract_grid.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_merge_daily.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_merge_hourly.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_point.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_reproject.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/mt_print.html</loc></url>
-<url><loc>https://moritzshore.github.io/miljotools/reference/reanalysis3_daily.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/reanalysis3_swatinput.html</loc></url>
-<url><loc>https://moritzshore.github.io/miljotools/reference/swat_weather_input_chain.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/swap_metnordic.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/swatplus_metnordic.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/thermopluviogram.html</loc></url>
 </urlset>
 
