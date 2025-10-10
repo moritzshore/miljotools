@@ -21,6 +21,9 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
     f_theme  <- bgYellow$black$bold
   }else if(function_name == "thermopluviogram"){
     f_theme = bgWhite$cyan$bold
+    # TODO: add GREPing senorge / metnordic for themeing
+  }else if(function_name == "senorge_download"){
+    f_theme = bgYellow$white$bold
   } else{
     f_theme <- bgCyan$white$bold
 
@@ -49,7 +52,6 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
     )
   }
 }
-
 
 install_missing_packs <- function(required_packages) {
   missing_packs <- which((required_packages %in% utils::installed.packages()) == FALSE)
