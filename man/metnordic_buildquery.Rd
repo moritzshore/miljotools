@@ -17,7 +17,7 @@ metnordic_buildquery(
 \arguments{
 \item{bounding_coords}{as passed by \code{metnordic_coordwindow()}}
 
-\item{mn_variables}{MET Nordic variables (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{documentation})}
+\item{mn_variables}{variable names of MET Nordic  (see \href{https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters}{MET Nordic documentation}) or SeNorge2018 ("tn", "tx", "rr", "tg").}
 
 \item{fromdate}{ie. "2019-01-01 00:00:00"}
 
@@ -26,27 +26,24 @@ metnordic_buildquery(
 \item{grid_resolution}{an integer, ie. 3 for 3x3 km grid.}
 
 \item{dataset}{either 'reanalysis' for the re-run archive, 'operational' for
-the operational archive, or 'continuous' to source from both, depending on
-time range.}
+the operational archive 'continuous' to source from both, depending on
+time range. Setting this parameter to 'senorge' will build queries for the \href{https://thredds.met.no/thredds/catalog/senorge/seNorge_2018/Archive/catalog.html}{SeNorge2018} dataset.}
 
 \item{verbose}{print to console?}
 }
 \value{
-character vector of all the OPENDAP URLs to download.
+Returns a list with  all the OPENDAP URLs to download as well as their filenames.
 }
 \description{
-This function builds the URL queries for downloading MET Nordic data through
+This function builds the URL queries for downloading MET Nordic / SeNorge data through
 the OPENDAP protocol. The requirements for this function to work are the
 bounding coordinates as divined by function \code{metnordic_coordwindow()}, the
 variables of interest, the starting and ending dates and the desired grid
 resolution. The results of this function can be downloaded when passed to
-\code{metnordic_download()}.
-}
-\examples{
-# TODO
+\code{metnordic_download()} or \code{senorge_download()}.
 }
 \seealso{
-\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}}
+\code{\link[=metnordic_coordwindow]{metnordic_coordwindow()}} \code{\link[=metnordic_download]{metnordic_download()}} \code{\link[=metnordic_download_daterange]{metnordic_download_daterange()}} \code{\link[=senorge_download]{senorge_download()}}
 }
 \author{
 Moritz Shore
