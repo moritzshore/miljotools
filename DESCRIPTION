@@ -29,6 +29,7 @@ Imports:
     stringr,
     terra,
     tibble,
+    tidyr,
     vroom
 Suggests:
     devtools,

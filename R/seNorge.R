@@ -1,3 +1,112 @@
+#' Build SeNorge2018 Nordic Download Query
+#'
+#' This function builds the URL queries for downloading SeNorge data through
+#' the OPENDAP protocol. The requirements for this function to work are the
+#' bounding coordinates as divined by function `metnordic_coordwindow()`, the
+#' variables of interest, the starting and ending dates and the desired grid
+#' resolution. The results of this function can be downloaded when passed to
+#' `senorge_download()`.
+#'
+#' @seealso [metnordic_coordwindow()] [senorge_download()]
+#'
+#' @param bounding_coords list as returned by `metnordic_coordwindow()`
+#' @param variables character vector of variables to download may include the following: "tn", "tx", "rr", "tg"
+#' @param fromdate date from when to start downloading data from (eg. "1957-01-01")
+#' @param todate date from when to end downloading data from (eg. "2024-12-31")
+#' @param grid_resolution integer value fo grid resolution (eg 1 for a 1x1km grid)
+#' @param verbose logical, print?
+#'
+#' @importFrom lubridate ymd year yday leap_year
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate
+#' @importFrom tidyr unite
+#'
+#' @returns Returns a named list with the urls and filenames which is to be passed to `senorge_download()`.
+#' @export
+#'
+#' @examples
+#' # TODO
+senorge_buildquery <- function(bounding_coords, variables, fromdate, todate,
+                                 grid_resolution = 1, verbose = FALSE){
+  # Source:
+  # https://thredds.met.no/thredds/catalog/senorge/seNorge_2018/Archive/catalog.html
+
+  ## Check variable format:
+  senorge_variables <- c("tn", "tx", "rr", "tg")
+  if ((variables %in% senorge_variables) %>% all() == FALSE) {
+    stop(
+      "Provided variables not all in SeNorge2018. You can only request the following:\n >> ",
+      paste(collapse = ", ", senorge_variables)
+    )
+  }
+
+  ## Check start and end dates
+  if(fromdate < ("1957-01-01" %>% as.Date())){stop("SeNorge only goes back to 1957. You requested data from: ", fromdate)}
+  # Don't know how to check start date yet.
+
+
+  ## Creating the suffix for the time dimension
+  ## For SeNorge
+  # https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018/Archive/seNorge2018_1980.nc.html
+  # hour of year
+  # the unit say its hour since 1970 etc. But in reality I think the unit is days
+  # hoy <- function(datetime){(datetime %>% lubridate::day()-1)*24 + datetime %>% lubridate::hour()}
+  # time1 = hoy(fromdate)
+  # time2 = hoy(todate)
+  fromdate_c <- fromdate %>% as.Date()
+  todate_c <- todate %>% as.Date()
+  daterange <- seq(from = fromdate %>% lubridate::ymd(),
+                   to = todate %>% lubridate::ymd(), by = "day")
+  years <- daterange %>% lubridate::year() %>% unique()
+  queryDF <- tibble(years)
+  queryDF$time_q = lapply(years, year_to_query) %>% unlist()
+
+
+  ## Building the geographic queries
+  geo_queries <- build_coord_suffix(
+    bounding_coords = bounding_coords,
+    grid_resolution = grid_resolution,
+    project = "senorge"
+  )
+  queryDF$x_q <- geo_queries$x_query
+  queryDF$y_q <- geo_queries$y_query
+  queryDF$X <- paste0("X", queryDF$x_q)
+  queryDF$Y <- paste0("Y", queryDF$y_q)
+  queryDF$latitude <- paste0("latitude", queryDF$y_q,queryDF$x_q)
+  queryDF$longitude <- paste0("longitude", queryDF$y_q,queryDF$x_q)
+  queryDF$time <- paste0("time",queryDF$time_q)
+
+  # Generating variable queries
+  var_q_gen <- function(variable){
+    queryDF %>% mutate(variable = paste0(variable, time_q, y_q, x_q)) %>% pull(variable) %>% return()
+  }
+  lapply(variables, var_q_gen) %>% do.call("cbind", args = .) %>% as.data.frame() %>% as_tibble()-> var_qs
+  colnames(var_qs) <- variables
+  queryDF <- cbind(queryDF, var_qs) %>% as_tibble()
+
+  # Add projection to query
+  queryDF$proj <- "UTM_Zone_33"
+
+  # add URL to query
+  queryDF$url <- paste0("https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018/Archive/seNorge2018_", queryDF$years, ".nc?")
+
+
+  ### BUILD REAL QUERIES
+  # f.ex:
+  # https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018/Archive/seNorge2018_
+  # 1980.nc?X[0:1:1194],Y[0:1:1549],time[0:1:365],tg[0:1:0][0:1:0][0:1:0],
+  # UTM_Zone_33,longitude[0:1:0][0:1:0],latitude[0:1:0][0:1:0],
+  # rr[0:1:0][0:1:0][0:1:0],tx[0:1:0][0:1:0][0:1:0],tn[0:1:0][0:1:0][0:1:0]
+
+  query_suffix <- queryDF %>% tidyr::unite(real_q, X, Y, time, proj, longitude, latitude, all_of(variables), sep = ",") %>% pull(real_q)
+  queryDF$q_suff <- query_suffix
+  full_queries <- paste0(queryDF$url, queryDF$q_suff)
+  full_filenames <- paste0("seNorge2018_", years, ".nc")
+
+  mt_print(verbose, "senorge_buildquery", "Returning queries..", paste0("(", length(full_filenames), ")"))
+  return(list(full_urls = full_queries, filenames = full_filenames))
+}
+
 #' Download SeNorge2018 data
 #'
 #' This function downloads the files as queried by `metnordic_buildquery()`. If
@@ -187,4 +296,31 @@ write_senorge <- function(megadf, outdir, verbose){
     filename <- paste0(outdir, "/", "senorge_vstation_", cell, ".csv")
     readr::write_csv(x = vstatslice, file = filename)
   }
+}
+
+## buils time query for SeNorge
+year_to_query <- function(c_year){
+  # we are operating on a daily fashion
+  timestep = 1
+  # if the current year is also the year of the start date, then grab
+  # the DOY of the start date and set it to t1
+  if(c_year == year(fromdate)){
+    t1 <- yday(fromdate)-1
+  }else{
+    # if that is not the case, then we are starting at the first day of the
+    # year I.e. 0
+    t1 <- 0
+  }
+  # if the current year also matches that of the end date year, then set t2
+  # to the DOY of the end date
+  if(c_year == year(todate)){
+    t2 <- yday(todate)-1
+  }else if(c_year %>% leap_year()){
+    # otherwise, set it to 365 (if its a leap year)
+    t2 <-  365
+  }else{
+    # or 364 if it is not a leap year
+    t2 <- 364
+  }
+  time_q <- paste0("[",t1, ":", timestep,":", t2, "]")
 }
