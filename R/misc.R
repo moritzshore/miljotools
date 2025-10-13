@@ -101,3 +101,47 @@ get_overlapping_cells <- function(directory, variables, area, buffer, verbose){
   }
   return(grid)
 }
+
+
+# builds the geo queries for threddz. for use in *_buildquery()
+build_coord_suffix <- function(bounding_coords, grid_resolution, project){
+  # unpacking the list pack
+  index_xmin = bounding_coords$index_xmin
+  index_xmax = bounding_coords$index_xmax
+  index_ymin = bounding_coords$index_ymin
+  index_ymax = bounding_coords$index_ymax
+
+  # this happens with the SeNorge data, no idea why.
+  # TODO find out why!
+  if(index_ymax < index_ymin){
+    temp <- index_ymax
+    index_ymax <- index_ymin
+    index_ymin <- temp
+  }
+
+  # checking if the grid resolution is small enough to at least download 1
+  # station.
+  bbox_width = index_xmax - index_xmin
+  bbox_height = index_ymax - index_ymin
+  mt_print(verbose, paste0(project, "_buildquery"), "You have a grid of:", paste0(bbox_width, " x ", bbox_height, " (", bbox_width*bbox_height, " cells)"))
+  if(bbox_width < (2*grid_resolution)-1){stop("Area is not big enough (too narrow) for the given grid resolution. Please use a finer resolution")}
+  if(bbox_height < (2*grid_resolution)-1){stop("Area is not big enough (too short) for the given grid resolution. Please use a finer resolution")}
+
+  # from min x/y to max x/y by step of 1
+  x1 = index_xmin
+  x2 = index_xmax
+  xstep = grid_resolution
+
+  y1 = index_ymin
+  y2 = index_ymax
+  ystep = grid_resolution
+  mt_print(verbose, paste0(project, "_buildquery"),"generating urls with a grid resolution of:", paste0(xstep, " x ", ystep, " km"))
+
+
+  ## paste together the vars
+  # Subtract 1 from the x and y because OPDENDAP starts at 0 but R starts at 1
+  x_q <- paste0("[", x1-1, ":", xstep,":", x2-1, "]")
+  y_q <- paste0("[", y1-1, ":", ystep,":", y2-1, "]")
+
+  list(x_query = x_q, y_query = y_q) %>% return()
+}
