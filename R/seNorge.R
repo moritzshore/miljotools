@@ -144,21 +144,20 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
     ncin <- nc_open(queries$full_urls[i])
     all_vars <- ncin$var %>% names()
     nc_create(filename = nc_filepath, vars = ncin$var, force_v4 = F) -> newnc
-    diagnostics = T
     for (variable in all_vars) {
       mt_print(verbose, "senorge_download", text = "Downloading..", variable, rflag = T)
       if(verbose){cat("                                                                               \r")}
-      mt_print(diagnostics, "senorge_download", text = "Getting data for:", variable, rflag = T)
+      mt_print(verbose, "senorge_download", text = "Getting data for:", variable, rflag = T)
       # getting and applying values for current variable
       values <- ncvar_get(nc = ncin, varid = variable)
       ncvar_put(nc = newnc, varid = variable, vals = values)
 
       # adding each attribute
-      mt_print(diagnostics, "senorge_download", text = "Applying attributes for", variable, rflag = T)
+      mt_print(verbose, "senorge_download", text = "Applying attributes for", variable, rflag = T)
       attrs <- ncatt_get(nc = ncin, varid = variable)
       all_attrs <- attrs %>% names()
       for (attribute in all_attrs) {
-        mt_print(diagnostics, "senorge_download", text = "Adding attribute:", paste0(variable, "[", attribute,"]"), rflag = T)
+        mt_print(verbose, "senorge_download", text = "Adding attribute:", paste0(variable, "[", attribute,"]"), rflag = T)
         attr_val <- attrs[[attribute]]
         ncatt_put(nc = newnc, varid = variable, attname = attribute, attval = attr_val)
         if(verbose){cat("\r")}
@@ -167,7 +166,7 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
       glob_attr_names <- all_glob_attr %>% names()
       for (glob_attr in glob_attr_names) {
         current_glob_attr <- all_glob_attr[[glob_attr]]
-        mt_print(diagnostics, "senorge_download", text = "Applying global attribures:", text2 = glob_attr, rflag = T)
+        mt_print(verbose, "senorge_download", text = "Applying global attribures:", text2 = glob_attr, rflag = T)
         ncatt_put(nc = newnc, varid = 0, attname = glob_attr, attval = current_glob_attr)
 
       }
@@ -221,6 +220,8 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
 #' @param buffer WIP
 #' @param verbose WIP
 #'
+#' @importFrom tidyr pivot_wider
+#'
 #' @returns WIP
 #' @export
 #'
@@ -266,7 +267,7 @@ senorge_nc_to_df <- function(grid, directory, filenames, verbose) {
         mt_print(verbose, "senorge_extract_grid", paste0("Extracting ", variable, " [", year, "]"), paste0("[", cell, "/", station_nr, "]" ), rflag = T)
         if(verbose){cat("                                                                 \r")}
         datamatrix[cell] %>% as.data.frame() %>% t() %>% as.data.frame(row.names = F) -> mydf
-        return_df <- tibble::tibble(date = timelist, value = mydf$V1, grid_cell = cell, variable = variable)
+        return_df <- tibble::tibble(date = timelist, value = mydf$V1 %>% round(2), grid_cell = cell, variable = variable)
         return(return_df)
       }
       lapply(c(1:station_nr),FUN =cell_to_df) %>% do.call(what = "rbind") -> variable_full
@@ -286,7 +287,6 @@ senorge_nc_to_df <- function(grid, directory, filenames, verbose) {
 write_senorge <- function(megadf, outdir, verbose){
   cells <- megadf %>% pull(grid_cell) %>% unique() %>% sort()
   dir.create(outdir, showWarnings = F)
-  warning("problem with leap years here, probably needs to be fixed in query buildr")
   for (cell in cells) {
     mt_print(verbose, "senorge_extract_grid", "Writing cells to file..", paste0("[", cell, "/",  length(cells), "]"), rflag = T)
     if(verbose){cat("                                                                 \r")}
