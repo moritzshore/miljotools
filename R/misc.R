@@ -17,15 +17,18 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
   miljotheme <- bold$bgGreen
   tools_theme <- bold$italic$bgBlue
 
-  if (function_name == "cwatm_hourly_to_daily_ncdf4") {
+  if (grepl("cwatm", x = function_name)) {
     f_theme  <- bgYellow$black$bold
-  }else if(function_name == "thermopluviogram"){
+  }else if(grepl("thermopluviogram", x = function_name)){
     f_theme = bgWhite$cyan$bold
     # TODO: add GREPing senorge / metnordic for themeing
-  }else if(function_name == "senorge_download"){
+  }else if(grepl("senorge", x = function_name)){
     f_theme = bgYellow$white$bold
-  } else{
+  }else if(grepl("metnordic", x = function_name)){
     f_theme <- bgCyan$white$bold
+
+  }else{
+    f_theme <- bgBlack$white$bold
 
   }
   text_theme <- italic$yellow
