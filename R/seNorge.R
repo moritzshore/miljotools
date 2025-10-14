@@ -221,6 +221,7 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
 #' @param verbose WIP
 #'
 #' @importFrom tidyr pivot_wider
+#' @importFrom sf write_sf
 #'
 #' @returns WIP
 #' @export
@@ -236,11 +237,22 @@ senorge_extract_grid <- function(directory,outdir, area, variables, buffer, verb
     area = area,
     buffer = buffer,
     verbose = verbose
-  ) %>% senorge_nc_to_df(directory = directory,
+  ) -> p1
+
+ p1 %>%  senorge_nc_to_df(directory = directory,
                          filenames = filenames,
-                         verbose = verbose) %>%
-    write_senorge(outdir = outdir, verbose = verbose)
-  mt_print(verbose, "senorge_extract_grid", "Finished, files can be found here:", outdir)
+                         verbose = verbose) -> p2
+
+ p2 %>% write_senorge(outdir = outdir, verbose = verbose)
+
+ mt_print(verbose, "senorge_extract_grid", "Finished, files can be found here:", outdir)
+
+ # writing metadata
+ metadata_filepath = paste0(outdir, "/extract_points_meta.shp")
+ p1_meta <- p1
+ p1_meta$vstation = c(1:length(p1_meta$geometry))
+ sf::write_sf(p1_meta, metadata_filepath)
+ mt_print(verbose, "senorge_extract_grid", "Metadata can be found here:", metadata_filepath)
   return(outdir)
 }
 
@@ -292,7 +304,7 @@ write_senorge <- function(megadf, outdir, verbose){
     if(verbose){cat("                                                                 \r")}
     megadf %>% filter(grid_cell ==  cell) %>%
       rename(vstation = grid_cell) %>%
-      pivot_wider(values_from = value, names_from = variable, id_cols = c(vstation, date)) -> vstatslice
+      tidyr::pivot_wider(values_from = value, names_from = variable, id_cols = c(vstation, date)) -> vstatslice
     filename <- paste0(outdir, "/", "senorge_vstation_", cell, ".csv")
     readr::write_csv(x = vstatslice, file = filename)
   }
