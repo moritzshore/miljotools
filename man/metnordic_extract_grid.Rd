@@ -10,6 +10,7 @@ metnordic_extract_grid(
   buffer = 0,
   mn_variables,
   outdir,
+  meta_shp,
   verbose
 )
 }
@@ -24,6 +25,8 @@ metnordic_extract_grid(
 
 \item{outdir}{String, Folder where data will be written}
 
+\item{meta_shp}{If set to \code{TRUE}, then a shapefile of the extracted grid points with ID will be written to the \code{outdir}}
+
 \item{verbose}{Boolean, print status}
 }
 \value{
@@ -35,7 +38,4 @@ timeseries at desired locations. If a polygon shapefile is passed to the
 function, data will be extracted at each grid cells within the (buffered)
 area. If a point geometry is supplied, data will be extracted at each point. A
 file is written to disk with .csv file for each grid cell and a metadata file for each grid cell.
-}
-\details{
-TODO: add resolution to polygon grid..
 }

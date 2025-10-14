@@ -14,6 +14,7 @@
 #' @param buffer Numeric, buffer in meters. Useful for getting grid cells just outside of catchment. Not used if a point geometry is passed.
 #' @param mn_variables Character Vector, Met Nordic variables to extract
 #' @param outdir String, Folder where data will be written
+#' @param meta_shp If set to `TRUE`, then a shapefile of the extracted grid points with ID will be written to the `outdir`
 #' @param verbose Boolean, print status
 #'
 #' @returns path to written files
@@ -28,6 +29,7 @@ metnordic_extract_grid <- function(merged_path,
                                    buffer = 0,
                                    mn_variables,
                                    outdir,
+                                   meta_shp,
                                    verbose) {
   # sub functions
   get_timestamps <- function(merged_path, variable){
@@ -84,6 +86,7 @@ metnordic_extract_grid <- function(merged_path,
   station_nr <- grid$geometry %>% length()
   matrix_list <- lapply(X = mn_variables,FUN =  extract_grid_cells)
 
+  metadf_full <- tibble::tibble()
   if(regular){
     for (i in c(1:station_nr)) {
       get_timeseries <- function(matrix){
@@ -113,6 +116,7 @@ metnordic_extract_grid <- function(merged_path,
       )
 
 
+      metadf_full <- rbind(metadf_full, metadf)
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
@@ -150,6 +154,19 @@ metnordic_extract_grid <- function(merged_path,
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
   }
+
+  if(meta_shp){
+    if(regular == FALSE){
+      stop("meta_shp needs to be FALSE if you are using point geometry. You don't need this data anyway.")
+    }
+    grid$id <- c(1:length(grid$geometry))
+    metadf_full$id <- c(1:length(metadf_full$name))
+    dplyr::left_join(grid, metadf_full, by = "id") -> grid_meta
+    filepath_meta_shp <-  paste0(outdir, "/extracted_grid.shp")
+    mt_print(verbose, function_name = "metnordic_extract_grid", text = "[meta_shp == TRUE] writing metadata grid shapefile: ", filepath_meta_shp)
+    sf::write_sf(grid_meta,filepath_meta_shp)
+    }
+
   if(verbose){cat("\n")}
   mt_print(verbose, function_name = "metnordic_extract_grid", text = "Finished. Files located here:", outdir)
   return(outdir)
