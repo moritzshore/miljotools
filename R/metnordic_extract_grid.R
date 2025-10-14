@@ -39,7 +39,8 @@ metnordic_extract_grid <- function(merged_path,
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',tz = "UTC")
+    # why 02:00:00 is correct??? something wrong somewhere? or is it timezone stuff again?
+    datetime <- as.POSIXct((datenumeric*3600),origin='1901-01-01 00:00:00')
     return(datetime)
   }
   extract_grid_cells <- function(variable){
