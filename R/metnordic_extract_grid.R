@@ -7,7 +7,6 @@
 #' file is written to disk with .csv file for each grid cell and a metadata file for each grid cell.
 #'
 #'
-#' TODO: add resolution to polygon grid..
 #'
 #' @param merged_path String, Path to merged ncdf files from `metnordic_merge_hourly()`
 #' @param area Geo-referenced shapefile either of polygon or point geometry. Passing a polygon geometry will lead to a regular grid being extracted from all overlaying points.
@@ -57,10 +56,10 @@ metnordic_extract_grid <- function(merged_path,
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
-      ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
-        geom_sf(data = area)+
-        geom_sf(data = grid)+
-        theme_bw() +  viridis::scale_fill_viridis(option="D")
+      ggplot2::ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
+        ggplot2::geom_sf(data = area)+
+        ggplot2::geom_sf(data = grid)+
+        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="D")
     }
     datamatrix %>% return()
   }
@@ -76,6 +75,7 @@ metnordic_extract_grid <- function(merged_path,
      }
 
   if(regular){
+    mt_print(verbose, "metnordic_extract_grid", "Detecting overlapping grid cells..")
     area_buffered <- sf::st_buffer(area, buffer)
     grid <- get_overlapping_cells(directory = merged_path, variables = mn_variables, area = area, buffer = buffer,verbose = verbose)
 
@@ -85,7 +85,6 @@ metnordic_extract_grid <- function(merged_path,
   }
   station_nr <- grid$geometry %>% length()
   matrix_list <- lapply(X = mn_variables,FUN =  extract_grid_cells)
-
   metadf_full <- tibble::tibble()
   if(regular){
     for (i in c(1:station_nr)) {
@@ -114,8 +113,6 @@ metnordic_extract_grid <- function(merged_path,
                         name = paste0("plot", i),
                         verbose = F
       )
-
-
       metadf_full <- rbind(metadf_full, metadf)
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
