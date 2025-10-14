@@ -22,6 +22,8 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
   }else if(grepl("thermopluviogram", x = function_name)){
     f_theme = bgWhite$cyan$bold
     # TODO: add GREPing senorge / metnordic for themeing
+  }else if(grepl("swatplus", x = function_name)){
+    f_theme = bgBlue$white$bold
   }else if(grepl("senorge", x = function_name)){
     f_theme = bgYellow$white$bold
   }else if(grepl("metnordic", x = function_name)){
@@ -47,7 +49,8 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
       miljotheme("miljo"),
       bgBlue("\U1F33F"),
       tools_theme("tools "),
-      f_theme(paste0("", function_name, "")),
+      bgWhite(">"),
+      f_theme(paste0(" ", function_name, " ")),
       text_theme(" >>", text, ""),
       text_2_theme(text2),
       suffix,
