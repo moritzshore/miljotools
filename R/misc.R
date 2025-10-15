@@ -9,7 +9,7 @@
 #' @return nothing
 #' @keywords internal
 #'
-#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan white
+#' @importFrom crayon bold bgGreen italic bgBlue bgYellow black bgCyan yellow underline bgWhite cyan white bgBlack
 #'
 #'
 #'
@@ -99,7 +99,8 @@ get_overlapping_cells <- function(directory, variables, area, buffer, verbose){
       ggplot2::geom_sf(data = testpoints, color = "darkorange")+
       ggplot2::geom_sf(data = grid, color = "darkgreen")+
       ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="E")+
-      ggplot2::ggtitle("Overlapping grid cells")-> plot
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))+
+      ggplot2::ggtitle("Overlapping cells")-> plot
     print(plot)
   }
   return(grid)
@@ -107,7 +108,7 @@ get_overlapping_cells <- function(directory, variables, area, buffer, verbose){
 
 
 # builds the geo queries for threddz. for use in *_buildquery()
-build_coord_suffix <- function(bounding_coords, grid_resolution, project){
+build_coord_suffix <- function(bounding_coords, grid_resolution, project, verbose){
   # unpacking the list pack
   index_xmin = bounding_coords$index_xmin
   index_xmax = bounding_coords$index_xmax

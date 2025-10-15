@@ -13,6 +13,7 @@
 #' @param area_buffer Integer: buffer in m to place around shapefile / point
 #' @param source String: 'metnordic' (default) to access the MET Nordic grid, or 'senorge' to access the SeNorge2018 grid.
 #' @param verbose Logical: plot the coordinate window?
+#' @param interactive Logical, should the plotted coordinate window be interactive (mapview) or static (ggplot)
 #'
 #' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
@@ -22,7 +23,7 @@
 #' @importFrom sf 'st_crs<-' read_sf st_bbox st_buffer st_zm
 #' @importFrom dplyr rename
 #' @importFrom mapview mapview
-metnordic_coordwindow <- function(area_path, area_buffer = 0, source = "metnordic", verbose = FALSE){
+metnordic_coordwindow <- function(area_path, area_buffer = 0, source = "metnordic", verbose = FALSE, interactive = FALSE){
 
   # settings between met nordic and senorge
   if(source == "metnordic"){
@@ -168,13 +169,28 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, source = "metnordi
       expand.grid(x[xs],y[ys]) %>% tibble::as_tibble() %>%
         dplyr::rename(x = Var1, y = Var2) %>%
         sf::st_as_sf(coords = c("x", "y"), crs = proj_crs) -> gridpoints
-      # Map view
-          mapview::mapview(wsbox, col.region = "grey",alpha.region = .3, layer.name = "Buffer bounding box", legend = FALSE, label = "Buffer BBOX")+
-          mapview::mapview(area_buff, col.region = "lightblue",alpha.region = .3, layer.name = "Buffer", legend = F)+
-          mapview::mapview(area, col.region = "white", alpha.region = .3,layer.name = "Provided Polygon", legend = FALSE)+
-          mapview::mapview(bbp, col.region = "blue", alpha.region = .3, layer.name = "Dataset Subset", legend = F)+
-          mapview::mapview(gridpoints, legend = FALSE) -> mymap
-        print(mymap)
+     if(interactive){
+       # Map view
+       mapview::mapview(wsbox, col.region = "grey",alpha.region = .3, layer.name = "Buffer bounding box", legend = FALSE, label = "Buffer BBOX")+
+         mapview::mapview(area_buff, col.region = "lightblue",alpha.region = .3, layer.name = "Buffer", legend = F)+
+         mapview::mapview(area, col.region = "white", alpha.region = .3,layer.name = "Provided Polygon", legend = FALSE)+
+         mapview::mapview(bbp, col.region = "blue", alpha.region = .3, layer.name = "Dataset Subset", legend = F)+
+         mapview::mapview(gridpoints, legend = FALSE) -> mymap
+       mymap
+     }else{
+        required_packages <- c("ggplot2")
+        install_missing_packs(required_packages)
+        ggplot2::ggplot() +
+          ggplot2::geom_sf(data = wsbox %>% sf::st_as_sfc(), alpha = .1, color = "black", fill = "lightblue", linetype = "dotted")+
+          ggplot2::geom_sf(data = bbp, fill = "orange", alpha = .1, linetype = "dashed")+
+          ggplot2::geom_sf(data = area_buff, alpha = .3, fill = "lightblue")+
+          ggplot2::geom_sf(data = area, fill = "darkblue", alpha = .1)+
+          ggplot2::geom_sf(data = gridpoints, fill = "darkorange", pch = 22, color = "black")+
+          ggplot2::theme_bw() +
+          ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))+
+          ggplot2::ggtitle("Cooridate Window", source)-> plot
+        print(plot)
+      }
     }
 
     return(list(index_xmin = index_xmin,

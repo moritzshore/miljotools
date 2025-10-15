@@ -4,28 +4,41 @@
 \alias{senorge_extract_grid}
 \title{Extract data from SeNorge2018 files}
 \usage{
-senorge_extract_grid(directory, outdir, area, variables, buffer, verbose)
+senorge_extract_grid(
+  directory,
+  outdir,
+  area,
+  variables,
+  buffer = 0,
+  verbose = FALSE,
+  map = TRUE
+)
 }
 \arguments{
-\item{directory}{WIP}
+\item{directory}{string, path to directory of downloaded SeNorge2018 files (as downloaded by \code{senorge_download()})}
 
-\item{outdir}{WIP}
+\item{outdir}{string, path to directory where data should be extracted to.}
 
-\item{area}{WIP}
+\item{area}{Shapefile of polygon geometry of which region should be extracted.}
 
-\item{variables}{WIP}
+\item{variables}{character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr")}
 
-\item{buffer}{WIP}
+\item{buffer}{integer, buffer (in meters) that should be applied to the provided shapefile for data extraction}
 
-\item{verbose}{WIP}
+\item{verbose}{logical, text be printed to console?}
+
+\item{map}{logical, should maps be printed?}
 }
 \value{
-WIP
+Returns path to extracted files.
 }
 \description{
-WIP
+This function extracts data from SeNorge2018 .nc files from overlapping grid cells of a provided polygon.
 }
 \examples{
+# TODO.
 
-WIP
+}
+\seealso{
+\code{\link[=senorge_download]{senorge_download()}}
 }

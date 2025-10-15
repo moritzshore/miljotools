@@ -26,8 +26,14 @@
 #'
 #' @examples
 #' # TODO
-senorge_buildquery <- function(bounding_coords, variables, fromdate, todate,
-                                 grid_resolution = 1, verbose = FALSE){
+senorge_buildquery <- function(bounding_coords,
+                               variables,
+                               fromdate,
+                               todate,
+                               grid_resolution = 1,
+                               verbose = FALSE) {
+  time_q <- y_q <- x_q <- . <- real_q <- X <- Y <- time <- proj <- longitude <- latitude <- NULL
+
   # Source:
   # https://thredds.met.no/thredds/catalog/senorge/seNorge_2018/Archive/catalog.html
 
@@ -59,14 +65,14 @@ senorge_buildquery <- function(bounding_coords, variables, fromdate, todate,
                    to = todate %>% lubridate::ymd(), by = "day")
   years <- daterange %>% lubridate::year() %>% unique()
   queryDF <- tibble(years)
-  queryDF$time_q = lapply(years, year_to_query) %>% unlist()
+  queryDF$time_q = lapply(years, year_to_query, fromdate = fromdate, todate = todate) %>% unlist()
 
 
   ## Building the geographic queries
   geo_queries <- build_coord_suffix(
     bounding_coords = bounding_coords,
     grid_resolution = grid_resolution,
-    project = "senorge"
+    project = "senorge", verbose = verbose
   )
   queryDF$x_q <- geo_queries$x_query
   queryDF$y_q <- geo_queries$y_query
@@ -179,67 +185,60 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
     # if a polygon simple feature is provided, then preview.
     if(polygon %>% is.null() == FALSE){
       terra::rast(nc_filepath, variables[1])[[1]] -> myrast
-      title = paste(terra::longnames(x =myrast))
-      subtitle = paste0(terra::sources(myrast), "\n", terra::time(myrast) %>% as.Date())
+      subtitle = paste0(terra::time(myrast) %>% as.Date())
       ggplot2::ggplot() +
-        tidyterra::geom_spatraster(data = myrast, interpolate = F)+
+        tidyterra::geom_spatraster(data = myrast, interpolate = F, show.legend = F)+
         ggplot2::geom_sf(data = polygon, color = "red", fill = NA, size = 2)+
         ggplot2::theme_bw()+
-        ggplot2::ggtitle(title, subtitle)+
-        ggplot2::guides(fill=ggplot2::guide_legend(title=terra::units(myrast))) -> myggplot
+        ggplot2::ggtitle(subtitle)+
+        ggplot2::guides(fill=ggplot2::guide_legend(title=terra::units(myrast)))+
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))-> myggplot
       print(myggplot)
     }
   }
   return(directory)
 }
-#
-#
-
-
-# Testing parameter set
-# if(FALSE){
-#   directory <- "../mt-testing/senorge/download_indiv_test2"
-#   outdir <- "../mt-testing/senorge/extract"
-#   area = "../swat-cs10/model_data/input/shape/cs10_basin.shp" %>% sf::read_sf()
-#   variables <- c("tg", "tx", "tn", "rr")
-#   buffer = 1000
-#   verbose = T
-#   senorge_extract_grid(directory,outdir, area, variables, buffer, verbose)
-# }
-
-
 
 #' Extract data from SeNorge2018 files
 #'
-#' WIP
+#' This function extracts data from SeNorge2018 .nc files from overlapping grid cells of a provided polygon.
+#' @seealso [senorge_download()]
 #'
-#' @param directory WIP
-#' @param outdir WIP
-#' @param area WIP
-#' @param variables WIP
-#' @param buffer WIP
-#' @param verbose WIP
+#' @param directory string, path to directory of downloaded SeNorge2018 files (as downloaded by `senorge_download()`)
+#' @param outdir string, path to directory where data should be extracted to.
+#' @param area Shapefile of polygon geometry of which region should be extracted.
+#' @param variables character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr")
+#' @param buffer integer, buffer (in meters) that should be applied to the provided shapefile for data extraction
+#' @param verbose logical, text be printed to console?
+#' @param map logical, should maps be printed?
 #'
 #' @importFrom tidyr pivot_wider
 #' @importFrom sf write_sf
 #'
-#' @returns WIP
+#' @returns Returns path to extracted files.
 #' @export
 #'
 #' @examples
+#' # TODO.
 #'
-#' WIP
-senorge_extract_grid <- function(directory,outdir, area, variables, buffer, verbose){
+senorge_extract_grid <- function(directory,
+                                 outdir,
+                                 area,
+                                 variables,
+                                 buffer = 0,
+                                 verbose = FALSE,
+                                 map = TRUE) {
   directory %>% list.files(full.names = T) -> filenames # move this into second function
   get_overlapping_cells(
     directory = directory,
     variables = variables,
     area = area,
     buffer = buffer,
-    verbose = verbose
+    verbose = map
   ) -> p1
 
  p1 %>%  senorge_nc_to_df(directory = directory,
+                          variables = variables,
                          filenames = filenames,
                          verbose = verbose) -> p2
 
@@ -257,7 +256,8 @@ senorge_extract_grid <- function(directory,outdir, area, variables, buffer, verb
 }
 
 # Returns data in tidy format from a grid.
-senorge_nc_to_df <- function(grid, directory, filenames, verbose) {
+senorge_nc_to_df <- function(grid, variables, directory, filenames, verbose) {
+  . <- NULL
   grid$geometry %>% length() -> station_nr
   filenames %>% stringr::str_split("_", simplify = T) -> splitted
   splitted[,ncol(splitted)] %>% stringr::str_remove_all(".nc") -> years
@@ -297,6 +297,7 @@ senorge_nc_to_df <- function(grid, directory, filenames, verbose) {
 
 # writes files
 write_senorge <- function(megadf, outdir, verbose){
+  grid_cell <- value <- variable <- vstation <- NULL
   cells <- megadf %>% pull(grid_cell) %>% unique() %>% sort()
   dir.create(outdir, showWarnings = F)
   for (cell in cells) {
@@ -311,7 +312,7 @@ write_senorge <- function(megadf, outdir, verbose){
 }
 
 ## buils time query for SeNorge
-year_to_query <- function(c_year){
+year_to_query <- function(c_year, fromdate, todate){
   # we are operating on a daily fashion
   timestep = 1
   # if the current year is also the year of the start date, then grab
@@ -350,6 +351,7 @@ year_to_query <- function(c_year){
 #' @param metadata string, path to the metadata shape file generated by `senorge_extract_grid()`.
 #' @param DEM string, path to a `.tif` raster of a DEM which covers the area of the extracted grid.
 #' @param aux_data string, path to `.xlsx` sheet in `SWATprepR` format with Auxiliary meteo data (this is needed, as SeNorge does not have all required variables to run SWAT+)
+#' @param epsg_code SWATprepR: integer value fo the EPSG code of the projection of the auxilliary data (See `?SWATprepR::load_template()`)
 #' @param write_path SWATprepR: Character, path to the SWAT+ txtinout folder (example "my_model").
 #' @param db_path SWATprepR: A character string representing the path to the SWAT+ SQLite database (e.g., "./output/project.sqlite").
 #' @param fill_missing SWATprepR: (optional) Boolean, TRUE - fill data for missing stations with data from closest stations with available data. FALSE - leave stations without data. Weather generator will be used to fill missing variables for a model. Default fill_missing = TRUE.
@@ -367,6 +369,7 @@ swatplus_senorge <- function(extract_path,
                              metadata,
                              DEM,
                              aux_data,
+                             epsg_code,
                              write_path,
                              db_path = NULL,
                              fill_missing = TRUE,
@@ -374,18 +377,19 @@ swatplus_senorge <- function(extract_path,
                              period_ends = NA,
                              clean_files = TRUE,
                              verbose = FALSE) {
+  ID <- Name <- Elevation <- Source <- geometry <- Long <- Lat <- . <- NULL
   ### Create metadata object in prepr format.
   mt_print(verbose, "swatplus_senorge", "Converting metadata to SWATprepR format..", "loading metadata file", rflag = T)
   stations <- sf::read_sf(metadata)
   mt_print(verbose, "swatplus_senorge", "Converting metadata to SWATprepR format..", "adding elevation from DEM", rflag = T)
   terra::rast(DEM) -> mydem
   stations_reproj <- stations %>% sf::st_transform(crs = sf::st_crs(mydem))
-  terra::extract(x = mydem, y = stations_reproj) %>% round(0) %>% as_tibble() -> el_df
+  terra::extract(x = mydem, y = stations_reproj) %>% round(0) %>% tibble::as_tibble() -> el_df
   colnames(el_df) <- c("ID", "elevation")
   stations_geo <- stations
   stations_geo <- st_transform(stations_geo, crs = 4326)
   stations_geo <- stations_geo %>%
-    mutate(Long = st_coordinates(stations_geo)[, 2],
+    dplyr::mutate(Long = st_coordinates(stations_geo)[, 2],
            Lat = st_coordinates(stations_geo)[, 1])
   stations$ID = paste0("ID", stations$vstation)
   stations$Name = paste0("SeNorge gridpoint ", stations$vstation)
@@ -393,7 +397,7 @@ swatplus_senorge <- function(extract_path,
   stations$Source = "met no"
   stations$Long = stations_geo$Long
   stations$Lat = stations_geo$Lat
-  stations_prepr <- stations %>% select(ID, Name, Elevation, Source, geometry, Long, Lat)
+  stations_prepr <- stations %>% dplyr::select(ID, Name, Elevation, Source, geometry, Long, Lat)
 
   ### Read in all stations as a prepR list
   mt_print(verbose, "swatplus_senorge", "Reading in meteo data..", rflag = T)
@@ -446,6 +450,7 @@ swatplus_senorge <- function(extract_path,
 
   ## Grab aux data:
   mt_print(verbose, "swatplus_senorge", "Adding Auxiliary data..")
+  aux_data <- SWATprepR::load_template(template_path = aux_data, epsg_code = epsg_code)
   nr_senorge_stations <- length(meteo_lst$stations$ID)
   nr_aux_stations <- length(aux_data$stations$ID)
   new_IDS <- paste0("ID", c((nr_senorge_stations+1):(nr_aux_stations+nr_senorge_stations)))

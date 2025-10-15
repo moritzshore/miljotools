@@ -9,6 +9,7 @@ swatplus_senorge(
   metadata,
   DEM,
   aux_data,
+  epsg_code,
   write_path,
   db_path = NULL,
   fill_missing = TRUE,
@@ -26,6 +27,8 @@ swatplus_senorge(
 \item{DEM}{string, path to a \code{.tif} raster of a DEM which covers the area of the extracted grid.}
 
 \item{aux_data}{string, path to \code{.xlsx} sheet in \code{SWATprepR} format with Auxiliary meteo data (this is needed, as SeNorge does not have all required variables to run SWAT+)}
+
+\item{epsg_code}{SWATprepR: integer value fo the EPSG code of the projection of the auxilliary data (See \code{?SWATprepR::load_template()})}
 
 \item{write_path}{SWATprepR: Character, path to the SWAT+ txtinout folder (example "my_model").}
 

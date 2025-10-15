@@ -8,7 +8,8 @@ metnordic_coordwindow(
   area_path,
   area_buffer = 0,
   source = "metnordic",
-  verbose = FALSE
+  verbose = FALSE,
+  interactive = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ metnordic_coordwindow(
 \item{source}{String: 'metnordic' (default) to access the MET Nordic grid, or 'senorge' to access the SeNorge2018 grid.}
 
 \item{verbose}{Logical: plot the coordinate window?}
+
+\item{interactive}{Logical, should the plotted coordinate window be interactive (mapview) or static (ggplot)}
 }
 \value{
 returns a list of the min and max x and y cells for downloading.
