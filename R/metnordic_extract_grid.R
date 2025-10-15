@@ -7,13 +7,13 @@
 #' file is written to disk with .csv file for each grid cell and a metadata file for each grid cell.
 #'
 #'
-#' TODO: add resolution to polygon grid..
 #'
 #' @param merged_path String, Path to merged ncdf files from `metnordic_merge_hourly()`
 #' @param area Geo-referenced shapefile either of polygon or point geometry. Passing a polygon geometry will lead to a regular grid being extracted from all overlaying points.
 #' @param buffer Numeric, buffer in meters. Useful for getting grid cells just outside of catchment. Not used if a point geometry is passed.
 #' @param mn_variables Character Vector, Met Nordic variables to extract
 #' @param outdir String, Folder where data will be written
+#' @param meta_shp If set to `TRUE`, then a shapefile of the extracted grid points with ID will be written to the `outdir`
 #' @param verbose Boolean, print status
 #'
 #' @returns path to written files
@@ -28,40 +28,9 @@ metnordic_extract_grid <- function(merged_path,
                                    buffer = 0,
                                    mn_variables,
                                    outdir,
+                                   meta_shp,
                                    verbose) {
   # sub functions
-  get_overlapping_cells <- function(merged_path, area_overlap){
-    filepaths <- list.files(merged_path, pattern = "metno-", full.names = T)
-    if(length(filepaths) == 0){
-      stop("No files found! (Make sure to provide a path to a directory, not a file)\nIn: >>",merged_path, "<<")
-    }
-    # quietly cuz of annoying warning messages that i cant turn off
-    rasterfile <- raster::raster(filepaths[1])
-    testpoints <- raster::xyFromCell(rasterfile[[1]], cell = 1:length(rasterfile)) %>% as.data.frame() %>% sf::st_as_sf(coords = c("x", "y"),
-                                                              crs =  terra::crs(rasterfile))
-
-    grid.sf.proj <- sf::st_transform(testpoints, sf::st_crs(rasterfile))
-    area_overlap <- sf::st_transform(area_overlap, sf::st_crs(rasterfile))
-    # figure out which ones are touching the area_overlap buffer
-    pnts_trans <- grid.sf.proj %>% dplyr::mutate(
-      intersection = as.integer(sf::st_intersects(grid.sf.proj, area_overlap)))
-    grid <- grid.sf.proj[which(pnts_trans$intersection == 1),]
-    if(verbose){
-      required_packages <- c("ggplot2", "tidyterra")
-      install_missing_packs(required_packages)
-      # quietly cuz of annoying warning messages that i cant turn off
-      terra::rast(filepaths[1], mn_variables[1]) -> myrast
-      ggplot2::ggplot() +  tidyterra::geom_spatraster(data=myrast[[1]])+
-        ggplot2::geom_sf(data = area_buffered, alpha = .3, color = "green")+
-        ggplot2::geom_sf(data = area, alpha = .3, color = "lightgreen")+
-        ggplot2::geom_sf(data = testpoints, color = "darkorange")+
-        ggplot2::geom_sf(data = grid, color = "darkgreen")+
-        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="E")+
-        ggplot2::ggtitle("Overlapping grid cells")-> plot
-      print(plot)
-    }
-    return(grid)
-  }
   get_timestamps <- function(merged_path, variable){
     filepaths <- list.files(merged_path, pattern = variable, full.names = T)
     ncin <- ncdf4::nc_open(filepaths[1])
@@ -70,7 +39,8 @@ metnordic_extract_grid <- function(merged_path,
     # Then to convert hours to seconds which are the basis for the POSIXt
     # classed objects, just multiply by 3600 = 60*60:
     # https://stackoverflow.com/a/30783581
-    datetime <- as.POSIXct(datenumeric*3600,origin='1901-01-01 01:00:00',tz = "UTC")
+    # why 02:00:00 is correct??? something wrong somewhere? or is it timezone stuff again?
+    datetime <- as.POSIXct((datenumeric*3600),origin='1901-01-01 00:00:00')
     return(datetime)
   }
   extract_grid_cells <- function(variable){
@@ -87,10 +57,10 @@ metnordic_extract_grid <- function(merged_path,
     if(FALSE){
       required_packages <- c("ggplot2", "tidyterra")
       install_missing_packs(required_packages)
-      ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
-        geom_sf(data = area)+
-        geom_sf(data = grid)+
-        theme_bw() +  viridis::scale_fill_viridis(option="D")
+      ggplot2::ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
+        ggplot2::geom_sf(data = area)+
+        ggplot2::geom_sf(data = grid)+
+        ggplot2::theme_bw() +  viridis::scale_fill_viridis(option="D")
     }
     datamatrix %>% return()
   }
@@ -106,15 +76,17 @@ metnordic_extract_grid <- function(merged_path,
      }
 
   if(regular){
+    mt_print(verbose, "metnordic_extract_grid", "Detecting overlapping grid cells..")
     area_buffered <- sf::st_buffer(area, buffer)
-    grid <- get_overlapping_cells(merged_path = merged_path, area_overlap = area_buffered)
+    grid <- get_overlapping_cells(directory = merged_path, variables = mn_variables, area = area, buffer = buffer,verbose = verbose)
+
   }else{
     # if the grid is not regular, just use the provided shapefile
     grid <- area
   }
   station_nr <- grid$geometry %>% length()
   matrix_list <- lapply(X = mn_variables,FUN =  extract_grid_cells)
-
+  metadf_full <- tibble::tibble()
   if(regular){
     for (i in c(1:station_nr)) {
       get_timeseries <- function(matrix){
@@ -142,8 +114,7 @@ metnordic_extract_grid <- function(merged_path,
                         name = paste0("plot", i),
                         verbose = F
       )
-
-
+      metadf_full <- rbind(metadf_full, metadf)
       metafp <- paste0(outdir, "/METNORDIC_meta_plot", i, ".csv")
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
@@ -181,6 +152,19 @@ metnordic_extract_grid <- function(merged_path,
       paste(names(metadf), "=", metadf, collapse = "\n") %>% writeLines(con = metafp)
     }
   }
+
+  if(meta_shp){
+    if(regular == FALSE){
+      stop("meta_shp needs to be FALSE if you are using point geometry. You don't need this data anyway.")
+    }
+    grid$id <- c(1:length(grid$geometry))
+    metadf_full$id <- c(1:length(metadf_full$name))
+    dplyr::left_join(grid, metadf_full, by = "id") -> grid_meta
+    filepath_meta_shp <-  paste0(outdir, "/extracted_grid.shp")
+    mt_print(verbose, function_name = "metnordic_extract_grid", text = "[meta_shp == TRUE] writing metadata grid shapefile: ", filepath_meta_shp)
+    sf::write_sf(grid_meta,filepath_meta_shp)
+    }
+
   if(verbose){cat("\n")}
   mt_print(verbose, function_name = "metnordic_extract_grid", text = "Finished. Files located here:", outdir)
   return(outdir)

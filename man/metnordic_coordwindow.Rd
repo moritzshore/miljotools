@@ -4,14 +4,24 @@
 \alias{metnordic_coordwindow}
 \title{Get a MET Nordic Coordinate Window}
 \usage{
-metnordic_coordwindow(area_path, area_buffer = 0, verbose = FALSE)
+metnordic_coordwindow(
+  area_path,
+  area_buffer = 0,
+  source = "metnordic",
+  verbose = FALSE,
+  interactive = FALSE
+)
 }
 \arguments{
 \item{area_path}{String: path to shapefile of region / point (this must have point or polygon geometry!)}
 
 \item{area_buffer}{Integer: buffer in m to place around shapefile / point}
 
+\item{source}{String: 'metnordic' (default) to access the MET Nordic grid, or 'senorge' to access the SeNorge2018 grid.}
+
 \item{verbose}{Logical: plot the coordinate window?}
+
+\item{interactive}{Logical, should the plotted coordinate window be interactive (mapview) or static (ggplot)}
 }
 \value{
 returns a list of the min and max x and y cells for downloading.
@@ -19,7 +29,8 @@ returns a list of the min and max x and y cells for downloading.
 \description{
 This function retrieves the coordinate window from a shapefile for
 downloading MET Nordic files. This window can then be passed to
-\code{metnordic_buildquery()} to parse OPENDAP urls to download.
+\code{metnordic_buildquery()} to parse OPENDAP urls to download. You can also set
+\code{source} to "senorge" to get the coordinate window for the SeNorge2018 grid.
 }
 \examples{
 # TODO

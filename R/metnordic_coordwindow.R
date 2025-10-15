@@ -2,7 +2,8 @@
 #'
 #' This function retrieves the coordinate window from a shapefile for
 #' downloading MET Nordic files. This window can then be passed to
-#' `metnordic_buildquery()` to parse OPENDAP urls to download.
+#' `metnordic_buildquery()` to parse OPENDAP urls to download. You can also set
+#' `source` to "senorge" to get the coordinate window for the SeNorge2018 grid.
 #'
 #' @seealso [metnordic_buildquery()]
 #'
@@ -10,7 +11,9 @@
 #'
 #' @param area_path String: path to shapefile of region / point (this must have point or polygon geometry!)
 #' @param area_buffer Integer: buffer in m to place around shapefile / point
+#' @param source String: 'metnordic' (default) to access the MET Nordic grid, or 'senorge' to access the SeNorge2018 grid.
 #' @param verbose Logical: plot the coordinate window?
+#' @param interactive Logical, should the plotted coordinate window be interactive (mapview) or static (ggplot)
 #'
 #' @returns returns a list of the min and max x and y cells for downloading.
 #' @export
@@ -20,10 +23,23 @@
 #' @importFrom sf 'st_crs<-' read_sf st_bbox st_buffer st_zm
 #' @importFrom dplyr rename
 #' @importFrom mapview mapview
-metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
+metnordic_coordwindow <- function(area_path, area_buffer = 0, source = "metnordic", verbose = FALSE, interactive = FALSE){
 
-  if(area_buffer < 0){
-    area_buffer = 0
+  # settings between met nordic and senorge
+  if(source == "metnordic"){
+    mt_print(verbose, function_name = "metnordic_coordwindow","getting base file from:", "MET Nordic")
+    filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
+    proj_crs <- sf::st_crs("+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000")
+    ncdf_coord_x <- "x"
+    ncdf_coord_y <- "y"
+  }else if(source == "senorge"){
+    mt_print(verbose, function_name = "metnordic_coordwindow","getting base file from:", "SeNorge2018" )
+    filename = "https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018/Archive/seNorge2018_1980.nc"
+    proj_crs <- sf::st_crs(32633)
+    ncdf_coord_x <- "X"
+    ncdf_coord_y <- "Y"
+  }else{
+    stop("'source' not recognized! needs to be either 'metnordic' or 'senorge'")
   }
 
   # if it already is a shape file, then no need to read it
@@ -37,19 +53,15 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
   }
 
   # get a base file to find the right x y
-  mt_print(verbose, function_name = "metnordic_coordwindow","getting base file..")
-  filename = "https://thredds.met.no/thredds/dodsC/metpparchivev3/2023/01/31/met_analysis_1_0km_nordic_20230131T23Z.nc"
   ncin <- nc_open_retry(filename)
   if(ncin$filename == filename){
     mt_print(verbose, function_name = "metnordic_coordwindow","basefile downloaded.")
   }else{stop("error downloading basefile:\n", filename)}
-  x <- ncdf4::ncvar_get(ncin, "x")
-  y <- ncdf4::ncvar_get(ncin, "y")
+  x <- ncdf4::ncvar_get(ncin, ncdf_coord_x)
+  y <- ncdf4::ncvar_get(ncin, ncdf_coord_y)
   ncdf4::nc_close(ncin)
 
   # lambert conform conical (the projection used by met reanalysis)
-  projection <- "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000"
-  proj_crs <- sf::st_crs(projection)
   mt_print(verbose, function_name = "metnordic_coordwindow","Loading and projecting shapefile...")
   # Transform the shapefile to the metno projection
   area <- sf::st_transform(area, crs = proj_crs)
@@ -85,7 +97,7 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
     if(verbose){
 
       area$name = "provided file"
-      plot = mapview::mapview(df, layer.name = "Nearest Re-analysis Gridpoint", col.regions = "orange")+
+      plot = mapview::mapview(df, layer.name = "Nearest Gridpoint", col.regions = "orange")+
         mapview::mapview(area, layer.name = "User location", col.regions = "blue")
       print(plot)
       mt_print(verbose, "metnordic_coordwindow",
@@ -157,13 +169,28 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, verbose = FALSE){
       expand.grid(x[xs],y[ys]) %>% tibble::as_tibble() %>%
         dplyr::rename(x = Var1, y = Var2) %>%
         sf::st_as_sf(coords = c("x", "y"), crs = proj_crs) -> gridpoints
-      # Map view
-          mapview::mapview(wsbox, col.region = "grey",alpha.region = .3, layer.name = "Buffer bounding box", legend = FALSE, label = "Buffer BBOX")+
-          mapview::mapview(area_buff, col.region = "lightblue",alpha.region = .3, layer.name = "Buffer", legend = F)+
-          mapview::mapview(area, col.region = "white", alpha.region = .3,layer.name = "Provided Polygon", legend = FALSE)+
-          mapview::mapview(bbp, col.region = "blue", alpha.region = .3, layer.name = "MET Nordic Subset", legend = F)+
-          mapview::mapview(gridpoints, legend = FALSE) -> mymap
-        print(mymap)
+     if(interactive){
+       # Map view
+       mapview::mapview(wsbox, col.region = "grey",alpha.region = .3, layer.name = "Buffer bounding box", legend = FALSE, label = "Buffer BBOX")+
+         mapview::mapview(area_buff, col.region = "lightblue",alpha.region = .3, layer.name = "Buffer", legend = F)+
+         mapview::mapview(area, col.region = "white", alpha.region = .3,layer.name = "Provided Polygon", legend = FALSE)+
+         mapview::mapview(bbp, col.region = "blue", alpha.region = .3, layer.name = "Dataset Subset", legend = F)+
+         mapview::mapview(gridpoints, legend = FALSE) -> mymap
+       mymap
+     }else{
+        required_packages <- c("ggplot2")
+        install_missing_packs(required_packages)
+        ggplot2::ggplot() +
+          ggplot2::geom_sf(data = wsbox %>% sf::st_as_sfc(), alpha = .1, color = "black", fill = "lightblue", linetype = "dotted")+
+          ggplot2::geom_sf(data = bbp, fill = "orange", alpha = .1, linetype = "dashed")+
+          ggplot2::geom_sf(data = area_buff, alpha = .3, fill = "lightblue")+
+          ggplot2::geom_sf(data = area, fill = "darkblue", alpha = .1)+
+          ggplot2::geom_sf(data = gridpoints, fill = "darkorange", pch = 22, color = "black")+
+          ggplot2::theme_bw() +
+          ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))+
+          ggplot2::ggtitle("Cooridate Window", source)-> plot
+        print(plot)
+      }
     }
 
     return(list(index_xmin = index_xmin,
