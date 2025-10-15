@@ -1,30 +1,34 @@
 #' Build MET Nordic Download Query
 #'
-#' This function builds the URL queries for downloading MET Nordic / SeNorge data through
+#' This function builds the URL queries for downloading MET Nordic data through
 #' the OPENDAP protocol. The requirements for this function to work are the
 #' bounding coordinates as divined by function `metnordic_coordwindow()`, the
 #' variables of interest, the starting and ending dates and the desired grid
 #' resolution. The results of this function can be downloaded when passed to
-#' `metnordic_download()` or `senorge_download()`.
+#' `metnordic_download()`.
 #'
-#' @seealso [metnordic_coordwindow()] [metnordic_download()] [metnordic_download_daterange()] [senorge_download()]
+#' @seealso [metnordic_coordwindow()] [metnordic_download()] [metnordic_download_daterange()]
 #' @author Moritz Shore
 #'
 #' @param bounding_coords as passed by `metnordic_coordwindow()`
-#' @param mn_variables variable names of MET Nordic  (see [MET Nordic documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters)) or SeNorge2018 ("tn", "tx", "rr", "tg").
+#' @param mn_variables MET Nordic variables (see [documentation](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters))
 #' @param fromdate ie. "2019-01-01 00:00:00"
 #' @param todate ie. "2020-12-31 23:00:00"
 #' @param dataset either 'reanalysis' for the re-run archive, 'operational' for
-#'   the operational archive 'continuous' to source from both, depending on
-#'   time range. Setting this parameter to 'senorge' will build queries for the [SeNorge2018](https://thredds.met.no/thredds/catalog/senorge/seNorge_2018/Archive/catalog.html) dataset.
+#'   the operational archive, or 'continuous' to source from both, depending on
+#'   time range.
 #' @param grid_resolution an integer, ie. 3 for 3x3 km grid.
 #' @param verbose print to console?
 #'
-#' @returns Returns a list with  all the OPENDAP URLs to download as well as their filenames.
+#' @returns character vector of all the OPENDAP URLs to download.
 #' @export
 #' @importFrom lubridate hour day year
+#'
+#' @examples
+#' # TODO
 metnordic_buildquery <- function(bounding_coords, mn_variables, fromdate, todate,
-                                 grid_resolution = 1, dataset = 'reanalysis', verbose = FALSE){
+                        grid_resolution = 1, dataset = 'reanalysis', verbose = FALSE){
+
   # detecting geometry by list structure
   if(length(bounding_coords) == 5){
     q_poly_geom <- (bounding_coords %>% names() == c("index_xmin", "index_xmax", "index_ymin", "index_ymax", "metadist")) %>% all()
