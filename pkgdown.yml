@@ -4,8 +4,9 @@ pkgdown_sha: ~
 articles:
   metno_reanal: metno_reanal.html
   Norwegian_Soil_Classification: Norwegian_Soil_Classification.html
+  senorge: senorge.html
   thermopluviograms: thermopluviograms.html
-last_built: 2025-10-09T08:48Z
+last_built: 2025-10-15T13:07Z
 urls:
   reference: https://moritzshore.github.io/miljotools/reference
   article: https://moritzshore.github.io/miljotools/articles
