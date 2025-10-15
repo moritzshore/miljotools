@@ -10,6 +10,31 @@ editor_options:
     wrap: 72
 ---
 
+```{r, include = FALSE}
+rm(list=ls())
+gc()
+folders <- c(
+  "./aggregated",
+  "./cs10_basin",
+  "./cs10_txt",
+  "./cs10point",
+  "./extracted",
+  "./extracted_grid",
+  "./indiv_point",
+  "./indiv_poly",
+  "./merged_daily",
+  "./merged_poly",
+  "./aggregated_range"
+)
+
+unlink(folders, recursive = T)
+
+files <- c("cs10_basin.zip", "cs10_txt.zip", "cs10point.zip", "metnordic.met", "reprojected_example.nc", "cwatm_ready.nc", "parlog.log", "Rplots.pdf")
+
+file.remove(files)
+```
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(gifski)

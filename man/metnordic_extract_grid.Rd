@@ -10,7 +10,7 @@ metnordic_extract_grid(
   buffer = 0,
   mn_variables,
   outdir,
-  meta_shp,
+  meta_shp = FALSE,
   verbose
 )
 }
