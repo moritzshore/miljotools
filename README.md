@@ -43,9 +43,11 @@ View the "Articles" to get started
 
 1.  [MET Nordic Reanalysis Dataset](https://moritzshore.github.io/miljotools/articles/metno_reanal.html)
 
-2.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
+2.  [SeNorge2018 Dataset](https://moritzshore.github.io/miljotools/articles/senorge.html)
 
-3.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+3.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
+
+4.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
  
 4.  More to come...
 
