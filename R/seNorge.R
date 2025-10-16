@@ -440,16 +440,6 @@ swatplus_senorge <- function(extract_path,
   names(data_list) <- list_names
   meteo_lst <- list(stations = stations_prepr , data = data_list)
 
-  if(verbose){
-    cat("                                                                           \n")
-    mt_print(verbose, "swatplus_senorge", "Previewing data in viewer plane"," >> PCP year sum", rflag = T)
-    SWATprepR::plot_weather(meteo_lst, "PCP", "year", "sum")
-    mt_print(verbose, "swatplus_senorge", "Previewing data in viewer plane"," >> TMP_MAX year sum", rflag = T)
-    SWATprepR:: plot_weather(meteo_lst, "TMP_MAX", "year", "mean")
-    SWATprepR::plot_weather(meteo_lst, "TMP_MIN", "year", "mean")
-    mt_print(verbose, "swatplus_senorge", "SWATprepR: Previewing data in viewer plane"," >> TMP_MIN year sum", rflag = T)
-  }
-
   ## Grab aux data:
   mt_print(verbose, "swatplus_senorge", "Adding Auxiliary data..")
   aux_data <- SWATprepR::load_template(template_path = aux_data, epsg_code = epsg_code)
