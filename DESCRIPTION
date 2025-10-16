@@ -1,7 +1,7 @@
 Type: Package
 Package: miljotools
 Title: Download MET Nordic data / SeNorge2018 Data / Soil Texture Classification / Thermopluviograms
-Version: 0.8.0
+Version: 0.8.1
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data gathering, processing, and
