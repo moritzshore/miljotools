@@ -78,8 +78,8 @@ senorge_buildquery <- function(bounding_coords,
   queryDF$y_q <- geo_queries$y_query
   queryDF$X <- paste0("X", queryDF$x_q)
   queryDF$Y <- paste0("Y", queryDF$y_q)
-  queryDF$latitude <- paste0("latitude", queryDF$y_q,queryDF$x_q)
-  queryDF$longitude <- paste0("longitude", queryDF$y_q,queryDF$x_q)
+  #queryDF$latitude <- paste0("latitude", queryDF$y_q,queryDF$x_q)
+  #queryDF$longitude <- paste0("longitude", queryDF$y_q,queryDF$x_q)
   queryDF$time <- paste0("time",queryDF$time_q)
 
   # Generating variable queries
@@ -104,7 +104,8 @@ senorge_buildquery <- function(bounding_coords,
   # UTM_Zone_33,longitude[0:1:0][0:1:0],latitude[0:1:0][0:1:0],
   # rr[0:1:0][0:1:0][0:1:0],tx[0:1:0][0:1:0][0:1:0],tn[0:1:0][0:1:0][0:1:0]
 
-  query_suffix <- queryDF %>% tidyr::unite(real_q, X, Y, time, proj, longitude, latitude, all_of(variables), sep = ",") %>% pull(real_q)
+  #query_suffix <- queryDF %>% tidyr::unite(real_q, X, Y, time, proj, longitude, latitude, all_of(variables), sep = ",") %>% pull(real_q)
+  query_suffix <- queryDF %>% tidyr::unite(real_q, X, Y, time, proj, all_of(variables), sep = ",") %>% pull(real_q)
   queryDF$q_suff <- query_suffix
   full_queries <- paste0(queryDF$url, queryDF$q_suff)
   full_filenames <- paste0("seNorge2018_", years, ".nc")
@@ -147,38 +148,38 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
   for (i in seq_along(queries$filenames)) {
     mt_print(verbose, "senorge_download", text = "Downloading:", queries$filenames[i])
     nc_filepath <- paste0(directory, "/", queries$filenames[i])
-    ncin <- nc_open(queries$full_urls[i])
+    ncin <- ncdf4::nc_open(queries$full_urls[i])
     all_vars <- ncin$var %>% names()
-    nc_create(filename = nc_filepath, vars = ncin$var, force_v4 = F) -> newnc
+    ncdf4::nc_create(filename = nc_filepath, vars = ncin$var, force_v4 = F) -> newnc
     for (variable in all_vars) {
       mt_print(verbose, "senorge_download", text = "Downloading..", variable, rflag = T)
       if(verbose){cat("                                                                               \r")}
       mt_print(verbose, "senorge_download", text = "Getting data for:", variable, rflag = T)
       # getting and applying values for current variable
-      values <- ncvar_get(nc = ncin, varid = variable)
-      ncvar_put(nc = newnc, varid = variable, vals = values)
+      values <- ncdf4::ncvar_get(nc = ncin, varid = variable)
+      ncdf4::ncvar_put(nc = newnc, varid = variable, vals = values)
 
       # adding each attribute
       mt_print(verbose, "senorge_download", text = "Applying attributes for", variable, rflag = T)
-      attrs <- ncatt_get(nc = ncin, varid = variable)
+      attrs <- ncdf4::ncatt_get(nc = ncin, varid = variable)
       all_attrs <- attrs %>% names()
       for (attribute in all_attrs) {
         mt_print(verbose, "senorge_download", text = "Adding attribute:", paste0(variable, "[", attribute,"]"), rflag = T)
         attr_val <- attrs[[attribute]]
-        ncatt_put(nc = newnc, varid = variable, attname = attribute, attval = attr_val)
+        ncdf4::ncatt_put(nc = newnc, varid = variable, attname = attribute, attval = attr_val)
         if(verbose){cat("\r")}
       }
-      all_glob_attr <- ncatt_get(ncin, varid = 0)
+      all_glob_attr <- ncdf4::ncatt_get(ncin, varid = 0)
       glob_attr_names <- all_glob_attr %>% names()
       for (glob_attr in glob_attr_names) {
         current_glob_attr <- all_glob_attr[[glob_attr]]
         mt_print(verbose, "senorge_download", text = "Applying global attribures:", text2 = glob_attr, rflag = T)
-        ncatt_put(nc = newnc, varid = 0, attname = glob_attr, attval = current_glob_attr)
+        ncdf4::ncatt_put(nc = newnc, varid = 0, attname = glob_attr, attval = current_glob_attr)
 
       }
     }
-    nc_close(ncin)
-    nc_close(newnc)
+    ncdf4::nc_close(ncin)
+    ncdf4::nc_close(newnc)
     mt_print(verbose, "senorge_download", text = "Finished Download                                                                   ",
              rflag = T)
     if(verbose){cat("\r\n")}
@@ -186,6 +187,7 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
     if(polygon %>% is.null() == FALSE){
       terra::rast(nc_filepath, variables[1])[[1]] -> myrast
       subtitle = paste0(terra::time(myrast) %>% as.Date())
+      polygon <- polygon %>% sf::st_transform(sf::st_crs(myrast))
       ggplot2::ggplot() +
         tidyterra::geom_spatraster(data = myrast, interpolate = F, show.legend = F)+
         ggplot2::geom_sf(data = polygon, color = "red", fill = NA, size = 2)+
