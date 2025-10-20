@@ -305,8 +305,10 @@ swatplus_metnordic <- function(directory,
   # convert to daily
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading data..")
   all_data <- list.files(directory, full.names = T, pattern = "extract_grid") %>% vroom::vroom(id = "station", show_col_types = F)
-  all_data <- all_data %>% mutate(station = (station %>% str_split(pattern = "metnordic_extract_grid_", simplify = T))[,2] %>% str_remove(".csv"),
-                                  day = as.Date(date))
+  all_data <- all_data %>% dplyr::mutate(
+    station = (station %>% stringr::str_split(pattern = "metnordic_extract_grid_", simplify = T))[, 2] %>% stringr::str_remove(".csv"),
+    day = as.Date(date)
+  )
 
   # summarize
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting to daily..")
