@@ -11,7 +11,7 @@ metnordic_extract_grid(
   mn_variables,
   outdir,
   meta_shp = FALSE,
-  verbose
+  verbose = FALSE
 )
 }
 \arguments{
