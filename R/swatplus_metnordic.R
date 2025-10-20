@@ -34,16 +34,18 @@
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
 #' @importFrom crayon green italic
-reanalysis3_swatinput <-
-  function(path,
-           swat_setup,
-           write_wgn = TRUE,
-           start = NA,
-           end = NA,
-           sqlite_path = NULL,
-           verbose = FALSE,
-           backup = TRUE) {
-
+reanalysis3_swatinput <- function(path,
+                                  swat_setup,
+                                  write_wgn = TRUE,
+                                  start = NA,
+                                  end = NA,
+                                  sqlite_path = NULL,
+                                  verbose = FALSE,
+                                  backup = FALSE,
+                                  aux_data = NULL,
+                                  epsg_code = NULL,
+                                  fill_missing = NULL,
+                                  clean_files = TRUE) {
     # create a backup of the SWAT+ setup
     if(backup){
       backuppath <- paste0(dirname(swat_setup), "/miljotools_swat_backup")
@@ -91,7 +93,14 @@ reanalysis3_swatinput <-
       # read
       df <- readr::read_csv(filepath, show_col_types = F)
 
-      variables <- colnames(df)
+      # BANDAID: filter out the NA or 0 values in case not all were passed
+      # For "AUXDATA"
+
+      not_all_na <- function(x) any(!is.na(x))
+      not_all_0 <- function(x) any(x != 0) # summing the rad of all NA gives 0 i think which is why this is needed
+
+      df %>% select(where(not_all_na)) %>% select(where(not_all_0)) -> df_filt
+      variables <- colnames(df_filt)
 
       if("daily" %in% variables){
         df2 <- data.frame(DATE = df$daily)
@@ -153,7 +162,7 @@ reanalysis3_swatinput <-
                    crs = 4326)
     metadata_spat$Long <- metadata$Long
     metadata_spat$Lat <- metadata$Lat
-    metadata_spat$Source = NA
+    metadata_spat$Source = "MET NORDIC DATASET"
 
     # recreating data format for SWATprepR
 
@@ -197,30 +206,34 @@ reanalysis3_swatinput <-
       names(new_list) <- paste0("ID", c(1:length(new_list)))
     }
 
-    # now we add that list to another list of metadata and data, in the final
-    # swatprepR format (NIGHTMARE!)
-    meteo_lst <- list(stations = metadata_spat , data = new_list)
-    if(verbose){print(mapview::mapview(meteo_lst$stations))}
+    if(aux_data %>% is.null() == FALSE){
+      ## Grab aux data:
+      mt_print(verbose, "swatplus_metnordic", "Adding Auxiliary data..")
+      aux_data_data <- SWATprepR::load_template(template_path = aux_data, epsg_code = epsg_code)
+      nr_metnordic_stations <- length(new_list)
+      nr_aux_stations <- length(aux_data_data$stations$ID)
+      new_IDS <- paste0("ID", c((nr_metnordic_stations+1):(nr_aux_stations+nr_metnordic_stations)))
+      aux_data_data$stations$ID <- new_IDS
+      aux_data_data$stations <- aux_data_data$stations %>% sf::st_transform(sf::st_crs(metadata_spat))
+      sf::st_coordinates(aux_data_data$stations) -> aux_coords
+      aux_long <- aux_coords[,1] %>% unname()
+      aux_lat <- aux_coords[,2] %>% unname()
+      aux_data_data$stations$Long <- aux_long
+      aux_data_data$stations$Lat <- aux_lat
+      names(aux_data_data$data) <- new_IDS
 
+      metadata_spat_aux <- rbind(metadata_spat, aux_data_data$stations)
+      data_prepr_aux <- c(new_list, aux_data_data$data)
+      meteo_lst <- list(stations = metadata_spat_aux, data = data_prepr_aux)
+      #if(verbose){print(mapview::mapview(meteo_lst$stations))}
+    }else{
+      meteo_lst <- list(stations = metadata_spat , data = new_list)
+    }
     # if the weather generator should be calculated and written:
     if(write_wgn){
       # calculating the weather generator
-      ## !!! which station should we use here? should be a parameter.
       cat(green(italic(("creating weather generator\n"))))
-      wgn <- SWATprepR::prepare_wgn(
-        meteo_lst,
-        TMP_MAX = meteo_lst$data$ID1$TMP_MAX,
-        TMP_MIN = meteo_lst$data$ID1$TMP_MIN,
-        PCP = meteo_lst$data$ID1$PCP,
-        RELHUM = meteo_lst$data$ID1$RELHUM,
-        WNDSPD = meteo_lst$data$ID1$WNDSPD,
-        SLR = meteo_lst$data$ID1$SLR
-      )
-      # writing the weather gen
-      if(verbose){cat(green(italic("writing weather generator to file in '", swat_setup, "'\n")))}
-
-      utils::write.csv(wgn$wgn_st, paste0(swat_setup,"/wgn_st.csv"), row.names = FALSE, quote = FALSE)
-      utils::write.csv(wgn$wgn_data, paste0(swat_setup,"/wgn_data.csv"), row.names = FALSE, quote = FALSE)
+      wgn <- SWATprepR::prepare_wgn(meteo_lst)
     }
 
     # writing
@@ -232,15 +245,16 @@ reanalysis3_swatinput <-
         db_path = sqlite_path,
         meteo_lst = meteo_lst,
         wgn_lst = wgn,
-        fill_missing = FALSE
+        fill_missing = fill_missing
       )
     }else{
       # if it is null, then write just the climate files
       if(verbose){cat(green(italic(("writing weather station files\n"))))}
-      SWATprepR::prepare_climate(meteo_lst,
-                                 swat_setup,
+      SWATprepR::prepare_climate(meteo_lst = meteo_lst,
+                                 write_path = swat_setup,
                                  period_starts = start,
-                                 period_ends = end)
+                                 period_ends = end,
+                                 clean_files = clean_files)
     }
   }
 
@@ -258,6 +272,11 @@ reanalysis3_swatinput <-
 #' @param start optional parameter to define start date of time series
 #' @param end optional parameter to define end date of time series4
 #' @param sqlite_path path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)
+#' @param backup (logical, defaults to true) creates a backup of your swat folder before modification
+#' @param aux_data Additional (non-metnordic) data to add to your SWAT+ project. Must be a path to an .xlsx file which matches the `SWATprepR` format of `load_template()`.
+#' @param epsg_code `SWATprepR`: (optional) Integer, EPSG code for station coordinates. Default epsg_code = 4326, which stands for WGS 84 coordinate system.
+#' @param fill_missing `SWATprepR`: (optional) Boolean, TRUE - fill data for missing stations with data from closest stations with available data. FALSE - leave stations without data. Weather generator will be used to fill missing variables for a model. Default fill_missing = TRUE.
+#' @param clean_files `SWATprepR`: Logical, if `TRUE`, will remove all existing weather files in model setup folder before writing new ones. Default `clean_files = TRUE`.
 #' @param verbose print to console?
 #'
 #' @returns path to SWAT+ setup
@@ -272,7 +291,12 @@ swatplus_metnordic <- function(directory,
                                start = NA,
                                end = NA,
                                sqlite_path = NULL,
-                               verbose) {
+                               backup = FALSE,
+                               aux_data = NULL,
+                               epsg_code = NULL,
+                               fill_missing = TRUE,
+                               clean_files = TRUE,
+                               verbose = FALSE) {
   coordpair <- station <- min_air <- max_air <- air_temperature_2m <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
@@ -346,12 +370,16 @@ swatplus_metnordic <- function(directory,
   reanalysis3_swatinput(
     path = output,
     swat_setup = swat_setup,
-    write_wgn = T,
-    start = NA,
-    end = NA,
-    sqlite_path = NULL,
+    write_wgn = write_wgn,
+    start = start,
+    end = end,
+    sqlite_path = sqlite_path,
     verbose =  verbose,
-    backup =  F
+    backup =  backup,
+    aux_data = aux_data,
+    epsg_code = epsg_code,
+    fill_missing = fill_missing,
+    clean_files = clean_files
   )
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Finished! deleting temp directory", output)
   unlink(output, recursive = T)

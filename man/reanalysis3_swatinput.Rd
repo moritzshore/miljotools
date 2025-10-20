@@ -12,7 +12,11 @@ reanalysis3_swatinput(
   end = NA,
   sqlite_path = NULL,
   verbose = FALSE,
-  backup = TRUE
+  backup = FALSE,
+  aux_data = NULL,
+  epsg_code = NULL,
+  fill_missing = NULL,
+  clean_files = TRUE
 )
 }
 \arguments{
