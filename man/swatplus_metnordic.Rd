@@ -11,7 +11,12 @@ swatplus_metnordic(
   start = NA,
   end = NA,
   sqlite_path = NULL,
-  verbose
+  backup = FALSE,
+  aux_data = NULL,
+  epsg_code = NULL,
+  fill_missing = TRUE,
+  clean_files = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -26,6 +31,16 @@ swatplus_metnordic(
 \item{end}{optional parameter to define end date of time series4}
 
 \item{sqlite_path}{path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)}
+
+\item{backup}{(logical, defaults to true) creates a backup of your swat folder before modification}
+
+\item{aux_data}{Additional (non-metnordic) data to add to your SWAT+ project. Must be a path to an .xlsx file which matches the \code{SWATprepR} format of \code{load_template()}.}
+
+\item{epsg_code}{\code{SWATprepR}: (optional) Integer, EPSG code for station coordinates. Default epsg_code = 4326, which stands for WGS 84 coordinate system.}
+
+\item{fill_missing}{\code{SWATprepR}: (optional) Boolean, TRUE - fill data for missing stations with data from closest stations with available data. FALSE - leave stations without data. Weather generator will be used to fill missing variables for a model. Default fill_missing = TRUE.}
+
+\item{clean_files}{\code{SWATprepR}: Logical, if \code{TRUE}, will remove all existing weather files in model setup folder before writing new ones. Default \code{clean_files = TRUE}.}
 
 \item{verbose}{print to console?}
 }
