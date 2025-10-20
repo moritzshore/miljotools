@@ -287,7 +287,7 @@ swatplus_metnordic <- function(directory,
   # summarize
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting to daily..")
 
-  daily_data <- all_data %>% group_by(station, day) %>% summarize(
+  daily_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(
     air_temperature_2m = mean(air_temperature_2m) %>% round(2),
     min_air  = min(air_temperature_2m) %>% round(2),
     max_air = max(air_temperature_2m) %>% round(2),
@@ -295,13 +295,13 @@ swatplus_metnordic <- function(directory,
     wind_speed_10m = mean(wind_speed_10m) %>% round(2),
     integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time = sum(integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time) %>% round(2),
     precipitation_amount = sum(precipitation_amount) %>% round(2)
-  )  %>%  select(station, daily = day, air_temperature_2m, relative_humidity_2m, wind_speed_10m, integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time, precipitation_amount, max_temp = max_air, min_temp = min_air)
+  )  %>%  dplyr::select(station, daily = day, air_temperature_2m, relative_humidity_2m, wind_speed_10m, integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time, precipitation_amount, max_temp = max_air, min_temp = min_air)
 
   write_indiv_station <- function(stat_id){
-    data = daily_data %>% filter(station == stat_id) %>% ungroup() %>% select(-station)
+    data = daily_data %>% dplyr::filter(station == stat_id) %>% dplyr::ungroup() %>% dplyr::select(-station)
     filename = paste0("station_", stat_id)
     filepath = paste0(output, "/", filename, ".csv")
-    write_csv(x = data, file = filepath)
+    readr::write_csv(x = data, file = filepath)
     return(TRUE)
   }
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing files to", output)
@@ -313,9 +313,9 @@ swatplus_metnordic <- function(directory,
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading metadata..")
 
   readmeta <- function(fp){
-   s1 =  utils::read.table(sep = "=", file = fp) %>% as_tibble()
-   ID = s1$V2[1] %>% str_replace(" plot", "ID")
-   Name = s1$V2[1] %>% str_replace(" plot", "vstation_")
+   s1 =  utils::read.table(sep = "=", file = fp) %>% tibble::as_tibble()
+   ID = s1$V2[1] %>% stringr::str_replace(" plot", "ID")
+   Name = s1$V2[1] %>% stringr::str_replace(" plot", "vstation_")
    Elevation = s1$V2[5] %>% as.numeric()
    Source = ""
 
@@ -323,11 +323,11 @@ swatplus_metnordic <- function(directory,
     x = s1$V2[3]
     y = s1$V2[4]
 
-    st_as_sf(x = data.frame(x = x, y = y),
+    sf::st_as_sf(x = data.frame(x = x, y = y),
              coords = c("x", "y"),
              crs =  "+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6371000") %>%
-      st_transform(coordpair, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") %>%
-      st_coordinates() -> geocoords
+      sf::st_transform(coordpair, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") %>%
+      sf::st_coordinates() -> geocoords
   Long = geocoords[1]
   Lat = geocoords[2]
   data.frame(ID = ID, Name = Name, Elevation = Elevation, Source = Source, Long = Long, Lat = Lat) %>% return()
@@ -336,11 +336,11 @@ swatplus_metnordic <- function(directory,
   all_meta_files <- metadata <- list.files(directory, full.names = T, pattern = "_meta_")
   lapply(all_meta_files, readmeta) -> metadf
 
-  do.call("rbind",args = metadf) %>% as_tibble() -> final_meta
+  do.call("rbind",args = metadf) %>% tibble::as_tibble() -> final_meta
 
   filepath = paste0(output, "/", "metadata.csv")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing metadata to:", filepath)
-  write_csv(x = final_meta, file = filepath)
+  readr::write_csv(x = final_meta, file = filepath)
 
   #NEXT: do SWAP prepr
   reanalysis3_swatinput(

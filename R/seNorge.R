@@ -389,10 +389,10 @@ swatplus_senorge <- function(extract_path,
   terra::extract(x = mydem, y = stations_reproj) %>% round(0) %>% tibble::as_tibble() -> el_df
   colnames(el_df) <- c("ID", "elevation")
   stations_geo <- stations
-  stations_geo <- st_transform(stations_geo, crs = 4326)
+  stations_geo <- sf::st_transform(stations_geo, crs = 4326)
   stations_geo <- stations_geo %>%
-    dplyr::mutate(Long = st_coordinates(stations_geo)[, 2],
-           Lat = st_coordinates(stations_geo)[, 1])
+    dplyr::mutate(Long = sf::st_coordinates(stations_geo)[, 2],
+           Lat = sf::st_coordinates(stations_geo)[, 1])
   stations$ID = paste0("ID", stations$vstation)
   stations$Name = paste0("SeNorge gridpoint ", stations$vstation)
   stations$Elevation = el_df$elevation
