@@ -29,7 +29,7 @@
 #'
 #' @author Moritz Shore, Svajunas Plunge
 #'
-#' @importFrom dplyr last nth
+#' @importFrom dplyr last nth where
 #' @importFrom purrr map
 #' @importFrom readr read_csv
 #' @importFrom stringr str_split str_remove
@@ -99,7 +99,7 @@ reanalysis3_swatinput <- function(path,
       not_all_na <- function(x) any(!is.na(x))
       not_all_0 <- function(x) any(x != 0) # summing the rad of all NA gives 0 i think which is why this is needed
 
-      df %>% select(where(not_all_na)) %>% select(where(not_all_0)) -> df_filt
+      df %>% dplyr::select(dplyr::where(not_all_na)) %>% select(dplyr::where(not_all_0)) -> df_filt
       variables <- colnames(df_filt)
 
       if("daily" %in% variables){
