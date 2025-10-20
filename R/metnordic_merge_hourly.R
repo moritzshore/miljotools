@@ -48,8 +48,12 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   # here we determine the correct format for the time dimension
   # "days since 1901-01-01 00:00:00.0"
   # note, UNSTABLE! dependent on file path ([,6] and [,1])
-  filenames_date <- ((stringr::str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% stringr::str_split(pattern = "-", simplify = T))[,1]
-
+  headers <- c("met_analysis_ltc_1_0km_nordic_", "met_analysis_1_0km_nordic_")
+  short_fps_filt %>% stringr::str_remove_all(headers[1]) %>%
+    stringr::str_remove_all(headers[2]) %>%
+    stringr::str_remove_all(paste0("_", variable)) %>%
+    stringr::str_remove_all(".nc") %>%
+    stringr::str_remove_all("Z") -> filenames_date
   # Converting the file names into date times.
   dateformat <-  paste0(
     substring(filenames_date, 1, 4),
@@ -66,6 +70,8 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
   if((dateformat[1] %>% lubridate::as_datetime() %>% is("POSIXct")) == FALSE){
     stop("Something went wrong converting the filenames to dates: \n", dateformat[1] )
   }
+
+  dateformat <- dateformat %>% sort()
 
   # A check if all the files are continuously in order
   # (this could be done a lot faster if i used dataframes i think)

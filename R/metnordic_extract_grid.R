@@ -29,7 +29,7 @@ metnordic_extract_grid <- function(merged_path,
                                    mn_variables,
                                    outdir,
                                    meta_shp = FALSE,
-                                   verbose) {
+                                   verbose = FALSE) {
   # sub functions
   get_timestamps <- function(merged_path, variable){
     filepaths <- list.files(merged_path, pattern = variable, full.names = T)
