@@ -26,8 +26,8 @@ metnordic_buildquery(
 \item{grid_resolution}{an integer, ie. 3 for 3x3 km grid.}
 
 \item{dataset}{either 'reanalysis' for the re-run archive, 'operational' for
-the operational archive, or 'continuous' to source from both, depending on
-time range.}
+the operational archive, 'ltc' for the EXPERIMENTAL long term consistent product or 'continuous' to source from all, depending on
+date range.}
 
 \item{verbose}{print to console?}
 }
