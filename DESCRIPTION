@@ -30,6 +30,7 @@ Imports:
     terra,
     tibble,
     tidyr,
+    units,
     vroom
 Suggests:
     devtools,
