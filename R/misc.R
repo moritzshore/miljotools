@@ -28,7 +28,8 @@ mt_print <- function(verbose, function_name, text, text2 = NULL, rflag = FALSE) 
     f_theme = bgYellow$white$bold
   }else if(grepl("metnordic", x = function_name)){
     f_theme <- bgCyan$white$bold
-
+  }else if(grepl("simplify_polygons", x = function_name)){
+    f_theme <- bgGreen$yellow$bold
   }else{
     f_theme <- bgBlack$white$bold
 

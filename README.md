@@ -48,8 +48,10 @@ View the "Articles" to get started
 3.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
 4.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+
+5.  [Simplify Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
  
-4.  More to come...
+6.  More to come...
 
 ## Add your own <a name="add"></a>
 
