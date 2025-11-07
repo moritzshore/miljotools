@@ -7,6 +7,7 @@ This R package aims to host a variety of functions useful for data collection, p
 ![GitHub repo size](https://img.shields.io/github/repo-size/moritzshore/miljotools)
 ![GitHub License](https://img.shields.io/github/license/moritzshore/miljotools)
 ![GitHub top language](https://img.shields.io/github/languages/top/moritzshore/miljotools)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17549371.svg)](https://doi.org/10.5281/zenodo.17549371)
 
 **Table of contents**
 
