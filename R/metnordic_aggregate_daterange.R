@@ -30,13 +30,29 @@
 #'
 #' @seealso [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_daily()]
 #'
-metnordic_aggregate_daterange <- function(directory, variable, method, start, end, outpath, overwrite = TRUE, n_cores = NULL, verbose = TRUE){
+metnordic_aggregate_daterange <- function(directory,
+                                          variable,
+                                          method,
+                                          start,
+                                          end,
+                                          outpath,
+                                          overwrite = TRUE,
+                                          n_cores = NULL,
+                                          verbose = TRUE) {
   # Creating date range from start to end dates
   daterange = seq(from  = start %>% as.Date(), to = end %>% as.Date())
   # converting it into the correct format (THIS MIGHT NOT BE STABLE DEPENDING ON LOCALE?)
   daterange %>% stringr::str_remove_all("-") -> dayformat
   # Lapply ready version
   custom_agg <- function(current_day){
+    if(overwrite == FALSE){
+      list.files(outpath, pattern = variable) -> xs
+      which(grepl(pattern = current_day,x = xs)) -> match
+      if(length(match) > 0){
+        grepl(pattern = method, x = xs[match]) -> check_true
+        return(paste0(current_day," ", variable, " ", method, " SKIPPED, ALREADY EXISTS"))
+      }
+    }
     miljotools::metnordic_aggregate(
       directory = directory,
       variable = variable,
@@ -44,7 +60,7 @@ metnordic_aggregate_daterange <- function(directory, variable, method, start, en
       day = current_day,
       outpath = outpath,
       overwrite = overwrite,
-      verbose = verbose
+      verbose = FALSE
     )
   }
   # determining number of cores
