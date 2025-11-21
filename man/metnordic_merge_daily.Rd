@@ -4,7 +4,13 @@
 \alias{metnordic_merge_daily}
 \title{Merge MET Nordic Files (daily)}
 \usage{
-metnordic_merge_daily(folderpath, variable, outpath, overwrite = FALSE)
+metnordic_merge_daily(
+  folderpath,
+  variable,
+  outpath,
+  overwrite = FALSE,
+  verify = FALSE
+)
 }
 \arguments{
 \item{folderpath}{String: Outpath of files from \code{metnordic_aggregate()}.}
@@ -14,6 +20,8 @@ metnordic_merge_daily(folderpath, variable, outpath, overwrite = FALSE)
 \item{outpath}{String: Folder path where to write files.}
 
 \item{overwrite}{Logical: Overwrite existing file?}
+
+\item{verify}{Logical: check if all dates in date range exist?}
 }
 \value{
 file path of generated files
