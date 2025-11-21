@@ -1,6 +1,3 @@
-"CWATM/metnordic/download_prec_temp/" -> folder
-setwd("../met-nordic-paper/")
-
 #' Verify MET Nordic download
 #'
 #' This function scans the download folder for files that are "too small" and
