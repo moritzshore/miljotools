@@ -123,14 +123,10 @@ convert_sea_to_surface <- function(met_var, altitude, temperature, verbose){
   if(((met_var[,,1] %>% dim() == alt_grid %>% dim()) %>% all()) == FALSE){
     stop("Spatial dimensions of altitude grid do not match dimensions of pressure data!")
   }
-  ## TEMP TEMPERATURE
-  # temperature dummy data
-  someData <- rep(273.15, 732)
-  temp_temp <- array(someData, c(203, 204, 732))
-  warning("still using dummy temp")
-  warning("remember to convert to K")
+  nc_open(temperature) -> temperature_nc
+  ncvar_get(temperature_nc, "air_temperature_2m_mean") -> temp_dc
 
-  if((((temp_temp %>% dim()) == (met_var %>% dim())) %>% all()) == FALSE){
+  if((((temp_dc %>% dim()) == (met_var %>% dim())) %>% all()) == FALSE){
     stop("Temperature data dimensions do not match that of pressure data!")
   }
   xs =c(1:dim(met_var)[1])
@@ -153,7 +149,7 @@ convert_sea_to_surface <- function(met_var, altitude, temperature, verbose){
         #          rflag = T)
         sea_level_pressure = met_var[x,y,day]
         altitude = alt_grid[x,y]
-        temperature = temp_temp[x,y,day] # temperature at ~sea~ level... [K]
+        temperature = temp_dc[x,y,day] # temperature at ~sea~ level... [K]
         P_b = sea_level_pressure # pressure at sea level (from met nordic) [Pa]
         h = altitude # height (m, from MN)
         R = 8.31432 # universal gas constant (N*m / mol * K)
