@@ -17,6 +17,7 @@
 #' @param end String: end of the date range to aggregate (eg. "2015-12-31")
 #' @param outpath String: path to directory of to be created files
 #' @param overwrite Logical: overwrite existing files? (optional, default TRUE)
+#' @param verfiy Logical: verify the existence of all required files? (recommended to be TRUE)
 #' @param n_cores Numeric: max number of cores to perform operation with. (optional)
 #' @param verbose Logical: print to console? (optional)
 #'
@@ -30,13 +31,63 @@
 #'
 #' @seealso [metnordic_aggregate()] [metnordic_download_daterange()] [metnordic_merge_daily()]
 #'
-metnordic_aggregate_daterange <- function(directory, variable, method, start, end, outpath, overwrite = TRUE, n_cores = NULL, verbose = TRUE){
+metnordic_aggregate_daterange <- function(directory,
+                                          variable,
+                                          method,
+                                          start,
+                                          end,
+                                          outpath,
+                                          overwrite = TRUE,
+                                          verify = FALSE,
+                                          n_cores = NULL,
+                                          verbose = TRUE) {
   # Creating date range from start to end dates
   daterange = seq(from  = start %>% as.Date(), to = end %>% as.Date())
   # converting it into the correct format (THIS MIGHT NOT BE STABLE DEPENDING ON LOCALE?)
   daterange %>% stringr::str_remove_all("-") -> dayformat
+
+  if(verify){
+    mt_print(TRUE, "metnordic_aggregate_daterange", "[verify = TRUE]", "Scanning for missing files...")
+    short_fps <- list.files(directory, pattern = "*.nc")
+    short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
+
+    short_fps_filt %>% str_remove(variable) %>% str_remove("_.nc") %>% str_split("_", simplify = T) -> set1
+    set1[,dim(set1)[2]] -> dtcode
+    year = substr(dtcode, 0,4)
+    month = substr(dtcode, 5,6)
+    day = substr(dtcode, 7,8)
+    hour = substr(dtcode, 10,11)
+    paste0(year, "-", month, "-", day, " ", hour, ":00:00") -> dates
+
+    dates %>% range() %>% as.POSIXct(tz = "UTC")  -> daterange
+    seq.POSIXt(daterange[1], daterange[2],by = "hour") %>% strftime(tz = "UTC")-> fulldate
+    which(dates != fulldate) -> issues
+
+    if(length(dates) != length(fulldate)){
+      mt_print(TRUE, "metnordic_aggregate_daterange", "[verify = TRUE]", "Missing dates detected!")
+      stop("Issue detected in timerange: Missing hour between [", dates[issues %>% first()-1], "] and [", dates[issues %>% first()], "]",
+           "\n\n", "You are missing the following timestamp: [", fulldate[issues %>% min()], "] for [", variable, "]",
+           "\n\n", "Please download the file AFTER: [", short_fps_filt[issues %>% min()-1], "] (+1 hour) and rerun..")
+    }else{
+      if(issues %>% length() > 1){
+        mt_print(TRUE, "metnordic_aggregate_daterange", "[verify = TRUE]", "Missing dates detected!")
+        stop(paste0("missing dates: ",dates[issues], collapse = "\n"))
+      }else{
+        mt_print(TRUE, "metnordic_aggregate_daterange", "[verify = TRUE]",  "No missing dates detected")
+      }
+    }
+  }
+
   # Lapply ready version
   custom_agg <- function(current_day){
+    if(overwrite == FALSE){
+      list.files(outpath, pattern = variable) -> xs
+      which(grepl(pattern = current_day,x = xs)) -> match
+      if(length(match) > 0){
+        grepl(pattern = method, x = xs[match]) -> check_true
+        return(paste0(current_day," ", variable, " ", method, " SKIPPED, ALREADY EXISTS"))
+      }
+    }
     miljotools::metnordic_aggregate(
       directory = directory,
       variable = variable,
@@ -44,7 +95,7 @@ metnordic_aggregate_daterange <- function(directory, variable, method, start, en
       day = current_day,
       outpath = outpath,
       overwrite = overwrite,
-      verbose = verbose
+      verbose = FALSE
     )
   }
   # determining number of cores

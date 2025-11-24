@@ -12,6 +12,7 @@ metnordic_aggregate_daterange(
   end,
   outpath,
   overwrite = TRUE,
+  verify = FALSE,
   n_cores = NULL,
   verbose = TRUE
 )
@@ -34,6 +35,8 @@ metnordic_aggregate_daterange(
 \item{n_cores}{Numeric: max number of cores to perform operation with. (optional)}
 
 \item{verbose}{Logical: print to console? (optional)}
+
+\item{verfiy}{Logical: verify the existence of all required files? (recommended to be TRUE)}
 }
 \value{
 Returns a named list with file paths to each aggregated file. \code{FALSE}

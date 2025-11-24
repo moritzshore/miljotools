@@ -16,6 +16,7 @@
 #' @param variable String: [MET Nordic variable](https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset#parameters) to be used (**NOTE:** don't forget suffix such as 'mean', 'sum', 'min', or 'max').
 #' @param outpath String: Folder path where to write files.
 #' @param overwrite Logical: Overwrite existing file?
+#' @param verify Logical: check if all dates in date range exist?
 #'
 #' @returns file path of generated files
 #' @export
@@ -25,7 +26,9 @@
 #' @importFrom abind abind
 #' @importFrom dplyr %>% first last
 #' @importFrom stringr str_split
-metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FALSE) {
+metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FALSE, verify = FALSE) {
+
+
 
   # testing par set:
   #
@@ -45,6 +48,29 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   short_fps_filt <- short_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
   long_fps_filt <- long_fps[(grepl(x = short_fps, pattern = variable) %>% which())]
 
+  if(verify){
+    short_fps_filt  %>% str_remove(variable) %>% str_remove(".nc") %>% str_split("_", simplify = T) -> myvec0
+    myvec1 <- suppressWarnings(as.numeric(myvec0))
+    myvec2 <- myvec1[!is.na(myvec1)]
+    dtcode <- myvec2[myvec2 > 19010101]
+    year = substr(dtcode, 0,4)
+    month = substr(dtcode, 5,6)
+    day = substr(dtcode, 7,8)
+    hour = substr(dtcode, 10,11)
+    paste0(year, "-", month, "-", day) %>% lubridate::as_date() -> dates
+
+    dates %>% range() -> daterange
+    seq(daterange[1], daterange[2],by = "day") -> fulldate
+    which(dates != fulldate) -> issues
+    if(issues %>% length() == 0){
+      mt_print(TRUE, "metnordic_merge_daily", "No missing dates detected")
+    }else{
+    mt_print(TRUE, "metnordic_merge_daily", "Missing dates detected!")
+    stop(paste0("missing dates: ",dates[issues], collapse = "\n"))
+    }
+  }
+
+
   # This opens all the files at once for the given varible, and then binds them
   # along the time axis (along = 3) to create a data cube.
   vect_open_return <- function(filepaths){
@@ -53,7 +79,7 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
     nc_close(ncfile)
     return(slice)
   }
-  datacube <- lapply(long_fps_filt, vect_open_return) %>% abind(along = 3)
+  datacube <- lapply(long_fps_filt, vect_open_return) %>% abind::abind(along = 3)
 
   # here we determine the correct format for the time dimension
   # "days since 1901-01-01 00:00:00.0"
@@ -61,7 +87,7 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
   daily_filenames <- ((str_split(short_fps_filt, pattern = "_", simplify = T)[,6]) %>% str_split(pattern = "-", simplify = T))[,1]
   dateformat <- paste0(substring(daily_filenames, 1,4), "-", substring(daily_filenames, 5,6), "-", substring(daily_filenames, 7,8)) %>% as.Date()
   dayssince1901 <- (dateformat-as.Date("1901-01-01")) %>% as.numeric()
-  daterange <- paste0(daily_filenames %>% first(),"to", daily_filenames %>% last())
+  daterange <- paste0(daily_filenames %>% dplyr::first(),"to", daily_filenames %>% dplyr::last())
 
   ### the rest is largely copied from the other metnordic functions
   # with a few adjustments for the time dimension.

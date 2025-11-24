@@ -4,12 +4,24 @@
 \alias{cwatm_convert_nc}
 \title{Convert MET Nordic Files to CWatM Meteo Input}
 \usage{
-cwatm_convert_nc(infile, outfile)
+cwatm_convert_nc(
+  infile,
+  outfile,
+  altitude = NULL,
+  temperature = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{infile}{String: path to projected MET Nordic .nc file as created by \code{metnordic_reproject()}}
 
 \item{outfile}{String: path and file name to desired output file}
+
+\item{altitude}{Only needed for converting to surface pressure. Path to file which contains altitude for the grid (.nc, ie as downloaded by \code{metnordic_download()})}
+
+\item{temperature}{Only needed for converting to surface pressure. Path to file which contains temperature data for a data cube of the same dimension.}
+
+\item{verbose}{Logical: print to console?}
 }
 \value{
 Path to outfile
@@ -18,8 +30,8 @@ Path to outfile
 This function converts a projected MET Nordic file (from
 \code{metnordic_reproject()}) to be compatible with CWatm. This function mainly
 just changes the dimension names from easting and northing to x and y and
-swapes variable order but has a crap load of boiler plate because... well..
-ncdf4.
+swaps variable order but has a crap load of boiler plate because... well..
+ncdf4. Supported variables are: tmax, tmin, prec, RH, shortwave downwelling, air pressure, wind speed
 }
 \details{
 Code largely adapted from this handy guide:
