@@ -9,7 +9,7 @@ to a SWAT+ setup, with the help of SWATprepR."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">miljotools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@ to a SWAT+ setup, with the help of SWATprepR."><meta property="og:image" content
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/metno_reanal.html">MET Nordic Reanalysis Dataset</a></li>
     <li><a class="dropdown-item" href="../articles/Norwegian_Soil_Classification.html">Soil Classification</a></li>
     <li><a class="dropdown-item" href="../articles/senorge.html">Accessing the SeNorge2018 dataset</a></li>
+    <li><a class="dropdown-item" href="../articles/simplify-polygons.html">Simplify Polygons</a></li>
     <li><a class="dropdown-item" href="../articles/thermopluviograms.html">Thermopluviograms</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -54,7 +55,12 @@ to a SWAT+ setup, with the help of <a href="https://biopsichas.github.io/SWATpre
 <span>  start <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  end <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  sqlite_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">verbose</span></span>
+<span>  backup <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aux_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  epsg_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill_missing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  clean_files <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,6 +92,26 @@ to a SWAT+ setup, with the help of <a href="https://biopsichas.github.io/SWATpre
 <dd><p>path to your SWAT+ sqlite file (only needed if you wish to update your database). Warning: start and end parameters will be ignored in this case (SWATprepR limitation)</p></dd>
 
 
+<dt id="arg-backup">backup<a class="anchor" aria-label="anchor" href="#arg-backup"></a></dt>
+<dd><p>(logical, defaults to true) creates a backup of your swat folder before modification</p></dd>
+
+
+<dt id="arg-aux-data">aux_data<a class="anchor" aria-label="anchor" href="#arg-aux-data"></a></dt>
+<dd><p>Additional (non-metnordic) data to add to your SWAT+ project. Must be a path to an .xlsx file which matches the <code>SWATprepR</code> format of <code>load_template()</code>.</p></dd>
+
+
+<dt id="arg-epsg-code">epsg_code<a class="anchor" aria-label="anchor" href="#arg-epsg-code"></a></dt>
+<dd><p><code>SWATprepR</code>: (optional) Integer, EPSG code for station coordinates. Default epsg_code = 4326, which stands for WGS 84 coordinate system.</p></dd>
+
+
+<dt id="arg-fill-missing">fill_missing<a class="anchor" aria-label="anchor" href="#arg-fill-missing"></a></dt>
+<dd><p><code>SWATprepR</code>: (optional) Boolean, TRUE - fill data for missing stations with data from closest stations with available data. FALSE - leave stations without data. Weather generator will be used to fill missing variables for a model. Default fill_missing = TRUE.</p></dd>
+
+
+<dt id="arg-clean-files">clean_files<a class="anchor" aria-label="anchor" href="#arg-clean-files"></a></dt>
+<dd><p><code>SWATprepR</code>: Logical, if <code>TRUE</code>, will remove all existing weather files in model setup folder before writing new ones. Default <code>clean_files = TRUE</code>.</p></dd>
+
+
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>print to console?</p></dd>
 
@@ -108,7 +134,7 @@ to a SWAT+ setup, with the help of <a href="https://biopsichas.github.io/SWATpre
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -4,6 +4,7 @@
 <url><loc>https://moritzshore.github.io/miljotools/articles/metno_reanal.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/senorge.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/articles/simplify-polygons.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/thermopluviograms.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/authors.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/index.html</loc></url>
@@ -23,11 +24,13 @@
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_merge_hourly.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_point.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_reproject.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_verify_download.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/mt_print.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/reanalysis3_swatinput.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/senorge_buildquery.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/senorge_download.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/senorge_extract_grid.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/simplify_polygons.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/swap_metnordic.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/swatplus_metnordic.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/swatplus_senorge.html</loc></url>

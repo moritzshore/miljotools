@@ -1,12 +1,13 @@
 pandoc: 3.6.3
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   metno_reanal: metno_reanal.html
   Norwegian_Soil_Classification: Norwegian_Soil_Classification.html
   senorge: senorge.html
+  simplify-polygons: simplify-polygons.html
   thermopluviograms: thermopluviograms.html
-last_built: 2025-10-15T13:07Z
+last_built: 2025-11-24T14:41Z
 urls:
   reference: https://moritzshore.github.io/miljotools/reference
   article: https://moritzshore.github.io/miljotools/articles
