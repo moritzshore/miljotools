@@ -17,7 +17,7 @@
 #' @param end String: end of the date range to aggregate (eg. "2015-12-31")
 #' @param outpath String: path to directory of to be created files
 #' @param overwrite Logical: overwrite existing files? (optional, default TRUE)
-#' @param verfiy Logical: verify the existence of all required files? (recommended to be TRUE)
+#' @param verify Logical: verify the existence of all required files? (recommended to be TRUE)
 #' @param n_cores Numeric: max number of cores to perform operation with. (optional)
 #' @param verbose Logical: print to console? (optional)
 #'

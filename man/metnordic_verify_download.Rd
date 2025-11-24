@@ -7,7 +7,7 @@
 metnordic_verify_download(folder)
 }
 \arguments{
-\item{folder}{}
+\item{folder}{path of downloaded files}
 }
 \value{
 Nothing

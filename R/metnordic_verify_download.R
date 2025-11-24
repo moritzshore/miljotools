@@ -5,7 +5,7 @@
 #' the same directory (and queries from `metnordic_build_query()`) function to
 #' re-download the deleted ones
 #'
-#' @param folder
+#' @param folder path of downloaded files
 #'
 #' @returns Nothing
 #' @export
