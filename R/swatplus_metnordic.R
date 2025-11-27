@@ -297,7 +297,7 @@ swatplus_metnordic <- function(directory,
                                fill_missing = TRUE,
                                clean_files = TRUE,
                                verbose = FALSE) {
-  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
+  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- air_temperature_2m_mean <- max_temp <- min_temp <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
@@ -320,9 +320,10 @@ swatplus_metnordic <- function(directory,
   if("air_temperature_2m" %in% swatcols){
     mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting temperature..")
     sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(
-      air_temperature_2m = mean(air_temperature_2m) %>% round(2),
+      air_temperature_2m_mean = mean(air_temperature_2m) %>% round(2),
       min_temp  = min(air_temperature_2m) %>% round(2),
-      max_temp = max(air_temperature_2m) %>% round(2))
+      max_temp = max(air_temperature_2m) %>% round(2)) %>%
+      dplyr::select(station, day, air_temperature_2m = air_temperature_2m_mean, min_temp, max_temp)
 
     daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
   }
