@@ -73,26 +73,20 @@ metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL
 
   dateformat <- dateformat %>% sort()
 
-  # A check if all the files are continuously in order
-  # (this could be done a lot faster if i used dataframes i think)
   if(verify){
-    is_1hr_after <- function(file1, file2){
-      mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",file1,"]"),rflag = T)
-      flag <- (((file1 %>% lubridate::as_datetime() - file2 %>% lubridate::as_datetime()) %>% as.numeric()) == -1)
-      if(flag == FALSE){
-        stop(paste0("files are not incremental! failed at: ", file1, " & ", file2))
-      }
+    daterange <- dateformat %>% range()
+    mt_print(verbose, "metnordic_merge_hourly", "verifiyng following timerange:", paste0(daterange[1], " - ", daterange[2]))
+    seq(daterange[1] %>% lubridate::as_datetime(tz = "UTC"), daterange[2]%>% lubridate::as_datetime(tz = "UTC"), by = "hour") -> fulldate
+    fulldate %>% strftime(tz = "UTC") -> full_date_notz
+    suppressWarnings((dateformat != full_date_notz) %>% which()) -> issue_idx
+    if(issue_idx %>% length() > 0){
+      issue_idx = min(issue_idx)
+      stop("[VERIFY = TRUE] Missing file detected at following date: ",   full_date_notz[issue_idx], " for '", variable, "'.
+         \n >> File after '", short_fps_filt[issue_idx-1], "' is probably missing and needs to be redownloaded!
+         \n >> The easiest way to fix this is to delete all files of datetime ", full_date_notz[issue_idx], " and re-run `metnordic_download_daterange()`")
+    }else{
+      mt_print(verbose, "metnordic_merge_hourly", "all files verified to be incremental..")
     }
-    vectorized_1hrafter <- function(date_nr){
-      if(date_nr == length(dateformat)){
-        mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] cheking if all files are in order..", text2 = paste0("[",dateformat[date_nr],"]"),rflag = T)
-        return(TRUE)
-        }
-      is_1hr_after(dateformat[date_nr], dateformat[date_nr+1])
-    }
-    lapply(seq_along(dateformat), vectorized_1hrafter) -> result
-    if(verbose){cat("\n")}
-    mt_print(verbose, function_name = "metnordic_merge_hourly", text = "[VERIFY = TRUE] All files verfied to be incremental")
   }
 
   # function to extract data from every file (used in parallel)
