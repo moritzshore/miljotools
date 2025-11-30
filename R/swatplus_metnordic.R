@@ -297,7 +297,7 @@ swatplus_metnordic <- function(directory,
                                fill_missing = TRUE,
                                clean_files = TRUE,
                                verbose = FALSE) {
-  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
+  coordpair <- station <- min_air <- max_air <- air_temperature_2m <- air_temperature_2m_mean <- max_temp <- min_temp <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
@@ -313,17 +313,49 @@ swatplus_metnordic <- function(directory,
   # summarize
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting to daily..")
 
-  daily_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(
-    air_temperature_2m = mean(air_temperature_2m) %>% round(2),
-    min_air  = min(air_temperature_2m) %>% round(2),
-    max_air = max(air_temperature_2m) %>% round(2),
-    relative_humidity_2m = mean(relative_humidity_2m) %>% round(2),
-    wind_speed_10m = mean(wind_speed_10m) %>% round(2),
-    integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time = sum(integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time) %>% round(2),
-    precipitation_amount = sum(precipitation_amount) %>% round(2)
-  )  %>%  dplyr::select(station, daily = day, air_temperature_2m, relative_humidity_2m, wind_speed_10m, integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time, precipitation_amount, max_temp = max_air, min_temp = min_air)
+  all_data %>% colnames() -> swatcols
+
+  daily_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::select(station, day) %>% dplyr::distinct()
+
+  if("air_temperature_2m" %in% swatcols){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting temperature..")
+    sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(
+      air_temperature_2m_mean = mean(air_temperature_2m) %>% round(2),
+      min_temp  = min(air_temperature_2m) %>% round(2),
+      max_temp = max(air_temperature_2m) %>% round(2)) %>%
+      dplyr::select(station, day, air_temperature_2m = air_temperature_2m_mean, min_temp, max_temp)
+
+    daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
+  }
+
+  if("relative_humidity_2m" %in% swatcols){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting temperature..")
+    sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(relative_humidity_2m = mean(relative_humidity_2m) %>% round(2))
+    daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
+  }
+
+  if("wind_speed_10m" %in% swatcols){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting wind speed..")
+    sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(wind_speed_10m = mean(wind_speed_10m) %>% round(2))
+    daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
+  }
+
+  if("integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time" %in% swatcols){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting radiation..")
+    sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time = sum(integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time) %>% round(2))
+    daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
+  }
+
+  if("precipitation_amount" %in% swatcols){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Converting precipitation..")
+    sub_data <- all_data %>% dplyr::group_by(station, day) %>% dplyr::summarize(precipitation_amount = sum(precipitation_amount) %>% round(2))
+    daily_data <- dplyr::left_join(daily_data, sub_data, by = c("station", "day"))
+  }
+
+  daily_data %>% dplyr::rename(daily = day) -> daily_data
 
   write_indiv_station <- function(stat_id){
+    mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing..", paste0("[", stat_id, "/", length(all_stations), "]"), rflag = T)
     data = daily_data %>% dplyr::filter(station == stat_id) %>% dplyr::ungroup() %>% dplyr::select(-station)
     filename = paste0("station_", stat_id)
     filepath = paste0(output, "/", filename, ".csv")
@@ -334,6 +366,8 @@ swatplus_metnordic <- function(directory,
 
   daily_data$station %>% unique() %>% as.numeric() %>% sort() %>% as.character() -> all_stations
   dump = lapply(all_stations, write_indiv_station)
+  mt_print(verbose, function_name = "swatplus_metnordic", text = "Writing..", "Finished!", rflag = F)
+
 
   ## Write metadata
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Loading metadata..")
