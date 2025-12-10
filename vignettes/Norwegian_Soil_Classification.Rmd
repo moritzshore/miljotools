@@ -66,11 +66,7 @@ automatically, then the following format is recommended:
 A simple usage is shown below. for a more in-depth run down of the
 arguments please visit the function help page.
 
-```{r, eval = F}
-
-## CURRENTLY BROKEN BECAUSE OF ggtern DEPENDENCY ISSUE.
-
-
+```{r, eval = T}
 # for demonstration purposes, use path of package
 example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 
@@ -79,9 +75,11 @@ classify_soil(
   output = "output_file.csv",
   version = "NOR",
   plot_result = T,
-  interactive = FALSE,
+  interactive = TRUE,
   decimal = ".",
   write = FALSE # false just for demonstration. 
 )
 ```
+
+> Note: Non-interactive plotting is currently broken due to a `ggtern` dependency.
 ## References
