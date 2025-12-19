@@ -386,6 +386,13 @@ swatplus_senorge <- function(extract_path,
   mt_print(verbose, "swatplus_senorge", "Converting metadata to SWATprepR format..", "adding elevation from DEM", rflag = T)
   terra::rast(DEM) -> mydem
   stations_reproj <- stations %>% sf::st_transform(crs = sf::st_crs(mydem))
+
+  if(verbose){
+    mt_print(verbose, "swatplus_senorge", "Plotting DEM and station locations...", "Make sure they overlap properly!!", rflag = F)
+    ggplot2::ggplot() + tidyterra::geom_spatraster(data = mydem) + ggplot2::geom_sf(data = stations_reproj, color = "orange")+
+    ggplot2::ggtitle("DEM and station locations...", "Make sure they overlap properly!!")
+  }
+
   terra::extract(x = mydem, y = stations_reproj) %>% round(0) %>% tibble::as_tibble() -> el_df
   colnames(el_df) <- c("ID", "elevation")
   stations_geo <- stations
@@ -396,7 +403,7 @@ swatplus_senorge <- function(extract_path,
   stations$ID = paste0("ID", stations$vstation)
   stations$Name = paste0("SeNorge gridpoint ", stations$vstation)
   stations$Elevation = el_df$elevation
-  stations$Source = "met no"
+  stations$Source = "SeNorge"
   stations$Long = stations_geo$Long
   stations$Lat = stations_geo$Lat
   stations_prepr <- stations %>% dplyr::select(ID, Name, Elevation, Source, geometry, Long, Lat)
@@ -447,7 +454,7 @@ swatplus_senorge <- function(extract_path,
   nr_aux_stations <- length(aux_data$stations$ID)
   new_IDS <- paste0("ID", c((nr_senorge_stations+1):(nr_aux_stations+nr_senorge_stations)))
   aux_data$stations$ID <- new_IDS
-  aux_data$stations <- aux_data$stations %>% st_transform(st_crs(stations_prepr))
+  aux_data$stations <- aux_data$stations %>% sf::st_transform(st_crs(stations_prepr))
   names(aux_data$data) <- new_IDS
 
   stations_prepr_aux <- rbind(stations_prepr, aux_data$stations)
@@ -468,7 +475,7 @@ swatplus_senorge <- function(extract_path,
     write_path = write_path,
     period_starts = period_starts,
     period_ends = period_ends,
-    clean_files = clean_files
+    clean_files = clean_files,cleanup = FALSE
   )
   mt_print(verbose, "swatplus_senorge", "Finished!")
   return(TRUE)
