@@ -2,6 +2,7 @@
 
 export(classify_soil)
 export(cwatm_convert_nc)
+export(era5_swatplus)
 export(metnordic_aggregate)
 export(metnordic_aggregate_daterange)
 export(metnordic_buildquery)

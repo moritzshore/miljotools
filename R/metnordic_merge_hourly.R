@@ -21,6 +21,7 @@
 #'
 #' @seealso [metnordic_download()] [metnordic_extract()]
 metnordic_merge_hourly <- function(folderpath, variable, outpath, n_cores = NULL, overwrite = FALSE, verify = FALSE, verbose = FALSE) {
+  mt_print(TRUE, "metnordic_merge_hourly", text = "Scanning files..")
   # Grabbing files
   short_fps <- list.files(folderpath, pattern = "*.nc")
   long_fps <- list.files(folderpath, pattern = "*.nc", full.names = T)
