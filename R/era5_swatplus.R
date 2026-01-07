@@ -38,6 +38,7 @@ era5_swatplus <- function(open_meteo_path,
   # reading in file to detect when the metadata ends and data starts
   readLines(open_meteo_path) -> mylines
   grepl(pattern = "location_id,time", x = mylines) %>% which() -> startidx # this location marks the split between metadata and data
+  if(startidx %>% is.numeric() != TRUE){stop("Issue with reading file. make sure it has `location_id,time` to split data from metadata.")}
   readr::read_csv(open_meteo_path, skip = startidx-1, show_col_types = F) -> openmeteoin
   readr::read_csv(open_meteo_path, n_max = startidx-3, show_col_types = F) -> metadata
 
@@ -59,6 +60,10 @@ era5_swatplus <- function(open_meteo_path,
                            Lat = latitude) %>%
     select(-location_id, -latitude, -longitude, -elevation, -utc_offset_seconds, -timezone, -timezone_abbreviation) -> metadata_spat
   metadata_spat %>% select(ID, Name = Name, Elevation, Source, Long, Lat, geometry) -> metadata_spat
+
+  if(verbose){
+    mapview::mapview(metadata_spat, zcol = "Name")
+  }
 
   # Filter and rename
   openmeteoin %>% filter(location_id %in% unique_data) %>%
@@ -182,6 +187,9 @@ era5_swatplus <- function(open_meteo_path,
     names(new_list) <- paste0("ID", c(1:length(new_list)))
   }
 
+ metadata_spat$ID <- paste0("ID", c(1:length(new_list)))
+ metadata_spat$Name <- paste0("vstat", c(1:length(new_list)))
+
   if(aux_data %>% is.null() == FALSE){
     ## Grab aux data:
     mt_print(verbose, "era5_swatplus", "Adding Auxiliary data..")
@@ -233,7 +241,8 @@ era5_swatplus <- function(open_meteo_path,
                                write_path = swat_setup,
                                period_starts = start,
                                period_ends = end,
-                               clean_files = clean_files)
+                               clean_files = clean_files, cleanup = FALSE)
+    unlink(paste0(swat_setup, "/temp"), recursive = T)
   }
   mt_print(verbose, "era5_swatplus", "Done!")
 }
