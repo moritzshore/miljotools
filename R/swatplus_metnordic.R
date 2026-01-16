@@ -254,8 +254,9 @@ reanalysis3_swatinput <- function(path,
                                  write_path = swat_setup,
                                  period_starts = start,
                                  period_ends = end,
-                                 clean_files = clean_files)
-    }
+                                 clean_files = clean_files, cleanup = FALSE)
+
+      }
   }
 
 
