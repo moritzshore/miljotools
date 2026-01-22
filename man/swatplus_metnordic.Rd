@@ -6,7 +6,7 @@
 \usage{
 swatplus_metnordic(
   directory,
-  swat_setup,
+  swat_setup = NULL,
   write_wgn = TRUE,
   start = NA,
   end = NA,
@@ -22,7 +22,7 @@ swatplus_metnordic(
 \arguments{
 \item{directory}{path to weather data as created by \code{metnordic_extract_grid()}}
 
-\item{swat_setup}{path to SWAT+ setup}
+\item{swat_setup}{path to SWAT+ setup (alternatively, you can pass a \code{sqlite_path})}
 
 \item{write_wgn}{should the weather generator be written?}
 
