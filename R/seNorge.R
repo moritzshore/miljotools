@@ -475,7 +475,7 @@ swatplus_senorge <- function(extract_path,
     write_path = write_path,
     period_starts = period_starts,
     period_ends = period_ends,
-    clean_files = clean_files,cleanup = FALSE
+    clean_files = clean_files#,cleanup = FALSE
   )
   mt_print(verbose, "swatplus_senorge", "Finished!")
   return(TRUE)
