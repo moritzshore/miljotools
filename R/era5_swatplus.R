@@ -29,6 +29,8 @@ era5_swatplus <- function(open_meteo_path,
                           sqlite_path = NULL,
                           fill_missing = FALSE
                           ) {
+  # rmd check satisfy:
+  latitude <- longitude <- location_id <- elevation <- utc_offset_seconds <- timezone <- timezone_abbreviation <- ID <- Name <- Elevation <- Source <- Long <- Lat <- time <- NULL
   # reset dir
   if(dir.exists(extract_path)){
     unlink(extract_path, recursive = T)
