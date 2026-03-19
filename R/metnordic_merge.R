@@ -66,7 +66,8 @@ metnordic_merge_daily <- function(folderpath, variable, outpath, overwrite = FAL
       mt_print(TRUE, "metnordic_merge_daily", "No missing dates detected")
     }else{
     mt_print(TRUE, "metnordic_merge_daily", "Missing dates detected!")
-    stop(paste0("missing dates: ",dates[issues], collapse = "\n"))
+    stop(paste0("missing date before : ",dates[issues %>% min()], "\n",
+                "file before: ",short_fps_filt[issues %>% min()] ))
     }
   }
 

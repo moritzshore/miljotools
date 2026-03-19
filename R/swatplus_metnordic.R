@@ -255,7 +255,8 @@ reanalysis3_swatinput <- function(path,
                                  period_starts = start,
                                  period_ends = end,
                                  clean_files = clean_files)
-    }
+
+      }
   }
 
 
@@ -267,7 +268,7 @@ reanalysis3_swatinput <- function(path,
 #' @seealso [metnordic_extract_grid()]
 #'
 #' @param directory path to weather data as created by `metnordic_extract_grid()`
-#' @param swat_setup path to SWAT+ setup
+#' @param swat_setup path to SWAT+ setup (alternatively, you can pass a `sqlite_path`)
 #' @param write_wgn should the weather generator be written?
 #' @param start optional parameter to define start date of time series
 #' @param end optional parameter to define end date of time series4
@@ -286,7 +287,7 @@ reanalysis3_swatinput <- function(path,
 #'
 #'
 swatplus_metnordic <- function(directory,
-                               swat_setup,
+                               swat_setup = NULL,
                                write_wgn = TRUE,
                                start = NA,
                                end = NA,
@@ -298,6 +299,15 @@ swatplus_metnordic <- function(directory,
                                clean_files = TRUE,
                                verbose = FALSE) {
   coordpair <- station <- min_air <- max_air <- air_temperature_2m <- air_temperature_2m_mean <- max_temp <- min_temp <- precipitation_amount <- integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <- wind_speed_10m <- relative_humidity_2m <-  NULL
+
+  if(is.null(swat_setup) & is.null(sqlite_path)){
+    stop("You must provide either a `sqlite_path` or a `swat_setup`")
+  }
+
+  if(!is.null(swat_setup) & !is.null(sqlite_path)){
+    stop("You can only provide either a `sqlite_path` or a `swat_setup`, not both!")
+  }
+
   output <- paste0(getwd(), "/swatplus_metnordic_temp")
   mt_print(verbose, function_name = "swatplus_metnordic", text = "Creating temp directory", output)
   dir.create(output)
