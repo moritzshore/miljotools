@@ -62,9 +62,8 @@ you an interactive map which can look somewhat like this:
 
 ![](images/clipboard-1736470040.png)
 
-The fucntion can be improved in the following way:
+The function can be improved in the following way:
 
 1.  Expand the land use legend
 2.  Incorporated connectivity of water objects
 3.  ...
-
