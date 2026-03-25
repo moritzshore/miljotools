@@ -9,7 +9,7 @@ to a SWAT+ setup, with the help of SWATprepR."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">miljotools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,9 @@ to a SWAT+ setup, with the help of SWATprepR."><meta property="og:image" content
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/metno_reanal.html">MET Nordic Reanalysis Dataset</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/cocoa.html">Visualize COCOA</a></li>
+    <li><a class="dropdown-item" href="../articles/era5_swatplus.html">ERA5 for SWAT Plus</a></li>
+    <li><a class="dropdown-item" href="../articles/metno_reanal.html">MET Nordic Reanalysis Dataset</a></li>
     <li><a class="dropdown-item" href="../articles/Norwegian_Soil_Classification.html">Soil Classification</a></li>
     <li><a class="dropdown-item" href="../articles/senorge.html">Accessing the SeNorge2018 dataset</a></li>
     <li><a class="dropdown-item" href="../articles/simplify-polygons.html">Simplify Polygons</a></li>
@@ -50,7 +52,7 @@ to a SWAT+ setup, with the help of <a href="https://biopsichas.github.io/SWATpre
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">swatplus_metnordic</span><span class="op">(</span></span>
 <span>  <span class="va">directory</span>,</span>
-<span>  <span class="va">swat_setup</span>,</span>
+<span>  swat_setup <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  write_wgn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  start <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  end <span class="op">=</span> <span class="cn">NA</span>,</span>
@@ -73,7 +75,7 @@ to a SWAT+ setup, with the help of <a href="https://biopsichas.github.io/SWATpre
 
 
 <dt id="arg-swat-setup">swat_setup<a class="anchor" aria-label="anchor" href="#arg-swat-setup"></a></dt>
-<dd><p>path to SWAT+ setup</p></dd>
+<dd><p>path to SWAT+ setup (alternatively, you can pass a <code>sqlite_path</code>)</p></dd>
 
 
 <dt id="arg-write-wgn">write_wgn<a class="anchor" aria-label="anchor" href="#arg-write-wgn"></a></dt>

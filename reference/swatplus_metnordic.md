@@ -10,7 +10,7 @@ and applies it to a SWAT+ setup, with the help of
 ``` r
 swatplus_metnordic(
   directory,
-  swat_setup,
+  swat_setup = NULL,
   write_wgn = TRUE,
   start = NA,
   end = NA,
@@ -33,7 +33,7 @@ swatplus_metnordic(
 
 - swat_setup:
 
-  path to SWAT+ setup
+  path to SWAT+ setup (alternatively, you can pass a `sqlite_path`)
 
 - write_wgn:
 

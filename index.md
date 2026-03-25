@@ -79,7 +79,13 @@ View the “Articles” to get started
 5.  [Simplify
     Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
 
-6.  More to come…
+6.  [Visualize
+    COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
+
+7.  [ERA5 Meteo data to
+    SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
+
+8.  …
 
 ## Add your own 
 

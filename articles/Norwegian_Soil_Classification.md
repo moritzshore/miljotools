@@ -1,8 +1,8 @@
 # Soil Classification
 
-Author: Moritz Shore
+**Author**: Moritz Shore (<moritz.shore@nibio.no>)
 
-Date: November, 2022
+**Date**: November, 2022
 
 ## Introduction
 
@@ -78,7 +78,7 @@ classify_soil(
 #>  adjusting the sand fraction and rounding...
 #> 
 #> > classifiying NORWEGIAN textures
-#> [1] "D:/miljotools/vignettes/output_file.csv"
+#> [1] "C:/Users/mosh/Documents/GIT/miljotools/vignettes/output_file.csv"
 ```
 
 > Note: Non-interactive plotting is currently broken due to a `ggtern`

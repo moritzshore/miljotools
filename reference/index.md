@@ -4,8 +4,14 @@
 
 - [`classify_soil()`](https://moritzshore.github.io/miljotools/reference/classify_soil.md)
   : Soil Texture ClassifieR
+- [`cocoa_hru()`](https://moritzshore.github.io/miljotools/reference/cocoa_hru.md)
+  : Generates a connectivity plot for an HRU
+- [`cocoa_vis()`](https://moritzshore.github.io/miljotools/reference/cocoa_vis.md)
+  : Visualize COCOA on a catchment scale
 - [`cwatm_convert_nc()`](https://moritzshore.github.io/miljotools/reference/cwatm_convert_nc.md)
   : Convert MET Nordic Files to CWatM Meteo Input
+- [`era5_swatplus()`](https://moritzshore.github.io/miljotools/reference/era5_swatplus.md)
+  : Convert ERA5 data from open meteo to SWAT+ input.
 - [`metnordic_aggregate()`](https://moritzshore.github.io/miljotools/reference/metnordic_aggregate.md)
   : Convert hourly MET Nordic files to daily
 - [`metnordic_aggregate_daterange()`](https://moritzshore.github.io/miljotools/reference/metnordic_aggregate_daterange.md)

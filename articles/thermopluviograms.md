@@ -1,8 +1,8 @@
 # Thermopluviograms
 
-Author: Moritz Shore
+**Author**: Moritz Shore (<moritz.shore@nibio.no>)
 
-Date: 01.06.2022
+**Date**: 01.06.2022
 
 ## Introduction
 
@@ -100,17 +100,17 @@ thermopluviogram(
 #> miljo🌿tools > thermopluviogram  >> generating plots... 
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment historical
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_hist_71-05_41-70.png
-#> 0.50s elapsed for 266010 iterations, 16 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 348910 iterations, 14 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  hist
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_hist_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment RCP 4.5
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_rcp45_71-05_41-70.png
-#> 0.50s elapsed for 394940 iterations, 4 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 497180 iterations, 3 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  rcp45
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_rcp45_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment RCP 8.5
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_rcp85_71-05_41-70.png
-#> 0.50s elapsed for 353470 iterations, 6 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 448750 iterations, 6 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  rcp85
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_rcp85_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> plots have been saved to ../man/figures

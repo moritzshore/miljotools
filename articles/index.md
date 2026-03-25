@@ -2,6 +2,10 @@
 
 ### All vignettes
 
+- [Visualize
+  COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.md):
+- [ERA5 for SWAT
+  Plus](https://moritzshore.github.io/miljotools/articles/era5_swatplus.md):
 - [MET Nordic Reanalysis
   Dataset](https://moritzshore.github.io/miljotools/articles/metno_reanal.md):
 - [Soil

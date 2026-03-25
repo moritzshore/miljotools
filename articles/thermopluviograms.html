@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">miljotools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/metno_reanal.html">MET Nordic Reanalysis Dataset</a></li>
+<li><a class="dropdown-item" href="../articles/cocoa.html">Visualize COCOA</a></li>
+    <li><a class="dropdown-item" href="../articles/era5_swatplus.html">ERA5 for SWAT Plus</a></li>
+    <li><a class="dropdown-item" href="../articles/metno_reanal.html">MET Nordic Reanalysis Dataset</a></li>
     <li><a class="dropdown-item" href="../articles/Norwegian_Soil_Classification.html">Soil Classification</a></li>
     <li><a class="dropdown-item" href="../articles/senorge.html">Accessing the SeNorge2018 dataset</a></li>
     <li><a class="dropdown-item" href="../articles/simplify-polygons.html">Simplify Polygons</a></li>
@@ -72,8 +74,8 @@
 
     
     
-<p>Author: Moritz Shore</p>
-<p>Date: 01.06.2022</p>
+<p><strong>Author</strong>: Moritz Shore (<a href="mailto:moritz.shore@nibio.no" class="email">moritz.shore@nibio.no</a>)</p>
+<p><strong>Date</strong>: 01.06.2022</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -88,16 +90,16 @@ data from SeNorge.</p>
 <li>Go to <a href="https://www.senorge.no/" class="external-link">senorge.no</a>, from the
 side menu, select themes &gt; daily maps &gt; temperature</li>
 </ol>
-<p><img src="../reference/figures/senorge1.png" class="r-plt" width="100%" height="100%" style="display: block; margin: auto;"></p>
+<p><img src="../reference/figures/senorge1.png" class="r-plt" alt="" width="100%" height="100%" style="display: block; margin: auto;"></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Select the point on interest on the map, then select “Graph of the
 point” and then download data from the point</li>
 </ol>
-<p><img src="../reference/figures/senorge2.png" class="r-plt" width="100%" height="100%" style="display: block; margin: auto;"></p>
+<p><img src="../reference/figures/senorge2.png" class="r-plt" alt="" width="100%" height="100%" style="display: block; margin: auto;"></p>
 <ol start="3" style="list-style-type: decimal">
 <li>Perform the same for Precipitation:</li>
 </ol>
-<p><img src="../reference/figures/senorge3.png" class="r-plt" width="100%" height="100%" style="display: block; margin: auto;"></p>
+<p><img src="../reference/figures/senorge3.png" class="r-plt" alt="" width="100%" height="100%" style="display: block; margin: auto;"></p>
 <p>That concludes the data acquisition part from SeNorge. Of course, you
 can source your observed data from where ever you please and use it in
 stead of SeNorge, if you match the format.</p>
@@ -170,17 +172,17 @@ Repo:</p>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating plots... </span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating thermopluviogram for experiment </span><span style="color: #000000; text-decoration: underline;">historical</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving thermopluviogram  </span><span style="color: #000000; text-decoration: underline;">tpg_Aas_hist_71-05_41-70.png</span></span></span>
-<span><span class="co">#&gt; 0.50s elapsed for 266010 iterations, 16 overlaps. Consider increasing 'max.time'.</span></span>
+<span><span class="co">#&gt; ggrepel: 0.500000s elapsed for 348910 iterations, 14 overlaps. Consider increasing 'max.time'.</span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating exetreme rain plot for experiment  </span><span style="color: #000000; text-decoration: underline;">hist</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving extreme rain plot </span><span style="color: #000000; text-decoration: underline;">xtreme_rain_Aas_hist_71-05_41-70.png</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating thermopluviogram for experiment </span><span style="color: #000000; text-decoration: underline;">RCP 4.5</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving thermopluviogram  </span><span style="color: #000000; text-decoration: underline;">tpg_Aas_rcp45_71-05_41-70.png</span></span></span>
-<span><span class="co">#&gt; 0.50s elapsed for 394940 iterations, 4 overlaps. Consider increasing 'max.time'.</span></span>
+<span><span class="co">#&gt; ggrepel: 0.500000s elapsed for 497180 iterations, 3 overlaps. Consider increasing 'max.time'.</span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating exetreme rain plot for experiment  </span><span style="color: #000000; text-decoration: underline;">rcp45</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving extreme rain plot </span><span style="color: #000000; text-decoration: underline;">xtreme_rain_Aas_rcp45_71-05_41-70.png</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating thermopluviogram for experiment </span><span style="color: #000000; text-decoration: underline;">RCP 8.5</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving thermopluviogram  </span><span style="color: #000000; text-decoration: underline;">tpg_Aas_rcp85_71-05_41-70.png</span></span></span>
-<span><span class="co">#&gt; 0.50s elapsed for 353470 iterations, 6 overlaps. Consider increasing 'max.time'.</span></span>
+<span><span class="co">#&gt; ggrepel: 0.500000s elapsed for 448750 iterations, 6 overlaps. Consider increasing 'max.time'.</span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; generating exetreme rain plot for experiment  </span><span style="color: #000000; text-decoration: underline;">rcp85</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; saving extreme rain plot </span><span style="color: #000000; text-decoration: underline;">xtreme_rain_Aas_rcp85_71-05_41-70.png</span></span></span>
 <span><span class="co">#&gt; <span style="background-color: #00BB00; font-weight: bold;">miljo</span><span style="background-color: #0000BB;">🌿</span><span style="background-color: #0000BB; font-weight: bold; font-style: italic;">tools </span><span style="background-color: #BBBBBB;">&gt;</span><span style="color: #00BBBB; background-color: #BBBBBB; font-weight: bold;"> thermopluviogram </span><span style="color: #BBBB00; font-style: italic;"> &gt;&gt; plots have been saved to </span><span style="color: #000000; text-decoration: underline;">../man/figures</span></span></span>
@@ -192,12 +194,12 @@ Repo:</p>
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/tpg_Aas_hist_71-05_41-70.png"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/tpg_Aas_rcp45_71-05_41-70.png"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/tpg_Aas_rcp85_71-05_41-70.png"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="../reference/figures/tpg_Aas_hist_71-05_41-70.png" class="r-plt" width="30%"><img src="../reference/figures/tpg_Aas_rcp45_71-05_41-70.png" class="r-plt" width="30%"><img src="../reference/figures/tpg_Aas_rcp85_71-05_41-70.png" class="r-plt" width="30%"></p>
+<p><img src="../reference/figures/tpg_Aas_hist_71-05_41-70.png" class="r-plt" alt="" width="30%"><img src="../reference/figures/tpg_Aas_rcp45_71-05_41-70.png" class="r-plt" alt="" width="30%"><img src="../reference/figures/tpg_Aas_rcp85_71-05_41-70.png" class="r-plt" alt="" width="30%"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/xtreme_rain_Aas_hist_71-05_41-70.png"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/xtreme_rain_Aas_rcp45_71-05_41-70.png"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../man/figures/xtreme_rain_Aas_rcp85_71-05_41-70.png"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="../reference/figures/xtreme_rain_Aas_hist_71-05_41-70.png" class="r-plt" width="30%"><img src="../reference/figures/xtreme_rain_Aas_rcp45_71-05_41-70.png" class="r-plt" width="30%"><img src="../reference/figures/xtreme_rain_Aas_rcp85_71-05_41-70.png" class="r-plt" width="30%"></p>
+<p><img src="../reference/figures/xtreme_rain_Aas_hist_71-05_41-70.png" class="r-plt" alt="" width="30%"><img src="../reference/figures/xtreme_rain_Aas_rcp45_71-05_41-70.png" class="r-plt" alt="" width="30%"><img src="../reference/figures/xtreme_rain_Aas_rcp85_71-05_41-70.png" class="r-plt" alt="" width="30%"></p>
 </div>
 <div class="section level3">
 <h3 id="cleanup">Cleanup<a class="anchor" aria-label="anchor" href="#cleanup"></a>

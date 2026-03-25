@@ -9,14 +9,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/moritzshore/miljotools/blob/HEAD/DESCRIPTION)
 
-Shore M (2025). *miljotools: Download MET Nordic data / SeNorge2018 Data
-/ Soil Texture Classification / Thermopluviograms*. R package version
-0.9.0, <https://moritzshore.github.io/miljotools/>.
+Shore M (2026). *miljotools: Collections of tools for R-based
+environemntal science workflows*. R package version 0.10.0,
+<https://moritzshore.github.io/miljotools/>.
 
     @Manual{,
-      title = {miljotools: Download MET Nordic data / SeNorge2018 Data / Soil Texture Classification / Thermopluviograms},
+      title = {miljotools: Collections of tools for R-based environemntal science workflows},
       author = {Moritz Shore},
-      year = {2025},
-      note = {R package version 0.9.0},
+      year = {2026},
+      note = {R package version 0.10.0},
       url = {https://moritzshore.github.io/miljotools/},
     }

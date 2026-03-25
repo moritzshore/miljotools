@@ -1,5 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://moritzshore.github.io/miljotools/404.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/articles/cocoa.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/articles/era5_swatplus.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/index.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/metno_reanal.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html</loc></url>
@@ -10,7 +12,10 @@
 <url><loc>https://moritzshore.github.io/miljotools/index.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/LICENSE.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/classify_soil.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/cocoa_hru.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/cocoa_vis.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/cwatm_convert_nc.html</loc></url>
+<url><loc>https://moritzshore.github.io/miljotools/reference/era5_swatplus.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/index.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_aggregate.html</loc></url>
 <url><loc>https://moritzshore.github.io/miljotools/reference/metnordic_aggregate_daterange.html</loc></url>

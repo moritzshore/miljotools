@@ -79,7 +79,13 @@ View the “Articles” to get started
 5.  [Simplify
     Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
 
-6.  More to come…
+6.  [Visualize
+    COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
+
+7.  [ERA5 Meteo data to
+    SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
+
+8.  …
 
 ## Add your own 
 
@@ -113,8 +119,14 @@ logo
 
 - [`classify_soil()`](https://moritzshore.github.io/miljotools/reference/classify_soil.md)
   : Soil Texture ClassifieR
+- [`cocoa_hru()`](https://moritzshore.github.io/miljotools/reference/cocoa_hru.md)
+  : Generates a connectivity plot for an HRU
+- [`cocoa_vis()`](https://moritzshore.github.io/miljotools/reference/cocoa_vis.md)
+  : Visualize COCOA on a catchment scale
 - [`cwatm_convert_nc()`](https://moritzshore.github.io/miljotools/reference/cwatm_convert_nc.md)
   : Convert MET Nordic Files to CWatM Meteo Input
+- [`era5_swatplus()`](https://moritzshore.github.io/miljotools/reference/era5_swatplus.md)
+  : Convert ERA5 data from open meteo to SWAT+ input.
 - [`metnordic_aggregate()`](https://moritzshore.github.io/miljotools/reference/metnordic_aggregate.md)
   : Convert hourly MET Nordic files to daily
 - [`metnordic_aggregate_daterange()`](https://moritzshore.github.io/miljotools/reference/metnordic_aggregate_daterange.md)
@@ -162,6 +174,10 @@ logo
 
 ### All vignettes
 
+- [Visualize
+  COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.md):
+- [ERA5 for SWAT
+  Plus](https://moritzshore.github.io/miljotools/articles/era5_swatplus.md):
 - [MET Nordic Reanalysis
   Dataset](https://moritzshore.github.io/miljotools/articles/metno_reanal.md):
 - [Soil

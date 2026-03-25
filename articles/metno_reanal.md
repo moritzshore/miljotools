@@ -1,6 +1,6 @@
 # MET Nordic Reanalysis Dataset
 
-*Author*: Moritz Shore
+*Author*: Moritz Shore (<moritz.shore@nibio.no>)
 
 *Date*: October, 2023
 
@@ -132,9 +132,6 @@ paste0(names(coord_window_poly), collapse = ", ")
 paste0(coord_window_poly, collapse = ", ")
 ```
 
-    ## [1] "index_xmin, index_xmax, index_ymin, index_ymax, metadist"
-    ## [1] "663, 674, 732, 750, NA"
-
 The `metadist` entry is only needed for point geometry and indicates the
 distance to the nearest data set grid cell. Of course, for this geometry
 there are only two coordinates:
@@ -143,9 +140,6 @@ there are only two coordinates:
 paste0(names(coord_window_point), collapse = ", ")
 paste0(coord_window_point, collapse = ", ")
 ```
-
-    ## [1] "index_x, index_y, metadist"
-    ## [1] "669, 744, 702"
 
 ## Build Query
 
@@ -208,21 +202,12 @@ We now have the files we want to download:
 queries_point$filenames %>% head()
 ```
 
-    ## [1] "met_analysis_1_0km_nordic_20190601T00Z.nc"
-    ## [2] "met_analysis_1_0km_nordic_20190601T01Z.nc"
-    ## [3] "met_analysis_1_0km_nordic_20190601T02Z.nc"
-    ## [4] "met_analysis_1_0km_nordic_20190601T03Z.nc"
-    ## [5] "met_analysis_1_0km_nordic_20190601T04Z.nc"
-    ## [6] "met_analysis_1_0km_nordic_20190601T05Z.nc"
-
 And the `OPenDaP` download urls: (just one as an example, as they are
 very long).
 
 ``` r
 queries_poly$full_urls[1]
 ```
-
-    ## [1] "https://thredds.met.no/thredds/dodsC/metpparchivev3/2019/06/01/met_analysis_1_0km_nordic_20190601T00Z.nc?x[662:1:673],y[731:1:749],latitude[731:1:749][662:1:673],longitude[731:1:749][662:1:673],altitude[731:1:749][662:1:673],air_temperature_2m[0:1:0][731:1:749][662:1:673],relative_humidity_2m[0:1:0][731:1:749][662:1:673],wind_speed_10m[0:1:0][731:1:749][662:1:673],integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[0:1:0][731:1:749][662:1:673],precipitation_amount[0:1:0][731:1:749][662:1:673]"
 
 > “metpparchivev3” indicates this comes from the re-run archive. if it
 > were to say “metpparchive” only, that would indicate that it comes
@@ -242,11 +227,6 @@ fps <- metnordic_download(url = queries_poly$full_urls[15],
 (fps[[1]] %>% terra::rast())[[1]] %>% plot()
 ```
 
-    ## Warning: [rast] skipped sub-datasets (see 'describe(sds=TRUE)'):
-    ## altitude
-
-![](metno_reanal_files/figure-html/unnamed-chunk-12-1.png)
-
 Please note, the downloaded files are separated per variable. Why?
 Because the project this code was designed for needed the files like
 that. Also, these files get very big very quickly, so having
@@ -264,13 +244,6 @@ dl_path = metnordic_download_daterange(
   mn_variables = my_variables)
 list.files(dl_path) %>% head()
 ```
-
-    ## [1] "met_analysis_1_0km_nordic_20190601T00Z_air_temperature_2m.nc"                                            
-    ## [2] "met_analysis_1_0km_nordic_20190601T00Z_integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time.nc"
-    ## [3] "met_analysis_1_0km_nordic_20190601T00Z_precipitation_amount.nc"                                          
-    ## [4] "met_analysis_1_0km_nordic_20190601T00Z_relative_humidity_2m.nc"                                          
-    ## [5] "met_analysis_1_0km_nordic_20190601T00Z_wind_speed_10m.nc"                                                
-    ## [6] "met_analysis_1_0km_nordic_20190601T01Z_air_temperature_2m.nc"
 
 ### Downloading from Point Geometry
 
@@ -294,21 +267,12 @@ point_dl_path <- metnordic_point(
   todate = end,
   mn_variables = my_variables,
   verbose = F)
-```
-
-    ## Warning in metnordic_point(area = example_point_geometry, path = point_path, : Warning, this function will be retired in the next update, please transition to the new system.
-    ##              
-    ##  https://moritzshore.github.io/miljotools/articles/metno_reanal.html
-
-``` r
 # Viewing the data:
 data <- read_csv("indiv_point/METNORDIC_point.csv", show_col_types = F)
 plot(data$date, data$air_temperature_2m-273.15, type = "b", 
      ylab = "air_temperature_2m", xlab = "Timestamp", 
      main = "metnordic_point() \ndownload")
 ```
-
-![](metno_reanal_files/figure-html/unnamed-chunk-14-1.png)
 
 ## Merging Hourly Files
 
@@ -328,12 +292,6 @@ custom_merge <- function(variable) {
 res = lapply(X = my_variables, FUN = custom_merge)
 ```
 
-    ## miljo🌿tools > metnordic_merge_hourly  >> Merging 49 files:  air_temperature_2m (using 30 threads)
-    ## miljo🌿tools > metnordic_merge_hourly  >> Merging 49 files:  relative_humidity_2m (using 30 threads)
-    ## miljo🌿tools > metnordic_merge_hourly  >> Merging 49 files:  wind_speed_10m (using 30 threads)
-    ## miljo🌿tools > metnordic_merge_hourly  >> Merging 49 files:  integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time (using 30 threads)
-    ## miljo🌿tools > metnordic_merge_hourly  >> Merging 49 files:  precipitation_amount (using 30 threads)
-
 ``` r
 data <- brick(res[[1]])
 spatast <- data  %>% rast()
@@ -342,10 +300,6 @@ for (i in c(1:hours)) {
   plot(spatast[[i]], legend = FALSE, main = spatast[[i]] %>% names())
 }
 ```
-
-![Hourly Air Temperature in K](metno_reanal_files/figure-html/gif-.gif)
-
-Hourly Air Temperature in K
 
 ## Extracting Timeseries
 
@@ -364,8 +318,6 @@ metnordic_extract(
   verbose = T)
 ```
 
-    ## [1] "./extracted/METNORDIC_point_vignette_example.csv"
-
 ``` r
 # Viewing the data:
 data <- read_csv("extracted//METNORDIC_point_vignette_example.csv", show_col_types = F)
@@ -373,8 +325,6 @@ plot(data$date, data$air_temperature_2m - 273.15,
   type = "b", ylab = "air_temperature_2m",
   xlab = "Timestamp", main = "metnordic_extract() data")
 ```
-
-![](metno_reanal_files/figure-html/unnamed-chunk-17-1.png)
 
 If you would like to extract at multiple points, or all points within an
 area, you can use
@@ -395,19 +345,6 @@ extracted_path = metnordic_extract_grid(
 extracted_path %>% list.files(pattern = "extract_grid_", full.names = T) %>%
   first() %>% read_csv(show_col_types = F) %>% head()
 ```
-
-    ## # A tibble: 6 × 6
-    ##   date                air_temperature_2m relative_humidity_2m wind_speed_10m
-    ##   <dttm>                           <dbl>                <dbl>          <dbl>
-    ## 1 2019-06-01 00:00:00               282.                0.884           1.30
-    ## 2 2019-06-01 01:00:00               282.                0.919           1.42
-    ## 3 2019-06-01 02:00:00               282.                0.926           1.33
-    ## 4 2019-06-01 03:00:00               282.                0.948           2.07
-    ## 5 2019-06-01 04:00:00               282.                0.963           1.72
-    ## 6 2019-06-01 05:00:00               282.                0.981           3.17
-    ## # ℹ 2 more variables:
-    ## #   integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time <dbl>,
-    ## #   precipitation_amount <dbl>
 
 ## Further processing the data cube
 
@@ -433,8 +370,6 @@ data <- brick(agg_path)
 spatast <- data  %>% rast()
 plot(spatast, main = "mean temp \n(2019-06-01)")
 ```
-
-![](metno_reanal_files/figure-html/unnamed-chunk-21-1.png)
 
 Now that was only a single day, and usually you would like to aggregate
 very many days all at once. For this, you can use the function
@@ -485,8 +420,6 @@ metnordic_reproject(filepath = merged_fp,
                     projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
 ```
 
-    ## [1] "reprojected_example.nc"
-
 ``` r
 reproj <- rast("reprojected_example.nc")
 mapview(reproj)
@@ -527,8 +460,6 @@ per variable.
 ``` r
 cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
 ```
-
-    ## [1] "cwatm_ready.nc"
 
 ### SWAP
 

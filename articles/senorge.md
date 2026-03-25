@@ -1,6 +1,6 @@
 # Accessing the SeNorge2018 dataset
 
-**Author**: Moritz Shore
+**Author**: Moritz Shore (<moritz.shore@nibio.no>)
 
 **Date**: October, 2025
 
@@ -70,16 +70,6 @@ my_coord_window <- metnordic_coordwindow(
 )
 ```
 
-    ## miljo🌿tools > metnordic_coordwindow  >> getting base file from: SeNorge2018
-    ## miljo🌿tools > metnordic_coordwindow  >> basefile downloaded. 
-    ## miljo🌿tools > metnordic_coordwindow  >> Loading and projecting shapefile... 
-    ## miljo🌿tools > metnordic_coordwindow  >> geometry detected: sfc_POLYGON
-    ## miljo🌿tools > metnordic_coordwindow  >> buffering shapefile:  500 m
-    ## miljo🌿tools > metnordic_coordwindow  >> calculating coordinate window... 
-    ## miljo🌿tools > metnordic_coordwindow  >> coordinate window is: xmin=341 xmax=349 xmin=1388 ymax=1372
-
-![](senorge_files/figure-html/unnamed-chunk-4-1.png)
-
 Now we can use this coordinate window to build our download queries. At
 this stage we need to define which variables we should like to download,
 at which resolution, and for which time period. In this example we are
@@ -99,10 +89,6 @@ my_queries <- senorge_buildquery(
 )
 ```
 
-    ## miljo🌿tools > senorge_buildquery  >> You have a grid of: 8 x 16 (128 cells)
-    ## miljo🌿tools > senorge_buildquery  >> generating urls with a grid resolution of: 1 x 1 km
-    ## miljo🌿tools > senorge_buildquery  >> Returning queries.. (2)
-
 Now that we have our queries, we can download our customized files. We
 can provide our polygon to double check that the download matches the
 area we want.
@@ -116,10 +102,6 @@ my_download <- senorge_download(
   verbose = FALSE
 )
 ```
-
-![Diagnostic plots](senorge_files/figure-html/gif-.gif)
-
-Diagnostic plots
 
 With our files downloaded in `.nc` format, we can convert them to `.csv`
 for the grid cells that cover our desired area. (Note: at this stage you
@@ -138,21 +120,11 @@ senorge_extract_grid(
 ) -> my_extract
 ```
 
-![](senorge_files/figure-html/unnamed-chunk-6-1.png)
-
 Having a look at the results:
 
 ``` r
 list.files(my_extract, pattern = ".csv", full.names = T)[1] %>% readr::read_csv(show_col_types = FALSE)
 ```
-
-    ## # A tibble: 4 × 6
-    ##   vstation date          tg     tn    tx    rr
-    ##      <dbl> <date>     <dbl>  <dbl> <dbl> <dbl>
-    ## 1        1 1999-12-30 -5.59 -10.7  -4.42  0   
-    ## 2        1 1999-12-31 -9.61 -13.5  -8.46  0   
-    ## 3        1 2000-01-01 -9.35  -9.35 -2.75 10.3 
-    ## 4        1 2000-01-02 -5.45  -6.39  3.16  0.47
 
 ``` r
 metadata_path = list.files(my_extract, pattern = ".shp", full.names = T)
