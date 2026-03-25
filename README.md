@@ -54,7 +54,9 @@ View the "Articles" to get started
 
 6.  [Visualize COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
 
-7.  ...
+7.  [ERA5 Meteo data to SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
+
+8.  ...
 
 ## Add your own <a name="add"></a>
 
