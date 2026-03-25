@@ -10,12 +10,12 @@ editor_options:
     wrap: 72
 bibliography: ../vignettes/references.bib
 csl: ../vignettes/apa-5th-edition.csl
-
 ---
 
-Author: Moritz Shore
+**Author**: Moritz Shore
+([moritz.shore\@nibio.no](mailto:moritz.shore@nibio.no){.email})
 
-Date: November, 2022
+**Date**: November, 2022
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -30,8 +30,9 @@ library(miljotools)
 
 ## Introduction
 
-Classifies soils based off of clay, silt, sand fractions using USDA [@ditzler2017soil] or
-Norwegian [@sveistrup1984kornstorrelsesgrupper] systems. 
+Classifies soils based off of clay, silt, sand fractions using USDA
+[@ditzler2017soil] or Norwegian [@sveistrup1984kornstorrelsesgrupper]
+systems.
 
 ```{r, fig1, echo= FALSE, fig.align='center', fig.cap="Figure 1: Soil classificatio based on the Norwegian (left) and USDA (right) systems.", out.width="100%", out.height="100%"}
 knitr::include_graphics("../man/figures/soil_class.png")
@@ -81,5 +82,5 @@ classify_soil(
 )
 ```
 
-> Note: Non-interactive plotting is currently broken due to a `ggtern` dependency.
-## References
+> Note: Non-interactive plotting is currently broken due to a `ggtern`
+> dependency. \## References

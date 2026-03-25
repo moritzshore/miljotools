@@ -34,7 +34,6 @@ files <- c("cs10_basin.zip", "cs10_txt.zip", "cs10point.zip", "metnordic.met", "
 file.remove(files)
 ```
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(gifski)
@@ -42,6 +41,7 @@ RUN_VIGNETTE = FALSE
 ```
 
 [Author]{.underline}: Moritz Shore
+([moritz.shore\@nibio.no](mailto:moritz.shore@nibio.no){.email})
 
 [Date]{.underline}: October, 2023
 
@@ -283,10 +283,10 @@ list.files(dl_path) %>% head()
 
 ## Downloading from Point Geometry
 
-Please note! `metnordic_download()` and `metnordic_download_daterange()` do not
-work for point geometries. You're meant to extract from downloaded .nc files
-using point locations. But, if you really don't want to do that, you can use the
-`metnordic_point()` function:
+Please note! `metnordic_download()` and `metnordic_download_daterange()`
+do not work for point geometries. You're meant to extract from
+downloaded .nc files using point locations. But, if you really don't
+want to do that, you can use the `metnordic_point()` function:
 
 ```{r, eval = RUN_VIGNETTE}
 point_path <- "indiv_point/"

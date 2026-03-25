@@ -11,7 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-**Author**: Moritz Shore
+**Author**: Moritz Shore (moritz.shore@nibio.no)
 
 **Date**: October, 2025
 
