@@ -4,12 +4,12 @@
 \alias{cocoa_vis}
 \title{Visualize COCOA on a catchment scale}
 \usage{
-cocoa_vis(buildR_dir, directory = NULL, RERENDER = TRUE, verbose = TRUE)
+cocoa_vis(buildR_dir, directory, RERENDER = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{buildR_dir}{(string) path to SWATbuildR project directory (containing the 'data/*' subdirectory)}
 
-\item{directory}{(string) directory where to save the generated HRU plots}
+\item{directory}{(string) directory where to save/load the generated HRU plots to/from. (will be saved in a sub-directory 'hru_report/')}
 
 \item{RERENDER}{(logical) re-generate the HRU plots?}
 

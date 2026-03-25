@@ -12,6 +12,11 @@ editor_options:
 
 # Visualize COCOA
 
+**Author**: Moritz Shore
+([moritz.shore\@nibio.no](mailto:moritz.shore@nibio.no){.email})
+
+**Date**: March, 2026
+
 This tool allows you to visualize the Contiguous Object Connectivity
 Approach (COCOA) of `SWATbuildR` and the OPTAIN project, which you can
 read more about here:
@@ -66,4 +71,5 @@ The function can be improved in the following way:
 
 1.  Expand the land use legend
 2.  Incorporated connectivity of water objects
-3.  ...
+3.  Faster plotting?
+4.  ...

@@ -1,10 +1,13 @@
+# rmd check appeastment
+type <- from_id <- to_id <- obj_typ <- hyd_typ <- frac <- direction <- percent <- id <- name<- cha_id<- flow<- gen_type<- label<- gis_id<-NULL
+
 # cocoa_vis(
 #   buildR_dir = "../SWAT-skuterud/project_data/SWATbuildR/skuterud_buildR/",
 #   directory = "../SWAT-skuterud/project_data/figures/connectivity",
 #   RERENDER = T,
 #   verbose = T
 # )
-
+# #
 
 #' Visualize COCOA on a catchment scale
 #'
@@ -16,7 +19,7 @@
 #' @seealso [cocoa_hru()]
 #'
 #' @param buildR_dir (string) path to SWATbuildR project directory (containing the 'data/*' subdirectory)
-#' @param directory (string) directory where to save the generated HRU plots
+#' @param directory (string) directory where to save/load the generated HRU plots to/from. (will be saved in a sub-directory 'hru_report/')
 #' @param RERENDER (logical) re-generate the HRU plots?
 #' @param verbose (logical) print status?
 #'
@@ -24,7 +27,7 @@
 #'
 #' @export
 cocoa_vis <- function(buildR_dir,
-                      directory = NULL,
+                      directory,
                       RERENDER = TRUE,
                       verbose = TRUE) {
 
@@ -32,9 +35,14 @@ cocoa_vis <- function(buildR_dir,
   required_packages <- c("leafpop", "naturalsort")
   install_missing_packs(required_packages)
 
+  # load data needed for mapping
+  sf::read_sf(paste0(buildR_dir, "data/vector/hru.shp")) -> hru.shp
+  sf::read_sf(paste0(buildR_dir, "data/vector/res.shp")) -> res.shp
+  sf::read_sf(paste0(buildR_dir, "data/vector/cha.shp")) -> cha.shp
+
   # generate HRU reports
   if (RERENDER) {
-    unlink(directory, recursive = T)
+    unlink(paste0(directory,"/hru_report"), recursive = T)
     lapply(
       X = hru.shp$id,
       FUN = cocoa_hru,
@@ -45,14 +53,10 @@ cocoa_vis <- function(buildR_dir,
     ) -> DUMP
   }
 
-  # load data needed for mapping
-  sf::read_sf(paste0(buildR_dir, "data/vector/hru.shp")) -> hru.shp
-  sf::read_sf(paste0(buildR_dir, "data/vector/res.shp")) -> res.shp
-  sf::read_sf(paste0(buildR_dir, "data/vector/cha.shp")) -> cha.shp
-
   # load filepaths for images
   list.files(paste0(directory, "/hru_report"), full.names = T) %>% naturalsort::naturalsort() -> imgs
-
+  if(length(imgs) == 0){stop("Found ", length(imgs), " HRU reports! did you pass the correct `directory`?)\n >> directory = ", directory)}
+  if(length(imgs) != length(hru.shp$id)){warning("Found ", length(imgs), " HRU reports for ", length(hru.shp$id), " --not all HRUs will have reports! (did you pass the correct `directory`?)")}
   # generate maps
   mapview::mapview(cha.shp, layer.name = "Channels", legend = FALSE) -> channelmap
   mapview::mapview(res.shp, layer.name = "Water boides", legend = FALSE) -> watrmap
@@ -66,14 +70,12 @@ cocoa_vis <- function(buildR_dir,
       imgs,
       src = "local",
       embed = FALSE,
-      width = 800
+      width = 600
     )
   )
   watrmap + channelmap + popupmap -> full_map
   full_map %>% return()
 }
-
-
 
 #' Generates a connectivity plot for an HRU
 #'
@@ -126,7 +128,7 @@ cocoa_hru <- function(hru_id, buildR_dir, agri_pattern = "a_", directory = NULL,
   }
   sf::read_sf(paste0(buildR_dir, "data/vector/land_connections_as_lines.shp")) -> lcal
   DEM <- terra::rast(paste0(buildR_dir, "data/raster/dem.tif"))
-  DEM %>%  terra::res() %>% paste(collapse = "x") %>% paste0(., "m") -> demrestring
+  DEM %>%  terra::res() %>% round(2) %>% paste(collapse = "x") %>% paste0(., "m") -> demrestring
   mt_print(verbose, "cocoa_hru", "Processing data...", rflag = F)
   lcal %>% dplyr::filter(from_id %in% hru_id | to_id %in% hru_id) %>%
     # we dont want these, because its not relevant.
@@ -359,3 +361,4 @@ cocoa_hru <- function(hru_id, buildR_dir, agri_pattern = "a_", directory = NULL,
     return(adjusted_plot)
   }
 }
+
