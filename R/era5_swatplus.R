@@ -1,23 +1,40 @@
 #' Convert ERA5 data from open meteo to SWAT+ input.
 #'
-#' `open_meteo_path` needs to point to a file downloaded from open-meteo.
+#' Usage of this function require the user to first download the ERA5 data from open-meteo. Please see below for instructions.
+#'
+#' To apply ERA5 data to a SWAT+ setup, you need to first independently download
+#' said data from open-meteo.com. Please note, there is a limit on downloads for
+#' the free tier, which is why (for now) it is not directly implemented in
+#' miljotools. When downloading the data for use in this package, please follow
+#' the following template EXACTLY, only changing the grid cells (list format),
+#' start and end date, and perhaps the variables (UNTESTED – make sure to adjust
+#' the open_meteo_variables parameter). Any deviations will probably cause
+#' errors. If you would like to make the function more robust for your use case,
+#' feel free to submit a pull request!
+#'
+#' Here is the template URL: [[link](https://open-meteo.com/en/docs/historical-weather-api?timezone=Europe%2FBerlin&models=era5&hourly=&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum,wind_speed_10m_mean,relative_humidity_2m_mean&wind_speed_unit=ms&bounding_box=59.522321,10.82686,59.865845,11.111253&start_date=2013-01-01&end_date=2022-12-31&location_mode=csv_coordinates&cell_selection=nearest&csv_coordinates=59.75,+10.75%0A59.75,11.00%0A59.50,10.75%0A59.50,11.00%0A#hourly_weather_variables)]
+#' Once you have downloaded your data, You can use the function to apply ERA5 meteorological data to a SWAT+ setup:
+#'
+#' Please see the [SWATprepR docs](https://biopsichas.github.io/SWATprepR/) for details on some of the optional parameters.
 #'
 #' @param open_meteo_path path to file downloaded from open-meteo in daily format with the correct variables
+#' @param open_meteo_variables character vector of which variables were downloaded. IMPORT TO KEEP THE ORDER CORRECT (same as in API request!). The default values are those needed for the SWAT+ setup.
 #' @param extract_path path to location where data can be extracted and processed
 #' @param swat_setup path to swat+ setup
-#' @param aux_data if auxilliary data is to be added, path to xlsx file using `SWATprepR` formatting.
+#' @param aux_data if auxiliary data is to be added, path to xlsx file using `SWATprepR` formatting.
 #' @param epsg_code See `SWATprepR` docs
 #' @param verbose Print? default is `TRUE`
-#' @param selected_vars Variables to incorporate from ERA5. default is all of them
-#' @param write_wgn See `SWATprepR`docs
-#' @param clean_files See `SWATprepR`docs
-#' @param sqlite_path See `SWATprepR`docs
+#' @param selected_vars Variables to incorporate from ERA5. default is all of them.
+#' @param write_wgn See `SWATprepR` docs
+#' @param clean_files See `SWATprepR` docs
+#' @param sqlite_path See `SWATprepR` docs
 #' @param fill_missing See `SWATprepR` docs
 #'
 #' @returns Nothing
 #' @export
 #'
 era5_swatplus <- function(open_meteo_path,
+                          open_meteo_variables = c("temperature_2m_max", "temperature_2m_min", "precipitation_sum", "shortwave_radiation_sum", "wind_speed_10m_mean", "relative_humidity_2m_mean"),
                           extract_path,
                           swat_setup,
                           aux_data = NULL,
@@ -29,12 +46,19 @@ era5_swatplus <- function(open_meteo_path,
                           sqlite_path = NULL,
                           fill_missing = FALSE
                           ) {
+# At some point we could make the function work in a way that it A. downloads the data itself, and B, generates the url itself from spatial and temporal parameters.
+# # sample url = https://archive-api.open-meteo.com/v1/archive?latitude=59.75,59.75,59.5,59.5&longitude=10.75,11,10.75,11&start_date=2013-01-01&end_date=2022-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum,wind_speed_10m_mean,relative_humidity_2m_mean&models=era5&timezone=Europe%2FBerlin&wind_speed_unit=ms&cell_selection=nearest
+#   dir.create(download_path)
+#   testdl <- download.file(url = open_meteo_url, destfile = paste0(download_path, "/open_meteo_dl.csv"))
+
   # rmd check satisfy:
-  latitude <- longitude <- location_id <- elevation <- utc_offset_seconds <- timezone <- timezone_abbreviation <- ID <- Name <- Elevation <- Source <- Long <- Lat <- time <- NULL
+  latitude <- longitude <- location_id <- elevation <- utc_offset_seconds <- timezone <- timezone_abbreviation <- ID <- Name <- Elevation <- Source <- Long <- Lat <- time <- temperature_2m_max <- temperature_2m_min<-precipitation_sum<-shortwave_radiation_sum<-wind_speed_10m_mean<-relative_humidity_2m_mean<-NULL
   # reset dir
   if(dir.exists(extract_path)){
     unlink(extract_path, recursive = T)
     dir.create(extract_path, showWarnings = F)
+  }else{
+    dir.create(extract_path)
   }
 
   # reading in file to detect when the metadata ends and data starts
@@ -42,6 +66,7 @@ era5_swatplus <- function(open_meteo_path,
   grepl(pattern = "location_id,time", x = mylines) %>% which() -> startidx # this location marks the split between metadata and data
   if(startidx %>% is.numeric() != TRUE){stop("Issue with reading file. make sure it has `location_id,time` to split data from metadata.")}
   readr::read_csv(open_meteo_path, skip = startidx-1, show_col_types = F) -> openmeteoin
+  colnames(openmeteoin) <- c("location_id", "time", open_meteo_variables)
   readr::read_csv(open_meteo_path, n_max = startidx-3, show_col_types = F) -> metadata
 
   # determining unique grid cells and only keeping those (safeguard against
@@ -70,19 +95,19 @@ era5_swatplus <- function(open_meteo_path,
   # Filter and rename
   openmeteoin %>% filter(location_id %in% unique_data) %>%
     rename(date = time,
-           min_temp = `temperature_2m_min (°C)`,
-           max_temp = `temperature_2m_max (°C)`,
-           precipitation_amount = `precipitation_sum (mm)`,
-           rh = `relative_humidity_2m_mean (%)`,
-           windspeed = `wind_speed_10m_mean (m/s)`,
-           rad = `shortwave_radiation_sum (MJ/m²)`
+           min_temp = temperature_2m_min,
+           max_temp = temperature_2m_max,
+           precipitation_amount = precipitation_sum,
+           rh = relative_humidity_2m_mean,
+           windspeed =wind_speed_10m_mean,
+           rad = shortwave_radiation_sum,
     )  -> openmeteofilt
 
   # write to disk
   for (location in openmeteofilt$location_id %>% unique()) {
     print(paste0("Writing station ", location+1, " to disk"))
     dir.create(extract_path, showWarnings = F)
-    fn = paste0("ERA5_location_id_",location+1, ".csv")
+    fn = paste0("/ERA5_location_id_",location+1, ".csv")
     fpfn = paste0(extract_path, fn)
     openmeteofilt %>% filter(location_id == location) %>% select(-location_id) %>% write_csv(file = fpfn)
   }

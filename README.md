@@ -51,8 +51,10 @@ View the "Articles" to get started
 4.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
 
 5.  [Simplify Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
- 
-6.  More to come...
+
+6.  [Visualize COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
+
+7.  ...
 
 ## Add your own <a name="add"></a>
 
