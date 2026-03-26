@@ -1,7 +1,7 @@
 Type: Package
 Package: miljotools
 Title: Collections of tools for R-based environemntal science workflows
-Version: 0.10.0
+Version: 0.10.1
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data gathering, processing, and
