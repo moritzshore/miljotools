@@ -72,7 +72,7 @@ simplify_polygons <- function(polygon_map,
 
     # the polygons that touch it
     if(length(touching_idx) == 0){
-      print(paste0("> polygon has no neighbors! removing..."))
+      mt_print(verbose, fname, "polygon has no neighbors! removing...")
       to_simp <- to_simp %>% dplyr::filter(idx != polygon)
       next()
     }
