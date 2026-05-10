@@ -1,0 +1,20 @@
+---
+title: "Accessing the SeNorge Snow dataset"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Accessing the SeNorge2 Snow dataset}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+  chunk_output_type: console
+---
+
+**Author**: Moritz Shore (moritz.shore@nibio.no)
+
+**Date**: May, 2026
+
+## Introduction
+
+WIP

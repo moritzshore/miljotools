@@ -11,7 +11,7 @@
 #'
 #' @param area_path String: path to shapefile of region / point (this must have point or polygon geometry!)
 #' @param area_buffer Integer: buffer in m to place around shapefile / point
-#' @param source String: 'metnordic' (default) to access the MET Nordic grid, or 'senorge' to access the SeNorge2018 grid.
+#' @param source String: 'metnordic' (default) to access the MET Nordic grid, 'senorge' to access the SeNorge2018 grid, or "senorge_snow" to access the SeNorge snow grid.
 #' @param verbose Logical: plot the coordinate window?
 #' @param interactive Logical, should the plotted coordinate window be interactive (mapview) or static (ggplot)
 #'
@@ -38,6 +38,12 @@ metnordic_coordwindow <- function(area_path, area_buffer = 0, source = "metnordi
     proj_crs <- sf::st_crs(32633)
     ncdf_coord_x <- "X"
     ncdf_coord_y <- "Y"
+  }else if(source == "senorge_snow"){
+    mt_print(verbose, function_name = "metnordic_coordwindow","getting base file from:", "SeNorge_snow" )
+    filename = "https://thredds.met.no/thredds/dodsC/senorge/seNorge_snow/swe/swe_1958.nc"
+    proj_crs <- sf::st_crs(32633)
+    ncdf_coord_x <- "x"
+    ncdf_coord_y <- "y"
   }else{
     stop("'source' not recognized! needs to be either 'metnordic' or 'senorge'")
   }

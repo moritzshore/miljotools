@@ -36,6 +36,9 @@ variables at daily resolution:
 \item \code{tx} (maximum daily temperature in Celsius)
 \item \code{rr} (sum daily precipitation in mm),
 \item \code{tg} (mean daily temperature in Celsius)
+(Alternatively, you can pass a "SeNorge Snow" variable, to download that
+dataset, but please note, these variables must be downloaded one at a time
+due to how they are structured in the database)
 If you do not provide a vector of variables to download, all will be downloaded.
 You can also provide a \code{polygon} (Georeferenced simple feature, the same that
 you provided to \code{metnordic_coordwindow()}) to verify that the download is

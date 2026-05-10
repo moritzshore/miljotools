@@ -10,7 +10,7 @@
 #' @seealso [metnordic_coordwindow()] [senorge_download()]
 #'
 #' @param bounding_coords list as returned by `metnordic_coordwindow()`
-#' @param variables character vector of variables to download may include the following: "tn", "tx", "rr", "tg"
+#' @param variables character vector of variables to download. For SeNorge2018, may include the following: "tn", "tx", "rr", "tg". For snow dataset, must use single variables. See [docs](https://github.com/metno/seNorge_docs/wiki/senorgesnow_variables).
 #' @param fromdate date from when to start downloading data from (eg. "1957-01-01")
 #' @param todate date from when to end downloading data from (eg. "2024-12-31")
 #' @param grid_resolution integer value fo grid resolution (eg 1 for a 1x1km grid)
@@ -36,20 +36,44 @@ senorge_buildquery <- function(bounding_coords,
 
   # Source:
   # https://thredds.met.no/thredds/catalog/senorge/seNorge_2018/Archive/catalog.html
-
   ## Check variable format:
   senorge_variables <- c("tn", "tx", "rr", "tg")
-  if ((variables %in% senorge_variables) %>% all() == FALSE) {
-    stop(
-      "Provided variables not all in SeNorge2018. You can only request the following:\n >> ",
-      paste(collapse = ", ", senorge_variables)
-    )
+  senorge_snow_variables <- c("fsw", "lwc", "qsw", "qtt", "sd", "sdfsw", "ski", "swe", "swepr")
+  if((variables %in% senorge_variables) %>% any()){
+    senorge_2018 = TRUE
+    project = "senorge_2018"
+    if(length(variables) > 1){
+      stop("For SeNorge_snow, you can only request one variable at a time!")
+    }
+
+    if ((variables %in% senorge_variables) %>% all() == FALSE) {
+      stop(
+        "Provided variables not all in SeNorge2018. You can only request the following:\n >> ",
+        paste(collapse = ", ", senorge_variables)
+      )
+    }
+    ## Check start and end dates
+    if(fromdate < ("1957-01-01" %>% as.Date())){stop("SeNorge only goes back to 1957. You requested data from: ", fromdate)}
+    # Don't know how to check start date yet.
+
+  }else if((variables %in% senorge_snow_variables) %>% any()){
+    senorge_2018 = FALSE
+    senorge_snow = TRUE
+    project = "senorge_snow"
+    if ((variables %in% senorge_snow_variables) %>% all() == FALSE) {
+      stop(
+        "Provided variables not all in SeNorge_snow. You can only request the following:\n >> ",
+        paste(collapse = ", ", senorge_snow_variables)
+      )
+    }
+
+    ## Check start and end dates
+    if(fromdate < ("1958-01-01" %>% as.Date())){stop("SeNorge Snow only goes back to 1958. You requested data from: ", fromdate)}
+    # Don't know how to check start date yet.
+
+  }else{
+    stop("Variables not recognized! Supported projects are 'SeNorge_2018' & 'SeNorge_snow'")
   }
-
-  ## Check start and end dates
-  if(fromdate < ("1957-01-01" %>% as.Date())){stop("SeNorge only goes back to 1957. You requested data from: ", fromdate)}
-  # Don't know how to check start date yet.
-
 
   ## Creating the suffix for the time dimension
   ## For SeNorge
@@ -72,12 +96,18 @@ senorge_buildquery <- function(bounding_coords,
   geo_queries <- build_coord_suffix(
     bounding_coords = bounding_coords,
     grid_resolution = grid_resolution,
-    project = "senorge", verbose = verbose
+    project = project, verbose = verbose
   )
   queryDF$x_q <- geo_queries$x_query
   queryDF$y_q <- geo_queries$y_query
-  queryDF$X <- paste0("X", queryDF$x_q)
-  queryDF$Y <- paste0("Y", queryDF$y_q)
+  if(senorge_snow){
+    queryDF$X <- paste0("x", queryDF$x_q)
+    queryDF$Y <- paste0("y", queryDF$y_q)
+  }else{
+    queryDF$X <- paste0("X", queryDF$x_q)
+    queryDF$Y <- paste0("Y", queryDF$y_q)
+  }
+
   #queryDF$latitude <- paste0("latitude", queryDF$y_q,queryDF$x_q)
   #queryDF$longitude <- paste0("longitude", queryDF$y_q,queryDF$x_q)
   queryDF$time <- paste0("time",queryDF$time_q)
@@ -86,6 +116,17 @@ senorge_buildquery <- function(bounding_coords,
   var_q_gen <- function(variable){
     queryDF %>% mutate(variable = paste0(variable, time_q, y_q, x_q)) %>% pull(variable) %>% return()
   }
+
+  if(project == "senorge_snow"){
+    # renaming the senorge vars
+    if(variables == "fsw"){
+      file_variable = variables
+      variables = "snow_amount"
+    }else{
+      stop("NEED TO IMPLEMENT! >>", variables )
+    }
+  }
+
   lapply(variables, var_q_gen) %>% do.call("cbind", args = .) %>% as.data.frame() %>% as_tibble()-> var_qs
   colnames(var_qs) <- variables
   queryDF <- cbind(queryDF, var_qs) %>% as_tibble()
@@ -93,8 +134,21 @@ senorge_buildquery <- function(bounding_coords,
   # Add projection to query
   queryDF$proj <- "UTM_Zone_33"
 
-  # add URL to query
-  queryDF$url <- paste0("https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018/Archive/seNorge2018_", queryDF$years, ".nc?")
+  if(project == "senorge_2018"){
+    project_url  = "https://thredds.met.no/thredds/dodsC/senorge/seNorge_2018"
+    sub_project = "Archive/seNorge2018_"
+    full_filenames <- paste0("seNorge2018_", years, ".nc")
+
+  } else if(project == "senorge_snow"){
+    project_url  = "https://thredds.met.no/thredds/dodsC/senorge/seNorge_snow"
+    sub_project = paste0(file_variable, "/", file_variable, "_")
+    full_filenames <- paste0("seNorge_snow_",file_variable,"_", years, ".nc")
+
+  }else{
+    stop("this should never execute")
+  }
+
+  queryDF$url <- paste0(project_url,"/",sub_project, queryDF$years, ".nc?")
 
 
   ### BUILD REAL QUERIES
@@ -108,8 +162,6 @@ senorge_buildquery <- function(bounding_coords,
   query_suffix <- queryDF %>% tidyr::unite(real_q, X, Y, time, proj, all_of(variables), sep = ",") %>% pull(real_q)
   queryDF$q_suff <- query_suffix
   full_queries <- paste0(queryDF$url, queryDF$q_suff)
-  full_filenames <- paste0("seNorge2018_", years, ".nc")
-
   mt_print(verbose, "senorge_buildquery", "Returning queries..", paste0("(", length(full_filenames), ")"))
   return(list(full_urls = full_queries, filenames = full_filenames))
 }
@@ -124,6 +176,9 @@ senorge_buildquery <- function(bounding_coords,
 #' - `tx` (maximum daily temperature in Celsius)
 #' - `rr` (sum daily precipitation in mm),
 #' - `tg` (mean daily temperature in Celsius)
+#' (Alternatively, you can pass a "SeNorge Snow" variable, to download that
+#' dataset, but please note, these variables must be downloaded one at a time
+#' due to how they are structured in the database)
 #' If you do not provide a vector of variables to download, all will be downloaded.
 #' You can also provide a `polygon` (Georeferenced simple feature, the same that
 #' you provided to `metnordic_coordwindow()`) to verify that the download is
@@ -147,6 +202,11 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
   }
   for (i in seq_along(queries$filenames)) {
     mt_print(verbose, "senorge_download", text = "Downloading:", queries$filenames[i])
+
+    # TODO REMOVE THIS
+    if(queries$filenames[i] == "seNorge_snow_fsw_1998.nc"){
+      next()
+    }
     nc_filepath <- paste0(directory, "/", queries$filenames[i])
     ncin <- ncdf4::nc_open(queries$full_urls[i])
     all_vars <- ncin$var %>% names()
@@ -185,11 +245,14 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
     if(verbose){cat("\r\n")}
     # if a polygon simple feature is provided, then preview.
     if(polygon %>% is.null() == FALSE){
+      if(polygon %>% is.character()){
+        polygon %>% sf::read_sf() -> polygon
+      }
       terra::rast(nc_filepath, variables[1])[[1]] -> myrast
       subtitle = paste0(terra::time(myrast) %>% as.Date())
       polygon <- polygon %>% sf::st_transform(sf::st_crs(myrast))
       ggplot2::ggplot() +
-        tidyterra::geom_spatraster(data = myrast, interpolate = F, show.legend = F)+
+        tidyterra::geom_spatraster(data = myrast, interpolate = F, show.legend = T)+
         ggplot2::geom_sf(data = polygon, color = "red", fill = NA, size = 2)+
         ggplot2::theme_bw()+
         ggplot2::ggtitle(subtitle)+
@@ -203,13 +266,13 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
 
 #' Extract data from SeNorge2018 files
 #'
-#' This function extracts data from SeNorge2018 .nc files from overlapping grid cells of a provided polygon.
+#' This function extracts data from SeNorge2018 (or SeNorge Snow) .nc files from overlapping grid cells of a provided polygon.
 #' @seealso [senorge_download()]
 #'
 #' @param directory string, path to directory of downloaded SeNorge2018 files (as downloaded by `senorge_download()`)
 #' @param outdir string, path to directory where data should be extracted to.
 #' @param area Shapefile of polygon geometry of which region should be extracted.
-#' @param variables character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr")
+#' @param variables character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr") (Or Single SeNorge snow Variable)
 #' @param buffer integer, buffer (in meters) that should be applied to the provided shapefile for data extraction
 #' @param verbose logical, text be printed to console?
 #' @param map logical, should maps be printed?
@@ -230,6 +293,8 @@ senorge_extract_grid <- function(directory,
                                  buffer = 0,
                                  verbose = FALSE,
                                  map = TRUE) {
+  if(area %>% is.character()){area = area %>% sf::read_sf()}
+
   directory %>% list.files(full.names = T) -> filenames # move this into second function
   get_overlapping_cells(
     directory = directory,
@@ -268,11 +333,11 @@ senorge_nc_to_df <- function(grid, variables, directory, filenames, verbose) {
     extract_senorge_year <- function(year){
       # Grab the right file
       filepath <- list.files(directory,
-                             pattern = paste0("seNorge2018_", year, ".nc"),
+                             pattern = paste0("*", year, ".nc"),
                              full.names = T)
       if(length(filepath) == 0){
-        stop("File `", paste0(directory, "/seNorge2018_", year, ".nc"), "` not found!")
-      }
+        stop("File for year >> ", year," << not found!")}
+
       varrast <- terra::rast(filepath, variable)
       terra::time(varrast) %>% as.Date() -> timelist
       grid <- grid %>% sf::st_transform(sf::st_crs(varrast))
