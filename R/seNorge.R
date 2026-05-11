@@ -122,6 +122,9 @@ senorge_buildquery <- function(bounding_coords,
     if(variables == "fsw"){
       file_variable = variables
       variables = "snow_amount"
+    }else if(variables == "qsw"){
+      file_variable = variables
+      variables = "snow_melt"
     }else{
       stop("NEED TO IMPLEMENT! >>", variables )
     }
