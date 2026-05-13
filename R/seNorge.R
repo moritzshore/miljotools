@@ -18,7 +18,7 @@
 #'
 #' @importFrom lubridate ymd year yday leap_year
 #' @importFrom tibble tibble
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate recode_values
 #' @importFrom tidyr unite
 #'
 #' @returns Returns a named list with the urls and filenames which is to be passed to `senorge_download()`.
@@ -39,6 +39,20 @@ senorge_buildquery <- function(bounding_coords,
   ## Check variable format:
   senorge_variables <- c("tn", "tx", "rr", "tg")
   senorge_snow_variables <- c("fsw", "lwc", "qsw", "qtt", "sd", "sdfsw", "ski", "swe", "swepr")
+  senorge_snow_variable_inner <- c(
+    "snow_amount",
+    "snow_liquid_water_content",
+    "snow_melt",
+    "runoff_amount",
+    "snow_depth",
+    "snow_depth",
+    "snow_condition",
+    "snow_water_equivalent",
+    "snow_water_equivalent_percentage"
+  )
+
+  snow_recode <- tibble::tibble(outer = senorge_snow_variables, inner = senorge_snow_variable_inner)
+
   if((variables %in% senorge_variables) %>% any()){
     senorge_2018 = TRUE
     project = "senorge_2018"
@@ -118,16 +132,10 @@ senorge_buildquery <- function(bounding_coords,
   }
 
   if(project == "senorge_snow"){
-    # renaming the senorge vars
-    if(variables == "fsw"){
-      file_variable = variables
-      variables = "snow_amount"
-    }else if(variables == "qsw"){
-      file_variable = variables
-      variables = "snow_melt"
-    }else{
-      stop("NEED TO IMPLEMENT! >>", variables )
-    }
+    file_variable = variables
+    variables <- dplyr::recode_values(x = variables,
+                               from = snow_recode$outer,
+                               to = snow_recode$inner)
   }
 
   lapply(variables, var_q_gen) %>% do.call("cbind", args = .) %>% as.data.frame() %>% as_tibble()-> var_qs
