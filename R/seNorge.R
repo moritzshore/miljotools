@@ -256,6 +256,7 @@ senorge_download <- function(queries, directory = NULL, variables = NULL, polygo
     if(verbose){cat("\r\n")}
     # if a polygon simple feature is provided, then preview.
     if(polygon %>% is.null() == FALSE){
+      install_missing_packs("tidyterra")
       if(polygon %>% is.character()){
         polygon %>% sf::read_sf() -> polygon
       }
