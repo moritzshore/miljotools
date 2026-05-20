@@ -4,12 +4,20 @@
 \alias{simplify_polygons}
 \title{Simplify Polygons}
 \usage{
-simplify_polygons(polygon_map, type, interactive = FALSE, verbose = TRUE)
+simplify_polygons(
+  polygon_map,
+  type,
+  remove = TRUE,
+  interactive = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{polygon_map}{shapefile containing a column \code{flag} of type \code{string} with labels for every polygon as either 'flagged' or 'ok'. Flagged polygons will be simplified.}
 
 \item{type}{character string of the name of the \code{type} column in your shapefile. Polygons of the same type will be prioritized for merging If you do not need this feature, simply set the type column to your ID column.}
+
+\item{remove}{(flag) will remove flagged polygons if they have no neighbors}
 
 \item{interactive}{\code{TRUE/FALSE} Setting this parameter to true will let you inspect the changes made.}
 

@@ -8,3 +8,5 @@
 _pkgdown.yaml
 ^doc$
 ^Meta$
+^\.positai$
+^\.claude$
