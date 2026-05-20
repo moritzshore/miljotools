@@ -56,8 +56,6 @@ View the "Articles" to get started
 
 7.  [ERA5 Meteo data to SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
 
-8.  ...
-
 ## Add your own <a name="add"></a>
 
 If you have a function / code / workflow / script / etc. which you would like to add to this package, please contact the maintainer for developer access.
