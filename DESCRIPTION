@@ -1,7 +1,7 @@
 Type: Package
 Package: miljotools
 Title: Collections of tools for R-based environemntal science workflows
-Version: 0.11.0
+Version: 0.10.2
 Author: Moritz Shore
 Maintainer: Moritz Shore <moritz.shore@nibio.no>
 Description: A few useful functions for environemental data gathering, processing, and
@@ -64,4 +64,4 @@ Encoding: UTF-8
 Language: English
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.0.0

@@ -8,6 +8,7 @@ geometry <- flag <- idx <- length_intersection <- MILJOTOOLS_TYPE <- . <- NULL
 #'
 #' @param polygon_map shapefile containing a column `flag` of type `string` with labels for every polygon as either 'flagged' or 'ok'. Flagged polygons will be simplified.
 #' @param type character string of the name of the `type` column in your shapefile. Polygons of the same type will be prioritized for merging If you do not need this feature, simply set the type column to your ID column.
+#' @param remove (flag) will remove flagged polygons if they have no neighbors
 #' @param interactive `TRUE/FALSE` Setting this parameter to true will let you inspect the changes made.
 #' @param verbose print actions to console?
 #'
@@ -24,6 +25,7 @@ geometry <- flag <- idx <- length_intersection <- MILJOTOOLS_TYPE <- . <- NULL
 #' # See Vignette
 simplify_polygons <- function(polygon_map,
                               type,
+                              remove = TRUE,
                               interactive = FALSE,
                               verbose = TRUE) {
   if (interactive) {
@@ -72,9 +74,15 @@ simplify_polygons <- function(polygon_map,
 
     # the polygons that touch it
     if(length(touching_idx) == 0){
-      print(paste0("> polygon has no neighbors! removing..."))
-      to_simp <- to_simp %>% dplyr::filter(idx != polygon)
-      next()
+      if(remove){
+        mt_print(verbose, fname, "polygon has no neighbors! removing...(remove = TRUE)")
+        to_simp <- to_simp %>% dplyr::filter(idx != polygon)
+        next()
+      }else{
+        mt_print(verbose, fname, "polygon has no neighbors! skipping... (remove = FALSE)")
+        next()
+      }
+
     }
 
     # mapping it
