@@ -53,6 +53,7 @@ You can install and use `miljotools` in `R`, downloaded from the GitHub
 repository using the following command:
 
 ``` r
+
 # install remotes, if not already present
 install.packages("remotes")
 
@@ -71,21 +72,22 @@ View the “Articles” to get started
 2.  [SeNorge2018
     Dataset](https://moritzshore.github.io/miljotools/articles/senorge.html)
 
-3.  [Soil
+3.  [SeNorge Snow
+    Dataset](https://moritzshore.github.io/miljotools/articles/senorge_snow.html)
+
+4.  [Soil
     Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
-4.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+5.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
 
-5.  [Simplify
+6.  [Simplify
     Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
 
-6.  [Visualize
+7.  [Visualize
     COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
 
-7.  [ERA5 Meteo data to
+8.  [ERA5 Meteo data to
     SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
-
-8.  …
 
 ## Add your own 
 

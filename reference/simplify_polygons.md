@@ -7,7 +7,13 @@ same type. See parameter descriptions for more details.
 ## Usage
 
 ``` r
-simplify_polygons(polygon_map, type, interactive = FALSE, verbose = TRUE)
+simplify_polygons(
+  polygon_map,
+  type,
+  remove = TRUE,
+  interactive = FALSE,
+  verbose = TRUE
+)
 ```
 
 ## Arguments
@@ -23,6 +29,10 @@ simplify_polygons(polygon_map, type, interactive = FALSE, verbose = TRUE)
   character string of the name of the `type` column in your shapefile.
   Polygons of the same type will be prioritized for merging If you do
   not need this feature, simply set the type column to your ID column.
+
+- remove:
+
+  (flag) will remove flagged polygons if they have no neighbors
 
 - interactive:
 
@@ -40,5 +50,6 @@ Returns a modified version of `polygon_map` with the simplifications.
 ## Examples
 
 ``` r
+
 # See Vignette
 ```

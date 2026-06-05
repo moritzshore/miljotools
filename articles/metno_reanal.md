@@ -73,6 +73,7 @@ The following will show you how to use these functions, but first the
 required libraries need to be loaded for this example workflow:
 
 ``` r
+
 require(miljotools)
 require(dplyr)
 require(sf)
@@ -101,6 +102,7 @@ or an `sf` object in the R environment. Here is an example:
 > code yourself)
 
 ``` r
+
 # downloading example files:
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10point.zip", destfile = "cs10point.zip")
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
@@ -120,6 +122,7 @@ Now, with our geometries loaded, we can create coordinate windows for
 them. We will also buffer our polygon shapefile to ensure full coverage.
 
 ``` r
+
 coord_window_poly <- metnordic_coordwindow(example_polygon_geometry, area_buffer = 1500)
 coord_window_point <- metnordic_coordwindow(example_point_geometry)
 ```
@@ -128,6 +131,7 @@ This gives us a list containing the minimum and maximum x and y cells to
 download the data from. `metadist` is NA for polygon geometries.
 
 ``` r
+
 paste0(names(coord_window_poly), collapse = ", ")
 paste0(coord_window_poly, collapse = ", ")
 ```
@@ -137,6 +141,7 @@ distance to the nearest data set grid cell. Of course, for this geometry
 there are only two coordinates:
 
 ``` r
+
 paste0(names(coord_window_point), collapse = ", ")
 paste0(coord_window_point, collapse = ", ")
 ```
@@ -169,6 +174,7 @@ download from the server. For that we also need to decide the following:
 Determining our settings:
 
 ``` r
+
 my_variables =c(
   "air_temperature_2m",
   "relative_humidity_2m",
@@ -181,6 +187,7 @@ end = "2019-06-03 00:00:00"
 ```
 
 ``` r
+
 queries_poly <- metnordic_buildquery(bounding_coords = coord_window_poly,
                                 mn_variables = my_variables,
                                 fromdate = start, todate = end, 
@@ -190,6 +197,7 @@ queries_poly <- metnordic_buildquery(bounding_coords = coord_window_poly,
 And for point geometry:
 
 ``` r
+
 queries_point <- metnordic_buildquery(bounding_coords = coord_window_point,
                                 mn_variables = my_variables,
                                 fromdate = start, todate = end, 
@@ -199,6 +207,7 @@ queries_point <- metnordic_buildquery(bounding_coords = coord_window_point,
 We now have the files we want to download:
 
 ``` r
+
 queries_point$filenames %>% head()
 ```
 
@@ -206,6 +215,7 @@ And the `OPenDaP` download urls: (just one as an example, as they are
 very long).
 
 ``` r
+
 queries_poly$full_urls[1]
 ```
 
@@ -219,6 +229,7 @@ Now we are ready to download the files. Lets download 14:00 as it rained
 at that time, a bit:
 
 ``` r
+
 poly_path <- "indiv_poly/"
 dir.create(poly_path, showWarnings = F)
 fps <- metnordic_download(url = queries_poly$full_urls[15],
@@ -238,6 +249,7 @@ Now of course, you would like to download not just one file, but the
 whole date range, the following function allows you to do this.
 
 ``` r
+
 dl_path = metnordic_download_daterange(
   queries = queries_poly,
   directory = poly_path,
@@ -258,6 +270,7 @@ want to do that, you can use the
 function:
 
 ``` r
+
 point_path <- "indiv_point/"
 dir.create(point_path, showWarnings = F)
 point_dl_path <- metnordic_point(
@@ -281,6 +294,7 @@ merge the per-hour per-variable files into simply per-variable files.
 You can do this like so:
 
 ``` r
+
 outpath = "merged_poly/"
 dir.create(outpath, showWarnings = F)
 custom_merge <- function(variable) {
@@ -293,6 +307,7 @@ res = lapply(X = my_variables, FUN = custom_merge)
 ```
 
 ``` r
+
 data <- brick(res[[1]])
 spatast <- data  %>% rast()
 hours = dim(data)[3]
@@ -308,6 +323,7 @@ In most cases, one would want a time series from a point on this map,
 does exactly this.
 
 ``` r
+
 dir.create("extracted", showWarnings = F)
 metnordic_extract(
   directory = "./merged_poly",
@@ -319,6 +335,7 @@ metnordic_extract(
 ```
 
 ``` r
+
 # Viewing the data:
 data <- read_csv("extracted//METNORDIC_point_vignette_example.csv", show_col_types = F)
 plot(data$date, data$air_temperature_2m - 273.15,
@@ -332,6 +349,7 @@ area, you can use
 . This function creates a data file and a metadata file for each point.
 
 ``` r
+
 extracted_path = metnordic_extract_grid(
   merged_path =  "merged_poly/",
   area = example_polygon_geometry,
@@ -342,6 +360,7 @@ extracted_path = metnordic_extract_grid(
 ```
 
 ``` r
+
 extracted_path %>% list.files(pattern = "extract_grid_", full.names = T) %>%
   first() %>% read_csv(show_col_types = F) %>% head()
 ```
@@ -356,6 +375,7 @@ the data in daily form, you can aggregate it (summarize) using
 [`metnordic_aggregate()`](https://moritzshore.github.io/miljotools/reference/metnordic_aggregate.md):
 
 ``` r
+
 dir.create("aggregated/", showWarnings = F)
 agg_path <- metnordic_aggregate(directory = "indiv_poly/", 
                                 variable = "air_temperature_2m",
@@ -366,6 +386,7 @@ agg_path <- metnordic_aggregate(directory = "indiv_poly/",
 ```
 
 ``` r
+
 data <- brick(agg_path)
 spatast <- data  %>% rast()
 plot(spatast, main = "mean temp \n(2019-06-01)")
@@ -379,6 +400,7 @@ in your date range does not contain 24 individual files (24hrs) it will
 not be created and in the returning list will be labelled with `FALSE`.
 
 ``` r
+
 agg_dr = metnordic_aggregate_daterange(
   directory =  "indiv_poly/",
   variable = "air_temperature_2m",
@@ -396,6 +418,7 @@ Now we would usually merge the aggregated days together, with
 > Tip: don’t forget to add the method of aggregation as a suffix!
 
 ``` r
+
 # aggregating a second day to merge it
 agg_path <- metnordic_aggregate(directory = "indiv_poly/", 
                                 variable = "air_temperature_2m",
@@ -415,12 +438,14 @@ If your use-case requires your NetCDF file to be in a specific
 projection, you can re-project it like so:
 
 ``` r
+
 metnordic_reproject(filepath = merged_fp,
                     outfile = "reprojected_example.nc",
                     projstring = "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs")
 ```
 
 ``` r
+
 reproj <- rast("reprojected_example.nc")
 mapview(reproj)
 ```
@@ -443,6 +468,7 @@ use the files written by
 [`metnordic_extract_grid()`](https://moritzshore.github.io/miljotools/reference/metnordic_extract_grid.md).
 
 ``` r
+
 # downloading an example SWAT+ project
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_txt.zip", destfile = "cs10_txt.zip")
 unzip("cs10_txt.zip")
@@ -458,6 +484,7 @@ into the correct projection for the setup. Note, this needs to be done
 per variable.
 
 ``` r
+
 cwatm_convert_nc(infile = "reprojected_example.nc", outfile = "cwatm_ready.nc")
 ```
 
@@ -471,6 +498,7 @@ in the function
 to create a meteo file for the SWAP model.
 
 ``` r
+
 swap_metnordic(
   dldir = "extracted/",
   name = "vignette_example",

@@ -46,6 +46,7 @@ A simple usage is shown below. for a more in-depth run down of the
 arguments please visit the function help page.
 
 ``` r
+
 # for demonstration purposes, use path of package
 example_file_path <- system.file(package = "miljotools", "/extdata/soil_classify/example.csv")
 
@@ -58,6 +59,11 @@ classify_soil(
   decimal = ".",
   write = FALSE # false just for demonstration. 
 )
+#> miljo🌿tools >   >> Missing CRAN packages are required to run this function, installing now: writexl 
+#> package 'writexl' successfully unpacked and MD5 sums checked
+#> 
+#> The downloaded binary packages are in
+#>  C:\Users\mosh\AppData\Local\Temp\RtmpIRFkxk\downloaded_packages
 #> Identifying column:  sand 
 #> sand  column identified as ' sand ' index= 3 
 #> > mean value of  sand  column is  25  

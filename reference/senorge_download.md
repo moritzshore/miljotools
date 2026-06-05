@@ -12,10 +12,12 @@ SeNorge2018 variables at daily resolution:
 
 - `rr` (sum daily precipitation in mm),
 
-- `tg` (mean daily temperature in Celsius) If you do not provide a
-  vector of variables to download, all will be downloaded. You can also
-  provide a `polygon` (Georeferenced simple feature, the same that you
-  provided to
+- `tg` (mean daily temperature in Celsius) (Alternatively, you can pass
+  a "SeNorge Snow" variable, to download that dataset, but please note,
+  these variables must be downloaded one at a time due to how they are
+  structured in the database) If you do not provide a vector of
+  variables to download, all will be downloaded. You can also provide a
+  `polygon` (Georeferenced simple feature, the same that you provided to
   [`metnordic_coordwindow()`](https://moritzshore.github.io/miljotools/reference/metnordic_coordwindow.md))
   to verify that the download is covering your desired area.
 

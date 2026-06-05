@@ -17,6 +17,7 @@ to use it.
 > function, let me know!
 
 ``` r
+
 require(miljotools)
 require(dplyr)
 require(sf)
@@ -27,6 +28,7 @@ available NIBIO AR50 land use map for Ås, which I’ve downloaded and
 hosted on a public NIBIO GitLab repository:
 
 ``` r
+
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/simplify-geometries/aas_ar50.zip", destfile = "aas_ar50.zip")
 unzip("aas_ar50.zip")
 lu_map <- sf::read_sf( "aas_ar50.shp")
@@ -40,6 +42,7 @@ area, some even with 0. Clearly these should be removed. To flag these,
 we calculate their area in the attribute table
 
 ``` r
+
 lu_map %>% 
   # fix geometries
   st_make_valid() %>%
@@ -64,6 +67,7 @@ types. If this kind of functionality is not needed, then you can set the
 same type.
 
 ``` r
+
 simplify_polygons(
   polygon_map = polygon_map,
   type = "arealtype",
@@ -75,12 +79,14 @@ simplify_polygons(
 As we can see, the map now has 30 less polygons:
 
 ``` r
+
 polygon_map %>% dim()
 ```
 
     ## [1] 854   9
 
 ``` r
+
 polygon_map_simplified %>% dim()
 ```
 
@@ -97,6 +103,7 @@ To make it more visible what the function does, we will now further
 simplify any polygons with less then 100,000 m^2 of area:
 
 ``` r
+
 polygon_map_simplified %>%   mutate(area = st_area(geometry)) %>% 
   # Flag any polygons with an area of less than 10 square meters.
   mutate(flag = if_else(condition = (area <  units::as_units(100000, "m^2")), true =  "flagged", false =  "ok")) -> polygon_map_2

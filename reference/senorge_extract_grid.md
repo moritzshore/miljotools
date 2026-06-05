@@ -1,7 +1,7 @@
 # Extract data from SeNorge2018 files
 
-This function extracts data from SeNorge2018 .nc files from overlapping
-grid cells of a provided polygon.
+This function extracts data from SeNorge2018 (or SeNorge Snow) .nc files
+from overlapping grid cells of a provided polygon.
 
 ## Usage
 
@@ -36,7 +36,7 @@ senorge_extract_grid(
 - variables:
 
   character vector of SeNorge2018 variables to be extracted ("tg", "tn",
-  "tx", "rr")
+  "tx", "rr") (Or Single SeNorge snow Variable)
 
 - buffer:
 

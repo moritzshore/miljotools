@@ -31,8 +31,10 @@ senorge_buildquery(
 
 - variables:
 
-  character vector of variables to download may include the following:
-  "tn", "tx", "rr", "tg"
+  character vector of variables to download. For SeNorge2018, may
+  include the following: "tn", "tx", "rr", "tg". For snow dataset, must
+  use single variables. See
+  [docs](https://github.com/metno/seNorge_docs/wiki/senorgesnow_variables).
 
 - fromdate:
 

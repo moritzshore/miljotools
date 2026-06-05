@@ -38,6 +38,7 @@ A useful flowchart on how the miljotools SeNorge functions fit together
 ## Workflow
 
 ``` r
+
 require(miljotools)
 require(sf)
 require(mapview)
@@ -48,6 +49,7 @@ download. In this example we will download the following publicly
 available watershed file:
 
 ``` r
+
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
 unzip("cs10_basin.zip")
 cs10_basin = "cs10_basin/cs10_basin.shp"
@@ -61,6 +63,7 @@ we just need to adjust the “project” parameter. We will also buffer the
 shapefile by 500 m to include grid cells just outside the boundaries.
 
 ``` r
+
 my_coord_window <- metnordic_coordwindow(
   area_path = example_polygon_geometry,
   area_buffer = 500,
@@ -79,6 +82,7 @@ total daily precipitation), from a random day in 1999 to a random day in
 2001. We are doing this at a grid resolution of 1x1.
 
 ``` r
+
 my_queries <- senorge_buildquery(
   bounding_coords = my_coord_window,
   variables = c("tg", "tn", "tx", "rr"),
@@ -94,6 +98,7 @@ can provide our polygon to double check that the download matches the
 area we want.
 
 ``` r
+
 my_download <- senorge_download(
   queries = my_queries,
   directory = "senorge_download",
@@ -109,6 +114,7 @@ can use a different, smaller polgyon if you only want to extract a
 smaller subset of the available data)
 
 ``` r
+
 senorge_extract_grid(
   directory = my_download,
   outdir = "senorge_extract_grid",
@@ -123,10 +129,12 @@ senorge_extract_grid(
 Having a look at the results:
 
 ``` r
+
 list.files(my_extract, pattern = ".csv", full.names = T)[1] %>% readr::read_csv(show_col_types = FALSE)
 ```
 
 ``` r
+
 metadata_path = list.files(my_extract, pattern = ".shp", full.names = T)
 metadata_path %>% sf::read_sf() %>% mapview::mapview(label = "vstation", legend = FALSE)
 ```
@@ -137,6 +145,7 @@ If you are using [SWAT+](https://swat.tamu.edu/software/plus/) you can
 apply the SeNorge data to your setup using the following function:
 
 ``` r
+
 swatplus_senorge(
   extract_path = my_extract,
   metadata = metadata_path,

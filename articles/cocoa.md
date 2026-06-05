@@ -23,6 +23,7 @@ Please see the documentation of the function(s) for further details and
 notes.
 
 ``` r
+
 require(miljotools)
 cocoa_hru(
   hru_id = 10,
@@ -41,6 +42,7 @@ Which would get you a plot that looks something like this:
 You can also interactively plot ALL HRUs using the following function:
 
 ``` r
+
 cocoa_vis(
   buildR_dir = "../SWAT-skuterud/project_data/SWATbuildR/skuterud_buildR/",
   RERENDER = TRUE,

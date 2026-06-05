@@ -31,8 +31,9 @@ metnordic_coordwindow(
 
 - source:
 
-  String: 'metnordic' (default) to access the MET Nordic grid, or
-  'senorge' to access the SeNorge2018 grid.
+  String: 'metnordic' (default) to access the MET Nordic grid, 'senorge'
+  to access the SeNorge2018 grid, or "senorge_snow" to access the
+  SeNorge snow grid.
 
 - verbose:
 

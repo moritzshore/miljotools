@@ -68,6 +68,7 @@ Moritz Shore
 ## Examples
 
 ``` r
+
  if(FALSE){
  metnordic_csv(
  area = example_file_path,

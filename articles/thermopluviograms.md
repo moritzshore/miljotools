@@ -50,6 +50,7 @@ Our climate data will be sourced from NVE’s Klima service cente
 For this example, we will download example data from a GitLab Repo:
 
 ``` r
+
 download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/thermopluviograms/Climate_Data.zip", 
               destfile = "Climate_Data.zip")
 unzip("Climate_Data.zip", 
@@ -59,6 +60,7 @@ unzip("Climate_Data.zip",
 Now we can generate the Thermopluviograms
 
 ``` r
+
 thermopluviogram(
   modelled_climate = "Climate_Data/Modelled/",
   observed_pr = "Climate_Data/Observed/senorge_pr.csv",
@@ -74,6 +76,11 @@ thermopluviogram(
   fixed_axis = T,
   verbose = T
 )
+#> miljo🌿tools >   >> Missing CRAN packages are required to run this function, installing now: ggrepel 
+#> package 'ggrepel' successfully unpacked and MD5 sums checked
+#> 
+#> The downloaded binary packages are in
+#>  C:\Users\mosh\AppData\Local\Temp\RtmpCyH3RG\downloaded_packages
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviograms... 
 #> ...for period 2041-01-01 to 2070-12-31 
 #> ...with a reference period from 2005-12-31 to 1971-01-01 
@@ -100,17 +107,17 @@ thermopluviogram(
 #> miljo🌿tools > thermopluviogram  >> generating plots... 
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment historical
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_hist_71-05_41-70.png
-#> ggrepel: 0.500000s elapsed for 348910 iterations, 14 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 88090 iterations, 16 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  hist
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_hist_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment RCP 4.5
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_rcp45_71-05_41-70.png
-#> ggrepel: 0.500000s elapsed for 497180 iterations, 3 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 144390 iterations, 6 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  rcp45
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_rcp45_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> generating thermopluviogram for experiment RCP 8.5
 #> miljo🌿tools > thermopluviogram  >> saving thermopluviogram  tpg_Aas_rcp85_71-05_41-70.png
-#> ggrepel: 0.500000s elapsed for 448750 iterations, 6 overlaps. Consider increasing 'max.time'.
+#> ggrepel: 0.500000s elapsed for 136670 iterations, 7 overlaps. Consider increasing 'max.time'.
 #> miljo🌿tools > thermopluviogram  >> generating exetreme rain plot for experiment  rcp85
 #> miljo🌿tools > thermopluviogram  >> saving extreme rain plot xtreme_rain_Aas_rcp85_71-05_41-70.png
 #> miljo🌿tools > thermopluviogram  >> plots have been saved to ../man/figures
@@ -120,6 +127,7 @@ thermopluviogram(
 ### Plots
 
 ``` r
+
 knitr::include_graphics("../man/figures/tpg_Aas_hist_71-05_41-70.png")
 knitr::include_graphics("../man/figures/tpg_Aas_rcp45_71-05_41-70.png")
 knitr::include_graphics("../man/figures/tpg_Aas_rcp85_71-05_41-70.png")
@@ -128,6 +136,7 @@ knitr::include_graphics("../man/figures/tpg_Aas_rcp85_71-05_41-70.png")
 ![](../reference/figures/tpg_Aas_hist_71-05_41-70.png)![](../reference/figures/tpg_Aas_rcp45_71-05_41-70.png)![](../reference/figures/tpg_Aas_rcp85_71-05_41-70.png)
 
 ``` r
+
 knitr::include_graphics("../man/figures/xtreme_rain_Aas_hist_71-05_41-70.png")
 knitr::include_graphics("../man/figures/xtreme_rain_Aas_rcp45_71-05_41-70.png")
 knitr::include_graphics("../man/figures/xtreme_rain_Aas_rcp85_71-05_41-70.png")
@@ -138,6 +147,7 @@ knitr::include_graphics("../man/figures/xtreme_rain_Aas_rcp85_71-05_41-70.png")
 ### Cleanup
 
 ``` r
+
 file.remove("Climate_Data.zip")
 #> [1] TRUE
 unlink("Climate_Data/", recursive = T)

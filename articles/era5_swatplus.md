@@ -26,6 +26,7 @@ Once you have downloaded your data, You can use the following function
 to apply ERA5 meteorological data to a SWAT+ setup:
 
 ``` r
+
 require(miljotools)
 era5_swatplus(open_meteo_path = "path/to/file.csv",
               extract_path = "path/to/directory",
