@@ -46,15 +46,17 @@ View the "Articles" to get started
 
 2.  [SeNorge2018 Dataset](https://moritzshore.github.io/miljotools/articles/senorge.html)
 
-3.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
+3.  [SeNorge Snow Dataset](https://moritzshore.github.io/miljotools/articles/senorge_snow.html)
 
-4.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
+4.  [Soil Classification](https://moritzshore.github.io/miljotools/articles/Norwegian_Soil_Classification.html)
 
-5.  [Simplify Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
+5.  [Thermopluviograms](https://moritzshore.github.io/miljotools/articles/thermopluviograms.html)
 
-6.  [Visualize COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
+6.  [Simplify Polygons](https://moritzshore.github.io/miljotools/articles/simplify-polygons.html)
 
-7.  [ERA5 Meteo data to SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
+7.  [Visualize COCOA](https://moritzshore.github.io/miljotools/articles/cocoa.html)
+
+8.  [ERA5 Meteo data to SWAT+](https://moritzshore.github.io/miljotools/articles/era5_swatplus.html)
 
 ## Add your own <a name="add"></a>
 

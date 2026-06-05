@@ -16,7 +16,7 @@ senorge_buildquery(
 \arguments{
 \item{bounding_coords}{list as returned by \code{metnordic_coordwindow()}}
 
-\item{variables}{character vector of variables to download may include the following: "tn", "tx", "rr", "tg"}
+\item{variables}{character vector of variables to download. For SeNorge2018, may include the following: "tn", "tx", "rr", "tg". For snow dataset, must use single variables. See \href{https://github.com/metno/seNorge_docs/wiki/senorgesnow_variables}{docs}.}
 
 \item{fromdate}{date from when to start downloading data from (eg. "1957-01-01")}
 

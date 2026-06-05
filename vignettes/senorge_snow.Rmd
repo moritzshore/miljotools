@@ -1,0 +1,160 @@
+---
+title: "Accessing the SeNorge Snow dataset"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Accessing the SeNorge Snow dataset}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+  chunk_output_type: console
+---
+
+**Author**: Moritz Shore
+([moritz.shore\@nibio.no](mailto:moritz.shore@nibio.no){.email})
+
+**Date**: May, 2026
+
+## Introduction
+
+The SeNorge snow dataset is described here:
+
+> <https://github.com/metno/seNorge_docs/wiki/seNorge_snow>
+
+`miljotools` can access this data using the [same functions as for the
+"SeNorge2018"
+data](https://moritzshore.github.io/miljotools/articles/senorge.html).
+
+What follows is a working script on how to access this dataset for a
+specific shapefile:
+
+```{r, include = F}
+RUN_VIGNETTE =TRUE
+```
+
+Loading Libraries:
+
+```{r message=FALSE, warning=FALSE}
+require(miljotools)
+require(sf)
+require(mapview)
+require(dplyr)
+require(tibble)
+
+```
+
+Downloading the example catchment:
+
+```{r}
+download.file(url = "https://gitlab.nibio.no/moritzshore/example-files/-/raw/main/MetNoReanalysisV3/cs10_basin.zip", destfile = "cs10_basin.zip")
+unzip("cs10_basin.zip")
+cs10_basin = "cs10_basin/cs10_basin.shp"
+example_polygon_geometry <- read_sf(cs10_basin)
+map1 <- mapview(example_polygon_geometry, alpha.regions = .3, legend = F)
+map1
+```
+
+Defining coordinate window:
+
+> *Note, the source is "senorge_snow"!*
+
+```{r, eval = RUN_VIGNETTE}
+metnordic_coordwindow(
+  area_path = cs10_basin,
+  area_buffer = 1000,
+  source = "senorge_snow",
+  verbose = T,
+  interactive = F
+) -> cw
+```
+
+Choosing a variable:
+
+```{r, eval = RUN_VIGNETTE}
+senorge_snow_var = "swe"
+```
+
+> *SeNorge Snow uses different names for variables depending on whether
+> they are stored in the file name, or within the ncdf4 file itself.
+> This is quite annoying and requires a recoding of the variable name,
+> which can be done using the code below:*
+
+```{r, eval = RUN_VIGNETTE}
+senorge_snow_variables <- c("fsw", "lwc", "qsw", "qtt", "sd", "sdfsw", "ski", "swe", "swepr")
+senorge_snow_variable_inner <- c("snow_amount","snow_liquid_water_content","snow_melt",
+                                   "runoff_amount","snow_depth","snow_depth", 
+                                   "snow_condition","snow_water_equivalent",
+                                   "snow_water_equivalent_percentage")
+snow_recode <- tibble::tibble(outer = senorge_snow_variables, 
+                              inner = senorge_snow_variable_inner)
+
+
+inner_var <- dplyr::recode_values(x = senorge_snow_var,
+                                  from = snow_recode$outer,
+                                  to = snow_recode$inner)
+inner_var
+```
+
+Building the download queries.
+
+```{r, eval = RUN_VIGNETTE}
+senorge_buildquery(
+  bounding_coords = cw,
+  variables = senorge_snow_var,
+  fromdate = "2016-01-01",
+  todate = "2016-12-31",
+  grid_resolution = 1,
+  verbose = T
+) -> myq
+```
+
+Downloading the queries:
+
+> *Note the use of `inner_var` in this function!*
+
+```{r, eval = RUN_VIGNETTE}
+senorge_download(
+  queries = myq,
+  directory =  "senorge_snow_download",
+  variables = inner_var,
+  polygon =  cs10_basin,
+  verbose = F
+) -> dldir
+```
+
+```{r, eval = RUN_VIGNETTE}
+senorge_extract_grid(
+  directory = dldir,
+  outdir = "senorge_snow_extract",
+  area =  cs10_basin,
+  variables = inner_var,
+  buffer = 250,
+  verbose = F,
+  map = T
+) -> edir
+```
+
+An example analysis using the extracted data:
+
+```{r}
+require(vroom)
+require(ggplot2)
+list.files(edir, pattern = ".csv", full.names = T) %>% vroom::vroom(show_col_types = F, altrep = FALSE) -> data
+
+data %>% filter(date < "2016-04-01") %>% ggplot() +
+  aes(x = date, y = snow_water_equivalent, 
+      color = vstation %>% as.factor()) +
+  geom_point(alpha = .3) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+```{r, eval = RUN_VIGNETTE, message=FALSE, warning=FALSE, include=FALSE}
+rm(data)
+gc()
+unlink("cs10_basin", recursive = T)
+unlink("senorge_snow_download", recursive = T)
+unlink("senorge_snow_extract", recursive = T)
+file.remove("cs10_basin.zip") -> res
+```

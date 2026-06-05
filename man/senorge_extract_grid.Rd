@@ -21,7 +21,7 @@ senorge_extract_grid(
 
 \item{area}{Shapefile of polygon geometry of which region should be extracted.}
 
-\item{variables}{character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr")}
+\item{variables}{character vector of SeNorge2018 variables to be extracted ("tg", "tn", "tx", "rr") (Or Single SeNorge snow Variable)}
 
 \item{buffer}{integer, buffer (in meters) that should be applied to the provided shapefile for data extraction}
 
@@ -33,7 +33,7 @@ senorge_extract_grid(
 Returns path to extracted files.
 }
 \description{
-This function extracts data from SeNorge2018 .nc files from overlapping grid cells of a provided polygon.
+This function extracts data from SeNorge2018 (or SeNorge Snow) .nc files from overlapping grid cells of a provided polygon.
 }
 \examples{
 # TODO.
