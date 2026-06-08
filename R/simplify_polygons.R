@@ -42,7 +42,7 @@ simplify_polygons <- function(polygon_map,
 
   if(length(flagged_issues) == 0){
     mt_print(verbose,fname, "no flagged issues found, returning dataset")
-    return(polygon_map)
+    return(polygon_map %>% select(-idx, -MILJOTOOLS_TYPE))
   }else{
     mt_print(verbose, fname, "Issues detected, attempting to solve.", paste0("(",flagged_issues %>% length(), ")"))
   }
