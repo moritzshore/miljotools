@@ -551,14 +551,16 @@ swatplus_senorge <- function(extract_path,
     )
   }
 
-  mt_print(verbose, "swatplus_senorge", "SWATprepR: Writing meteo files for SWAT+ setup:", write_path)
-  SWATprepR::prepare_climate(
-    meteo_lst = met_lst_aux,
-    write_path = write_path,
-    period_starts = period_starts,
-    period_ends = period_ends,
-    clean_files = clean_files#,cleanup = FALSE
-  )
+  if (write_path %>% is.null() == FALSE) {
+    mt_print(verbose, "swatplus_senorge", "SWATprepR: Writing meteo files for SWAT+ setup:", write_path)
+    SWATprepR::prepare_climate(
+      meteo_lst = met_lst_aux,
+      write_path = write_path,
+      period_starts = period_starts,
+      period_ends = period_ends,
+      clean_files = clean_files#,cleanup = FALSE
+    )
+  }
   mt_print(verbose, "swatplus_senorge", "Finished!")
   return(TRUE)
   }
