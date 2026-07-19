@@ -42,7 +42,7 @@ simplify_polygons <- function(polygon_map,
 
   if(length(flagged_issues) == 0){
     mt_print(verbose,fname, "no flagged issues found, returning dataset")
-    return(polygon_map)
+    return(polygon_map %>% select(-idx, -MILJOTOOLS_TYPE))
   }else{
     mt_print(verbose, fname, "Issues detected, attempting to solve.", paste0("(",flagged_issues %>% length(), ")"))
   }
@@ -66,10 +66,18 @@ simplify_polygons <- function(polygon_map,
       stop("idx", polygon, " >> polygon has NO geometry, can't handle this!")
     }
 
-    # the polygon IDs that touch it
-    touchers <-  sf::st_touches(problem_poly, to_simp, sparse = T) %>% unlist()
-    neigh <- to_simp[touchers,]
-    touching_idx <- neigh$idx
+    # the polygon IDs that touch it (REMOVED, this doesnt work well if one polygon only touches at a POINT)
+    # touchers <-  sf::st_touches(problem_poly, to_simp, sparse = T) %>% unlist()
+    # neigh <- to_simp[touchers,]
+    # touching_idx <- neigh$idx
+
+    shared_perimeter(problem_poly = problem_poly, neigh = to_simp) %>%
+      filter(length_intersection > as_units(0, "m")) -> adj_poly
+
+    neigh <- to_simp %>% filter(idx %in% adj_poly$idx)
+    touching_idx <- adj_poly$idx
+
+
     mt_print(verbose, fname, "the following polygons contact the problem poly:", paste0(touching_idx, collapse = ", "))
 
     # the polygons that touch it
@@ -186,6 +194,25 @@ longest_shared_perimeter <- function(problem_poly, neigh){
     dplyr::filter(length_intersection > units::as_units(0, 'm')) %>%
     dplyr::filter(idx != problem_poly$idx) %>% dplyr::arrange(dplyr::desc(length_intersection)) %>%
     sf::st_drop_geometry() %>% dplyr::pull(idx) %>% dplyr::first() -> result
+  return(result)
+}
+
+shared_perimeter <- function(problem_poly, neigh){
+  full <- rbind(problem_poly, neigh)
+  # inspiration:
+  # https://stackoverflow.com/questions/70869316/finding-ratio-of-perimeter-with-surrounding-neighbors-in-r
+
+  # https://github.com/r-spatial/sf/issues/406
+  sf::st_agr(full) = "constant"
+  sf::st_agr(problem_poly) = "constant"
+
+  full %>%
+    sf::st_cast('MULTILINESTRING') %>%
+    sf::st_intersection(problem_poly,) %>%
+    dplyr::mutate(length_intersection = sf::st_length(.)) %>%
+    #dplyr::filter(length_intersection > units::as_units(0, 'm')) %>%
+    dplyr::filter(idx != problem_poly$idx) %>% dplyr::arrange(dplyr::desc(length_intersection)) %>%
+    sf::st_drop_geometry() %>% select(idx, length_intersection, type) -> result
   return(result)
 }
 
