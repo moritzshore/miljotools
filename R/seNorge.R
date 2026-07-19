@@ -501,11 +501,11 @@ swatplus_senorge <- function(extract_path,
     DATE = data$date
     string_together <- function(variable) {
       if ("tx" == variable) {
-        TMP_MAX = tibble(DATE, TMP_MAX = data$tx) %>% return()
+        TMP_MAX = tibble::tibble(DATE, TMP_MAX = data$tx) %>% return()
       }else if ("tn" == variable) {
-        TMP_MIN = tibble(DATE, TMP_MIN = data$tn) %>% return()
+        TMP_MIN = tibble::tibble(DATE, TMP_MIN = data$tn) %>% return()
       }else if ("rr" == variable) {
-        PCP = tibble(DATE, PCP = data$rr) %>% return()
+        PCP = tibble::tibble(DATE, PCP = data$rr) %>% return()
       }else{
         stop("oppsie")
       }
