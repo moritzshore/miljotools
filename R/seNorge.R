@@ -449,7 +449,7 @@ swatplus_senorge <- function(extract_path,
                              DEM,
                              aux_data,
                              epsg_code,
-                             write_path,
+                             write_path = NULL,
                              db_path = NULL,
                              fill_missing = TRUE,
                              period_starts  = NA,
@@ -501,11 +501,11 @@ swatplus_senorge <- function(extract_path,
     DATE = data$date
     string_together <- function(variable) {
       if ("tx" == variable) {
-        TMP_MAX = tibble(DATE, TMP_MAX = data$tx) %>% return()
+        TMP_MAX = tibble::tibble(DATE, TMP_MAX = data$tx) %>% return()
       }else if ("tn" == variable) {
-        TMP_MIN = tibble(DATE, TMP_MIN = data$tn) %>% return()
+        TMP_MIN = tibble::tibble(DATE, TMP_MIN = data$tn) %>% return()
       }else if ("rr" == variable) {
-        PCP = tibble(DATE, PCP = data$rr) %>% return()
+        PCP = tibble::tibble(DATE, PCP = data$rr) %>% return()
       }else{
         stop("oppsie")
       }
@@ -531,7 +531,7 @@ swatplus_senorge <- function(extract_path,
   nr_aux_stations <- length(aux_data$stations$ID)
   new_IDS <- paste0("ID", c((nr_senorge_stations+1):(nr_aux_stations+nr_senorge_stations)))
   aux_data$stations$ID <- new_IDS
-  aux_data$stations <- aux_data$stations %>% sf::st_transform(st_crs(stations_prepr))
+  aux_data$stations <- aux_data$stations %>% sf::st_transform(sf::st_crs(stations_prepr))
   names(aux_data$data) <- new_IDS
 
   stations_prepr_aux <- rbind(stations_prepr, aux_data$stations)
@@ -543,17 +543,24 @@ swatplus_senorge <- function(extract_path,
 
   if (db_path %>% is.null() == FALSE) {
     mt_print(verbose, "swatplus_senorge", "SWATprepR: Updating SWAT+ SQLite database with weather data:", db_path)
-    SWATprepR::add_weather(db_path = db_path, meteo_lst = met_lst_aux, wgn_lst = wgn, fill_missing = fill_missing)
+    SWATprepR::add_weather(
+      db_path = db_path,
+      meteo_lst = met_lst_aux,
+      wgn_lst = wgn,
+      fill_missing = fill_missing
+    )
   }
 
-  mt_print(verbose, "swatplus_senorge", "SWATprepR: Writing meteo files for SWAT+ setup:", write_path)
-  SWATprepR::prepare_climate(
-    meteo_lst = met_lst_aux,
-    write_path = write_path,
-    period_starts = period_starts,
-    period_ends = period_ends,
-    clean_files = clean_files#,cleanup = FALSE
-  )
+  if (write_path %>% is.null() == FALSE) {
+    mt_print(verbose, "swatplus_senorge", "SWATprepR: Writing meteo files for SWAT+ setup:", write_path)
+    SWATprepR::prepare_climate(
+      meteo_lst = met_lst_aux,
+      write_path = write_path,
+      period_starts = period_starts,
+      period_ends = period_ends,
+      clean_files = clean_files#,cleanup = FALSE
+    )
+  }
   mt_print(verbose, "swatplus_senorge", "Finished!")
   return(TRUE)
   }
