@@ -10,7 +10,7 @@ swatplus_senorge(
   DEM,
   aux_data,
   epsg_code,
-  write_path,
+  write_path = NULL,
   db_path = NULL,
   fill_missing = TRUE,
   period_starts = NA,

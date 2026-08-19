@@ -37,7 +37,7 @@ file.remove(files)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(gifski)
-RUN_VIGNETTE = FALSE
+RUN_VIGNETTE = TRUE
 ```
 
 [Author]{.underline}: Moritz Shore

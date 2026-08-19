@@ -83,4 +83,6 @@ classify_soil(
 ```
 
 > Note: Non-interactive plotting is currently broken due to a `ggtern`
-> dependency. \## References
+> dependency.
+
+## References

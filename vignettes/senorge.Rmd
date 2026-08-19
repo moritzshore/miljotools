@@ -54,7 +54,7 @@ require(mapview)
 ```
 
 ```{r, include = FALSE}
-RUN_VIGNETTE = FALSE
+RUN_VIGNETTE = TRUE
 require(gifski)
 unlink("senorge_download", recursive = T)
 unlink("senorge_extract_grid", recursive = T)
