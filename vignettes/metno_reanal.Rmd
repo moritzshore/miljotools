@@ -311,14 +311,25 @@ If you are working with hourly data, the next logical step would be to
 merge the per-hour per-variable files into simply per-variable files.
 You can do this like so:
 
+```{r, include = F}
+# this is needed to pass Rcheck
+# https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
+Sys.setenv("_R_CHECK_LIMIT_CORES_" = FALSE)
+```
+
+
 ```{r, eval = RUN_VIGNETTE}
 outpath = "merged_poly/"
 dir.create(outpath, showWarnings = F)
+
 custom_merge <- function(variable) {
-  metnordic_merge_hourly(folderpath = poly_path,
-                         variable = variable,
-                         outpath = outpath,
-                         verbose = T, overwrite = T)
+  metnordic_merge_hourly(
+    folderpath = poly_path,
+    variable = variable,
+    outpath = outpath,
+    verbose = T,
+    overwrite = T
+  )
 }
 res = lapply(X = my_variables, FUN = custom_merge)
 ```

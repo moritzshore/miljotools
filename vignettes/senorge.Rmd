@@ -51,6 +51,7 @@ knitr::include_graphics("../man/figures/senorge_flowchart.png")
 require(miljotools)
 require(sf)
 require(mapview)
+require(dplyr)
 ```
 
 ```{r, include = FALSE}
