@@ -76,13 +76,10 @@ classify_soil(
   output = "output_file.csv",
   version = "NOR",
   plot_result = T,
-  interactive = TRUE,
+  interactive = FALSE,
   decimal = ".",
   write = FALSE # false just for demonstration. 
 )
 ```
-
-> Note: Non-interactive plotting is currently broken due to a `ggtern`
-> dependency.
 
 ## References

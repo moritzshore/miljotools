@@ -28,123 +28,149 @@ export(swatplus_senorge)
 export(thermopluviogram)
 import(ncdf4)
 importFrom(abind,abind)
-importFrom(crayon,bgBlack)
-importFrom(crayon,bgBlue)
-importFrom(crayon,bgCyan)
-importFrom(crayon,bgGreen)
-importFrom(crayon,bgWhite)
-importFrom(crayon,bgYellow)
-importFrom(crayon,black)
-importFrom(crayon,bold)
-importFrom(crayon,cyan)
-importFrom(crayon,green)
-importFrom(crayon,italic)
-importFrom(crayon,underline)
-importFrom(crayon,white)
-importFrom(crayon,yellow)
+importFrom(crayon,
+  bgBlack,
+  bgBlue,
+  bgCyan,
+  bgGreen,
+  bgWhite,
+  bgYellow,
+  black,
+  bold,
+  cyan,
+  green,
+  italic,
+  underline,
+  white,
+  yellow
+)
 importFrom(doParallel,registerDoParallel)
-importFrom(dplyr,"%>%")
-importFrom(dplyr,all_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,as_tibble)
-importFrom(dplyr,desc)
-importFrom(dplyr,distinct)
-importFrom(dplyr,filter)
-importFrom(dplyr,first)
-importFrom(dplyr,full_join)
-importFrom(dplyr,group_by)
-importFrom(dplyr,if_else)
-importFrom(dplyr,last)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,nth)
-importFrom(dplyr,pull)
-importFrom(dplyr,recode_values)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,summarise)
-importFrom(dplyr,summarize)
-importFrom(dplyr,ungroup)
-importFrom(dplyr,where)
-importFrom(foreach,"%dopar%")
-importFrom(foreach,foreach)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,alpha)
-importFrom(ggplot2,arrow)
-importFrom(ggplot2,coord_sf)
-importFrom(ggplot2,element_blank)
-importFrom(ggplot2,geom_sf)
-importFrom(ggplot2,geom_sf_label)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,ggsave)
-importFrom(ggplot2,ggtitle)
-importFrom(ggplot2,guide_legend)
-importFrom(ggplot2,guides)
-importFrom(ggplot2,scale_color_manual)
-importFrom(ggplot2,scale_fill_manual)
-importFrom(ggplot2,scale_linetype_manual)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_bw)
-importFrom(ggplot2,unit)
-importFrom(lubridate,as_datetime)
-importFrom(lubridate,date)
-importFrom(lubridate,day)
-importFrom(lubridate,hour)
-importFrom(lubridate,leap_year)
-importFrom(lubridate,month)
-importFrom(lubridate,yday)
-importFrom(lubridate,year)
-importFrom(lubridate,ymd)
+importFrom(dplyr,
+  "%>%",
+  all_of,
+  arrange,
+  as_tibble,
+  desc,
+  distinct,
+  filter,
+  first,
+  full_join,
+  group_by,
+  if_else,
+  last,
+  left_join,
+  mutate,
+  n,
+  nth,
+  pull,
+  recode_values,
+  rename,
+  select,
+  summarise,
+  summarize,
+  ungroup,
+  where
+)
+importFrom(foreach,
+  "%dopar%",
+  foreach
+)
+importFrom(ggplot2,
+  aes,
+  alpha,
+  arrow,
+  coord_sf,
+  element_blank,
+  geom_sf,
+  geom_sf_label,
+  ggplot,
+  ggsave,
+  ggtitle,
+  guide_legend,
+  guides,
+  scale_color_manual,
+  scale_fill_manual,
+  scale_linetype_manual,
+  theme,
+  theme_bw,
+  unit
+)
+importFrom(lubridate,
+  as_datetime,
+  date,
+  day,
+  hour,
+  leap_year,
+  month,
+  yday,
+  year,
+  ymd
+)
 importFrom(mapview,mapview)
 importFrom(methods,is)
-importFrom(ncdf4,nc_close)
-importFrom(ncdf4,nc_open)
-importFrom(ncdf4,ncatt_get)
-importFrom(ncdf4,ncvar_get)
-importFrom(parallel,detectCores)
-importFrom(parallel,makeCluster)
-importFrom(parallel,stopCluster)
+importFrom(ncdf4,
+  nc_close,
+  nc_open,
+  ncatt_get,
+  ncvar_get
+)
+importFrom(parallel,
+  detectCores,
+  makeCluster,
+  stopCluster
+)
 importFrom(purrr,map)
 importFrom(raster,xyFromCell)
-importFrom(readr,read_csv)
-importFrom(readr,write_csv)
-importFrom(sf,'st_crs<-')
-importFrom(sf,read_sf)
-importFrom(sf,st_agr)
-importFrom(sf,st_as_sf)
-importFrom(sf,st_as_sfc)
-importFrom(sf,st_bbox)
-importFrom(sf,st_buffer)
-importFrom(sf,st_cast)
-importFrom(sf,st_coordinates)
-importFrom(sf,st_crs)
-importFrom(sf,st_distance)
-importFrom(sf,st_drop_geometry)
-importFrom(sf,st_geometry)
-importFrom(sf,st_geometry_type)
-importFrom(sf,st_intersection)
-importFrom(sf,st_intersects)
-importFrom(sf,st_length)
-importFrom(sf,st_touches)
-importFrom(sf,st_transform)
-importFrom(sf,st_union)
-importFrom(sf,st_zm)
-importFrom(sf,write_sf)
-importFrom(stringr,str_pad)
-importFrom(stringr,str_remove)
-importFrom(stringr,str_remove_all)
-importFrom(stringr,str_replace)
-importFrom(stringr,str_split)
-importFrom(terra,crop)
-importFrom(terra,crs)
-importFrom(terra,minmax)
-importFrom(terra,project)
-importFrom(terra,rast)
-importFrom(terra,res)
-importFrom(terra,writeCDF)
-importFrom(tibble,is_tibble)
-importFrom(tibble,tibble)
-importFrom(tidyr,pivot_wider)
-importFrom(tidyr,unite)
+importFrom(readr,
+  read_csv,
+  write_csv
+)
+importFrom(sf,
+  'st_crs<-',
+  read_sf,
+  st_agr,
+  st_as_sf,
+  st_as_sfc,
+  st_bbox,
+  st_buffer,
+  st_cast,
+  st_coordinates,
+  st_crs,
+  st_distance,
+  st_drop_geometry,
+  st_geometry,
+  st_geometry_type,
+  st_intersection,
+  st_intersects,
+  st_length,
+  st_touches,
+  st_transform,
+  st_union,
+  st_zm,
+  write_sf
+)
+importFrom(stringr,
+  str_pad,
+  str_remove,
+  str_remove_all,
+  str_replace,
+  str_split
+)
+importFrom(terra,
+  crop,
+  crs,
+  minmax,
+  project,
+  rast,
+  res,
+  writeCDF
+)
+importFrom(tibble,
+  is_tibble,
+  tibble
+)
+importFrom(tidyr,
+  pivot_wider,
+  unite
+)
 importFrom(units,as_units)
