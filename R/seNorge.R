@@ -55,10 +55,9 @@ senorge_buildquery <- function(bounding_coords,
 
   if((variables %in% senorge_variables) %>% any()){
     senorge_2018 = TRUE
+    senorge_snow = FALSE
+
     project = "senorge_2018"
-    if(length(variables) > 1){
-      stop("For SeNorge_snow, you can only request one variable at a time!")
-    }
 
     if ((variables %in% senorge_variables) %>% all() == FALSE) {
       stop(
@@ -79,6 +78,10 @@ senorge_buildquery <- function(bounding_coords,
         "Provided variables not all in SeNorge_snow. You can only request the following:\n >> ",
         paste(collapse = ", ", senorge_snow_variables)
       )
+    }
+
+    if(length(variables) > 1){
+      stop("For SeNorge_snow, you can only request one variable at a time!")
     }
 
     ## Check start and end dates
