@@ -79,8 +79,7 @@ classify_soil <-
            write = FALSE){
 
     # install required packages
-    # removed 'ggtern'
-    required_packages <- c("readxl", "writexl", "utils", "stringr", "ggplot2", "RColorBrewer", "plotly", "grDevices")
+    required_packages <- c("ggtern", "readxl", "writexl", "utils", "stringr", "ggplot2", "RColorBrewer", "plotly", "grDevices")
     install_missing_packs(required_packages)
 
     # REQUIRED to fill these out!
@@ -799,11 +798,7 @@ classify_soil <-
 
         plotly_plot %>% print()
       }else{
-        # non interactive ggplot (seems to be pretty broken now that ggtern is no longer
-        # supported.. cannot use ggsave)
-        ggtern <- NULL
-        stop("ggtern is currently broken and needs fixing, see issue #35 \n https://github.com/moritzshore/miljotools/issues/35")
-        outplot <- plot_data %>% ggtern(ggplot2::aes(
+        outplot <- plot_data %>% ggtern::ggtern(ggplot2::aes(
           y = clay,
           z = silt,
           x = sand,
