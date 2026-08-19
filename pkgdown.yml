@@ -1,5 +1,5 @@
-pandoc: 3.8.3
-pkgdown: 2.2.0
+pandoc: 3.6.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   cocoa: cocoa.html
@@ -10,7 +10,4 @@ articles:
   senorge_snow: senorge_snow.html
   simplify-polygons: simplify-polygons.html
   thermopluviograms: thermopluviograms.html
-last_built: 2026-06-05T11:48Z
-urls:
-  reference: https://moritzshore.github.io/miljotools/reference
-  article: https://moritzshore.github.io/miljotools/articles
+last_built: 2026-08-19T22:06Z
