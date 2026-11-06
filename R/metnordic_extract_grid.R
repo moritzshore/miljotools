@@ -55,7 +55,7 @@ metnordic_extract_grid <- function(merged_path,
     datamatrix <- terra::extract(varrast, grid, method = "bilinear", raw = TRUE, ID = FALSE)
     # DIAGNOSTICS
     if(FALSE){
-      required_packages <- c("ggplot2", "tidyterra")
+      required_packages <- c("ggplot2", "tidyterra", "viridis")
       install_missing_packs(required_packages)
       ggplot2::ggplot() +  tidyterra::geom_spatraster(data=varrast[[1]])+
         ggplot2::geom_sf(data = area)+
